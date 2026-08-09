@@ -117,26 +117,86 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
 }
 .ghost:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink-soft)}
 
-/* ---------- gardens ---------- */
-.garden{margin-top:16px}
+/* ---------- welcome banner ---------- */
+.welcome{
+  position:fixed;left:50%;top:16px;transform:translateX(-50%);z-index:20;
+  font-family:'Fredoka';font-weight:600;font-size:19px;color:var(--ink);
+  background:var(--paper);border:2px solid var(--ink);border-radius:99px;
+  box-shadow:0 5px 0 var(--ink-soft);padding:11px 22px;max-width:92vw;
+  text-align:center;pointer-events:none;
+}
+.welcome.in{animation:welcomeIn .45s ease both}
+.welcome.out{animation:welcomeOut .5s ease both}
+@keyframes welcomeIn{0%{opacity:0;transform:translateX(-50%) translateY(-14px) scale(.92)}
+  100%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}}
+@keyframes welcomeOut{0%{opacity:1;transform:translateX(-50%) translateY(0)}
+  100%{opacity:0;transform:translateX(-50%) translateY(-12px)}}
+
+/* ---------- setup ---------- */
+.setup-card{text-align:center;padding:26px 20px}
+.setup-title{font-family:'Fredoka';font-weight:700;font-size:25px}
+.setup-sub{color:var(--muted);font-size:14.5px;margin-top:7px}
+.setup-warn{
+  margin-top:14px;font-size:13px;font-weight:800;color:var(--coral-deep);
+  background:var(--coral-tint);border:1.5px solid var(--coral);border-radius:10px;padding:9px 11px;
+}
+.name-input{
+  display:block;width:100%;margin:16px 0 4px;padding:13px 14px;
+  font-family:'Fredoka';font-weight:600;font-size:22px;text-align:center;color:var(--ink);
+  background:var(--paper);border:2px solid var(--ink);border-radius:14px;
+}
+.name-input:focus{outline:3px solid var(--teal);outline-offset:2px}
+.world-pick{display:grid;gap:12px;margin-top:14px}
+.world-opt{
+  display:block;width:100%;text-align:left;padding:10px;
+  background:var(--paper);border:2px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink-soft);
+}
+.world-opt:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink-soft)}
+.world-opt h3{font-family:'Fredoka';font-weight:600;font-size:18px;margin-bottom:2px}
+.world-opt p{font-size:12.5px;font-weight:700;color:var(--muted);margin-bottom:8px}
+.world-opt .strip{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+
+/* ---------- scenes ---------- */
+.garden{margin-top:18px}
 .garden:first-child{margin-top:0}
-.garden-head{display:flex;align-items:baseline;gap:8px;margin-bottom:7px}
+.garden-head{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .garden-name{font-family:'Fredoka';font-weight:600;font-size:16px}
 .garden-name .sym{font-size:18px}
 .garden-pts{margin-left:auto;font-size:13px;font-weight:800;color:var(--muted)}
+.badge{width:22px;height:22px;flex:0 0 auto}
+.scene-wrap{position:relative;line-height:0}
 .garden-art{
   display:block;width:100%;height:auto;border:2px solid var(--ink);border-radius:14px;
   box-shadow:0 4px 0 var(--ink-soft);overflow:hidden;
 }
 .garden-art .fl[tabindex]{cursor:pointer}
-.garden-bar{height:9px;border:2px solid var(--ink);border-radius:99px;background:var(--paper);overflow:hidden;margin-top:9px}
-.garden-bar i{display:block;height:100%;border-radius:99px;transition:width .4s ease}
-.garden[data-op="add"] .garden-bar i{background:var(--teal)}
-.garden[data-op="sub"] .garden-bar i{background:var(--coral)}
-.garden[data-op="mul"] .garden-bar i{background:var(--grape)}
-.garden[data-op="div"] .garden-bar i{background:var(--sky)}
-.garden-note{margin-top:6px;font-size:12.5px;font-weight:700;color:var(--muted)}
-.total-line{text-align:center;margin-top:4px;font-size:13.5px;font-weight:800;color:var(--muted)}
+/* fullness bar, sitting inside the scene along its bottom edge */
+.scene-bar{
+  position:absolute;left:10px;right:10px;bottom:9px;height:9px;
+  border:2px solid var(--ink);border-radius:99px;overflow:hidden;
+  background:rgba(255,254,251,.7);
+}
+.scene-bar i{display:block;height:100%;border-radius:99px;transition:width .4s ease}
+.garden[data-op="add"] .scene-bar i{background:var(--teal)}
+.garden[data-op="sub"] .scene-bar i{background:var(--coral)}
+.garden[data-op="mul"] .scene-bar i{background:var(--grape)}
+.garden[data-op="div"] .scene-bar i{background:var(--sky)}
+.garden.done .garden-art{box-shadow:0 4px 0 var(--sun-deep)}
+.mastery{display:flex;align-items:center;gap:8px;margin-top:9px}
+.mastery-meter{
+  flex:1;height:7px;border-radius:99px;background:var(--line);overflow:hidden;
+}
+.mastery-meter i{display:block;height:100%;background:var(--good);border-radius:99px;transition:width .4s ease}
+.mastery-txt{font-size:11.5px;font-weight:800;color:var(--muted);white-space:nowrap}
+.garden.done .mastery-txt{color:var(--good-deep)}
+.garden-note{margin-top:5px;font-size:12.5px;font-weight:700;color:var(--muted)}
+.total-line{text-align:center;margin-top:6px;font-size:13.5px;font-weight:800;color:var(--muted)}
+.sum-done{
+  margin-top:16px;padding:14px 13px;border-radius:14px;
+  background:var(--sun-tint);border:2px solid var(--sun-deep);
+}
+.sum-done h3{font-family:'Fredoka';font-weight:700;font-size:20px;margin-bottom:4px}
+.sum-done p{font-size:14px;font-weight:700;color:var(--muted)}
 
 /* ---------- tabs ---------- */
 .tabs{display:flex;gap:6px;margin-bottom:14px}
@@ -296,11 +356,31 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
     </svg>
     <div>
       <h1>Numo</h1>
-      <p class="tag">Grow your maths, grow your garden</p>
+      <p class="tag" id="heroTag">Grow your maths, grow your world</p>
     </div>
   </header>
 
+  <div id="welcome" class="welcome" hidden aria-live="polite"></div>
+
   <main>
+    <!-- ============ SETUP (first run) ============ -->
+    <section id="screen-setup" hidden>
+      <div class="card setup-card" id="stepName" hidden>
+        <h2 class="setup-title">What should we call you?</h2>
+        <p class="setup-sub">So Numo knows whose world this is.</p>
+        <input id="nameInput" class="name-input" type="text" maxlength="16"
+               autocomplete="given-name" spellcheck="false" placeholder="Your name" aria-label="Your name">
+        <button id="nameNext" class="cta">That&rsquo;s me</button>
+      </div>
+
+      <div class="card setup-card" id="stepWorld" hidden>
+        <h2 class="setup-title">Choose your world</h2>
+        <p class="setup-sub">Each kind of maths gets its own place, and it grows as you practise.</p>
+        <div id="worldPick" class="world-pick"></div>
+        <p class="setup-warn">Choose carefully — your world can&rsquo;t be swapped later.</p>
+      </div>
+    </section>
+
     <!-- ============ HOME ============ -->
     <section id="screen-home">
       <div class="mode-row" id="modeRow" role="group" aria-label="What to practise">
@@ -313,8 +393,8 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
 
       <button id="startBtn" class="cta">Start practicing</button>
 
-      <section class="card" aria-label="Your gardens">
-        <h2 class="card-title">Your gardens <span class="note">tap a flower</span></h2>
+      <section class="card" aria-label="Your world">
+        <h2 class="card-title" id="worldTitle">Your world <span class="note">tap to recolour</span></h2>
         <div id="gardens"></div>
         <p id="totalLine" class="total-line"></p>
       </section>
@@ -343,8 +423,11 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
         <p id="streakLine" class="streak-line"></p>
       </section>
 
-      <p class="footer-row"><button id="resetBtn" class="linkish">Erase all progress</button></p>
-      <p class="version-line">v4 · gardens</p>
+      <p class="footer-row">
+        <button id="renameBtn" class="linkish">Change name</button>
+        <button id="resetBtn" class="linkish">Erase all progress</button>
+      </p>
+      <p class="version-line">v5 · worlds</p>
     </section>
 
     <!-- ============ QUIZ ============ -->
@@ -377,6 +460,7 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
         <h2 id="sumTitle">Nice work! 🎉</h2>
         <div class="big-points"><span id="sumPoints">0</span> <small>points this session</small></div>
         <p id="sumStopped" class="sum-stopped" hidden></p>
+        <div id="sumDone" class="sum-done" hidden></div>
         <div id="sumGardens" class="sum-block" hidden>
           <h3 id="sumGardensTitle">🌱 Your garden grew</h3>
           <div id="sumGardenArt"></div>
@@ -423,8 +507,10 @@ var OP_NAME = {add:"Addition", sub:"Subtraction", mul:"Multiplication", div:"Div
 
 /* ---------------- state ---------------- */
 var defaultState = function(){ return {
-  v:2, sound:true,
-  pts:{add:0, sub:0, mul:0, div:0},   // points per section — drives the gardens
+  v:3, sound:true,
+  name:"",                            // "" until the child tells us
+  world:null,                         // "wild" | "space" — chosen once, then fixed
+  pts:{add:0, sub:0, mul:0, div:0},   // points per section — decorates the scenes
   ops:["add","sub"],                  // sections selected for practice (>=1)
   unlocked:{add:3, sub:2, mul:2, div:2},
   facts:{add:{}, sub:{}, mul:{}, div:{}},   // key "a,b" -> {n,s,r:[],t:[]}
@@ -442,6 +528,8 @@ function fill(s){
   s.facts = s.facts || {}; s.blooms = s.blooms || {};
   s.days = s.days || {};
   if(s.sound === undefined) s.sound = true;
+  if(typeof s.name !== "string") s.name = "";
+  if(s.world !== "wild" && s.world !== "space") s.world = null;
   for(var i=0;i<OPS.length;i++){
     var o = OPS[i];
     if(typeof s.pts[o] !== "number") s.pts[o] = 0;
@@ -476,16 +564,24 @@ function migrate(old){
   s.pts.sub = p - s.pts.add;
   return s;
 }
+/* v2 kept the same progress but had no name and only one look. Carry it all
+   over and leave name/world unset, so the setup screen asks once. */
+function migrateV2(old){
+  old.v = 3; old.name = ""; old.world = null;
+  return fill(old);
+}
 function loadState(){
   try{
     var raw = localStorage.getItem(LSKEY);
     if(raw){
       var s = JSON.parse(raw);
-      if(s && s.v===2) return fill(s);
+      if(s && s.v===3) return fill(s);
+      if(s && s.v===2){ didMigrate = true; return migrateV2(s); }
     }
     var oldRaw = localStorage.getItem(OLDKEY);
     if(oldRaw){
       var o = JSON.parse(oldRaw);
+      /* migrate() builds on defaultState(), so it already lands on v3 */
       if(o && o.v===1){ didMigrate = true; return migrate(o); }
     }
   }catch(e){ if(memFallback) return memFallback; }
@@ -652,21 +748,72 @@ function nextFact(){
   return pickFrom(pools, order, S.lastKey);
 }
 
-/* ---------------- gardens ----------------
-   A garden's layout is a pure function of (section, points): a seeded
-   PRNG gives each section a stable arrangement of its own, so nothing
-   about the picture needs saving. Only recoloured flowers are stored. */
+/* ---------------- worlds & scenes ----------------
+   Each section gets its own landscape so a child can tell at a glance which
+   one they're looking at. A scene is drawn from (world, section, points,
+   complete) alone — a seeded PRNG fixes the layout, so nothing about the
+   picture is ever stored and it can't drift between visits.
+
+   Art direction: the landscape is soft and gradient-shaded for depth, while
+   everything the child has *earned* keeps the bold ink outline, so earned
+   things read as objects sitting in the scene rather than part of it. */
 var GROUND = 104;
-var FLOWERS = 12;
+var SLOTS = 12;               // earned "plant" slots per scene
+var INK = "#253253";
 var BLOOMS = [
   {c:"#EF5B3F",n:"red"},    {c:"#FFC93C",n:"yellow"}, {c:"#F06BA8",n:"pink"},
   {c:"#8455E0",n:"purple"}, {c:"#2E7DD1",n:"blue"},   {c:"#FFFEFB",n:"white"}
 ];
-var SKYCOL = {add:"#E2F4F4", sub:"#FDE9E4", mul:"#EEE8FC", div:"#E3EEFC"};
-/* Milestones, in points. Tune the pacing here — the drawing code reads
-   these and needs no changes. */
-var MILE = {shrub:120, tree:250, pond:400, fly1:500, fly2:650, bird:900, rainbow:GOAL};
-var BUD_AT = 40, BLOOM_AT = 90;   // points past a flower's threshold
+/* Milestones, in points. Tune pacing here — the drawing code reads these. */
+var MILE = {small:120, big:250, water:400, fly1:500, fly2:650, high:900};
+var BUD_AT = 40, BLOOM_AT = 90;   // points past a slot's threshold
+
+var WORLDS = {
+  wild:  { name:"Wild Places", mine:"wild places",
+           blurb:"Forests, meadows, beaches and fjords",
+           order:{add:"forest", sub:"meadow", mul:"beach", div:"fjord"} },
+  space: { name:"Space",       mine:"corner of space",
+           blurb:"Planets, ice moons, ring giants and stations",
+           order:{add:"rocky", sub:"ice", mul:"gas", div:"station"} }
+};
+function worldOf(){ return (state.world && WORLDS[state.world]) ? state.world : "wild"; }
+function kindFor(op, world){ return WORLDS[world||worldOf()].order[op]; }
+
+/* Per-scene palettes. `gold` overrides apply once a section is complete. */
+var SCENE = {
+  forest:{ label:"forest",
+    sky:["#BFE3F0","#E6F3E6"], gold:["#FFD8A0","#FFF0D2"],
+    far:"#A9C3B4", mid:"#7BA487", ground:"#4E8058", ground2:"#3E6A48",
+    sun:"#FFF3C4", stars:false },
+  meadow:{ label:"mountain meadow",
+    sky:["#CDE7F7","#F4F1DE"], gold:["#FFCE94","#FFF3DA"],
+    far:"#A9B6C8", mid:"#8FBF6A", ground:"#A6CE68", ground2:"#87B355",
+    sun:"#FFF6D2", snow:true, stars:false },
+  beach:{ label:"beach",
+    sky:["#FFE3BC","#BFE9F3"], gold:["#FFC98A","#FFE6C4"],
+    far:"#9FC9D6", mid:"#59B7CE", ground:"#F0DDAC", ground2:"#DFC68C",
+    sun:"#FFEFAE", water:["#2E9BC4","#8FD9E4"], stars:false },
+  fjord:{ label:"fjord",
+    sky:["#CFE0EF","#EFE2D6"], gold:["#F6C98F","#FFE9CE"],
+    far:"#93A7BA", mid:"#5D6E80", ground:"#44515F", ground2:"#333E4A",
+    sun:"#FFF0CE", water:["#1F4E63","#4E86A0"], snow:true, stars:false },
+  rocky:{ label:"rocky planet",
+    sky:["#160E26","#4A2A3C"], gold:["#3A1E30","#8A4A48"],
+    far:"#7A4A3E", mid:"#9A5C46", ground:"#B87551", ground2:"#96593C",
+    sun:"#FFD9A0", stars:true, craters:true },
+  ice:{ label:"ice moon",
+    sky:["#07182B","#123A55"], gold:["#0E2438","#2E6C7E"],
+    far:"#8FB6CC", mid:"#B6D8E8", ground:"#D9EDF7", ground2:"#B9D9EA",
+    sun:"#E8F6FF", stars:true, aurora:true },
+  gas:{ label:"ring giant",
+    sky:["#150B26","#3D2150"], gold:["#2A1436","#7A4470"],
+    far:"#6B5480", mid:"#8A6E9E", ground:"#A08CB4", ground2:"#7E6A92",
+    sun:"#FFE0B0", stars:true, giant:true },
+  station:{ label:"deep-space station",
+    sky:["#04081A","#122647"], gold:["#0A1430","#2C4E7E"],
+    far:"#3E5170", mid:"#5A7092", ground:"#8C9AB4", ground2:"#6E7C96",
+    sun:"#DDEBFF", stars:true, homeworld:true }
+};
 
 function mulberry32(a){
   return function(){
@@ -681,28 +828,86 @@ function seedFor(s){
   for(var i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619); }
   return h>>>0;
 }
-function flowerThreshold(i){ return Math.round(25*Math.pow(i,1.5)); }
+function n1(v){ return (Math.round(v*10)/10); }
+/* Four scenes share one page, so every gradient id must be unique or they
+   cross-contaminate and the wrong sky gets painted. */
+function rid(uid,name){ return "n-"+uid+"-"+name; }
+function slotThreshold(i){ return Math.round(25*Math.pow(i,1.5)); }
 
+/* ---- shared drawing primitives ---- */
+function ridgePath(rnd, yBase, amp, segs){
+  var pts=[], i;
+  for(i=0;i<=segs;i++) pts.push({x:i*(300/segs), y:yBase-rnd()*amp});
+  var d="M0 150 L0 "+n1(pts[0].y);
+  for(i=1;i<=segs;i++){
+    var p0=pts[i-1], p1=pts[i], cx=(p0.x+p1.x)/2;
+    d+=" C"+n1(cx)+" "+n1(p0.y)+" "+n1(cx)+" "+n1(p1.y)+" "+n1(p1.x)+" "+n1(p1.y);
+  }
+  return d+" L300 150 Z";
+}
+function peakPath(rnd, yBase, amp, n){
+  var d="M0 150 L0 "+n1(yBase), x=0, i;
+  for(i=0;i<n;i++){
+    var w=300/n, top=yBase-amp*(0.55+rnd()*0.45);
+    d+=" L"+n1(x+w*0.5)+" "+n1(top)+" L"+n1(x+w)+" "+n1(yBase-rnd()*6);
+    x+=w;
+  }
+  return d+" L300 150 Z";
+}
+function conifer(x, baseY, h, light, dark){
+  var w=h*0.42, s='<g>';
+  s+='<path d="M'+n1(x-1.6)+' '+n1(baseY)+' h3.2 v-'+n1(h*0.22)+' h-3.2 Z" fill="#6B4A32"/>';
+  for(var k=0;k<3;k++){
+    var ty=baseY-h*0.18-k*h*0.26, tw=w*(1-k*0.24), th=h*0.42;
+    s+='<path d="M'+n1(x)+' '+n1(ty-th)+' L'+n1(x+tw)+' '+n1(ty)+' L'+n1(x-tw)+' '+n1(ty)+' Z" fill="'+(k===2?light:dark)+'"/>';
+  }
+  return s+'</g>';
+}
+function starField(rnd, n, maxY){
+  var s='<g fill="#FFFFFF">';
+  for(var i=0;i<n;i++){
+    var x=n1(rnd()*300), y=n1(rnd()*maxY), r=n1(0.4+rnd()*1.1), o=n1(0.35+rnd()*0.6);
+    s+='<circle cx="'+x+'" cy="'+y+'" r="'+r+'" opacity="'+o+'"/>';
+  }
+  return s+'</g>';
+}
+function auroraBands(uid, rnd, gold){
+  var cols = gold ? ["#FFD9A0","#FFB26B"] : ["#7BE8B0","#6BC8E8"];
+  var s='<g fill="none" stroke-linecap="round">';
+  for(var i=0;i<3;i++){
+    var y=18+i*11, a=10+rnd()*10;
+    s+='<path d="M-10 '+n1(y+a)+' C 70 '+n1(y-a)+' 150 '+n1(y+a*1.3)+' 310 '+n1(y-a*0.4)+
+       '" stroke="'+cols[i%2]+'" stroke-width="'+n1(5+rnd()*5)+'" opacity="'+n1(0.22+i*0.07)+'"/>';
+  }
+  return s+'</g>';
+}
+
+/* ---- layout plan (stable per world+section) ----
+   Scenes with open water need their planting band pushed down onto the
+   shore, or things end up growing out of the sea. */
+function plantTop(kind){
+  if(kind==="beach") return GROUND+22;
+  if(kind==="fjord") return GROUND+24;
+  return GROUND+8;
+}
 var planCache={};
-function gardenPlan(op){
-  if(planCache[op]) return planCache[op];
-  var rnd=mulberry32(seedFor(op)), list=[], xs=[], j, k, tmp;
-  for(j=0;j<FLOWERS;j++) xs.push(16+j*(268/(FLOWERS-1)));
-  /* Shuffle the bed positions before handing them out, so a young garden is
-     scattered across the whole bed instead of filling in from the left. */
+function scenePlan(op, world){
+  var ck=world+"/"+op;
+  if(planCache[ck]) return planCache[ck];
+  /* stop short of 136 so nothing is clipped by the fullness bar sitting
+     along the bottom edge of the scene */
+  var top=plantTop(kindFor(op,world)), span=Math.max(8,136-top);
+  var rnd=mulberry32(seedFor("plan"+ck)), list=[], xs=[], j,k,tmp;
+  for(j=0;j<SLOTS;j++) xs.push(16+j*(268/(SLOTS-1)));
+  /* Shuffle bed positions so a young scene is scattered across the whole
+     ground instead of filling in from the left. */
   for(j=xs.length-1;j>0;j--){ k=Math.floor(rnd()*(j+1)); tmp=xs[j]; xs[j]=xs[k]; xs[k]=tmp; }
-  for(var i=1;i<=FLOWERS;i++){
-    list.push({
-      i:i,
-      x:xs[i-1]+(rnd()*10-5),
-      y:112+rnd()*26,
-      c:Math.floor(rnd()*BLOOMS.length),
-      lean:rnd()*8-4,
-      t:flowerThreshold(i)
-    });
+  for(var i=1;i<=SLOTS;i++){
+    list.push({ i:i, x:xs[i-1]+(rnd()*10-5), y:top+rnd()*span,
+                c:Math.floor(rnd()*BLOOMS.length), lean:rnd()*8-4, t:slotThreshold(i) });
   }
   list.sort(function(p,q){ return p.y-q.y; });   // back to front
-  planCache[op]=list;
+  planCache[ck]=list;
   return list;
 }
 function bloomIndex(op,f){
@@ -710,142 +915,424 @@ function bloomIndex(op,f){
   return (typeof pick === "number") ? pick : f.c;
 }
 function bloomColor(op,f){
-  var idx = bloomIndex(op,f);
-  return BLOOMS[((idx % BLOOMS.length) + BLOOMS.length) % BLOOMS.length];
+  var idx=bloomIndex(op,f);
+  return BLOOMS[((idx % BLOOMS.length)+BLOOMS.length)%BLOOMS.length];
 }
-function n1(v){ return (Math.round(v*10)/10); }
-
-function drawFlower(f, pts, op, interactive){
-  var age = pts - f.t;
-  var stage = age>=BLOOM_AT ? 2 : age>=BUD_AT ? 1 : 0;
-  var h = stage===2 ? 30 : stage===1 ? 23 : 14;
-  var top = f.y-h, x = n1(f.x), tip = n1(f.x+f.lean), col = bloomColor(op,f);
-  var a = 'class="fl" data-op="'+op+'" data-i="'+f.i+'"';
-  if(stage===2 && interactive)
-    a += ' tabindex="0" role="button" aria-label="Flower '+f.i+', '+col.n+'. Tap to change its colour."';
-  var s = '<g '+a+'>';
-  s += '<path d="M'+x+' '+n1(f.y)+' Q'+x+' '+n1(top+h*0.4)+' '+tip+' '+n1(top)+'" stroke="#3E8E41" stroke-width="3" fill="none" stroke-linecap="round"/>';
-  s += '<ellipse cx="'+n1(f.x-6)+'" cy="'+n1(f.y-h*0.42)+'" rx="6" ry="3.4" fill="#5CB85C" stroke="#2F6E33" stroke-width="1" transform="rotate(-20 '+n1(f.x-6)+' '+n1(f.y-h*0.42)+')"/>';
-  if(stage>0)
-    s += '<ellipse cx="'+n1(f.x+6)+'" cy="'+n1(f.y-h*0.64)+'" rx="5.5" ry="3.2" fill="#5CB85C" stroke="#2F6E33" stroke-width="1" transform="rotate(20 '+n1(f.x+6)+' '+n1(f.y-h*0.64)+')"/>';
-  if(stage===0){
-    s += '<circle cx="'+tip+'" cy="'+n1(top)+'" r="2.8" fill="#5CB85C" stroke="#2F6E33" stroke-width="1"/>';
-  }else if(stage===1){
-    s += '<ellipse cx="'+tip+'" cy="'+n1(top)+'" rx="4.4" ry="5.8" fill="'+col.c+'" stroke="#253253" stroke-width="1.4"/>';
-  }else{
-    for(var p=0;p<5;p++){
-      var ang=(Math.PI*2/5)*p - Math.PI/2;
-      s += '<circle cx="'+n1(f.x+f.lean+Math.cos(ang)*6.2)+'" cy="'+n1(top+Math.sin(ang)*6.2)+'" r="5" fill="'+col.c+'" stroke="#253253" stroke-width="1.4"/>';
-    }
-    s += '<circle cx="'+tip+'" cy="'+n1(top)+'" r="3.6" fill="'+(col.n==="yellow"?"#EF5B3F":"#FFC93C")+'" stroke="#253253" stroke-width="1.2"/>';
-  }
-  return s+'</g>';
-}
-function drawTree(pts){
-  if(pts<MILE.tree) return "";
-  var g=Math.min(1,(pts-MILE.tree)/550), bx=44, by=110;
-  var th=26+g*30, tw=6+g*5, top=by-th, r=13+g*13;
-  return '<g>'+
-    '<path d="M'+bx+' '+by+' V'+n1(top)+'" stroke="#8A5A33" stroke-width="'+n1(tw)+'" stroke-linecap="round"/>'+
-    '<circle cx="'+n1(bx-r*0.72)+'" cy="'+n1(top+r*0.22)+'" r="'+n1(r*0.7)+'" fill="#5CB85C" stroke="#253253" stroke-width="2"/>'+
-    '<circle cx="'+n1(bx+r*0.72)+'" cy="'+n1(top+r*0.22)+'" r="'+n1(r*0.7)+'" fill="#5CB85C" stroke="#253253" stroke-width="2"/>'+
-    '<circle cx="'+bx+'" cy="'+n1(top-r*0.32)+'" r="'+n1(r)+'" fill="#4FA85A" stroke="#253253" stroke-width="2"/>'+
-    '</g>';
-}
-function drawShrub(pts){
-  if(pts<MILE.shrub) return "";
-  var g=Math.min(1,(pts-MILE.shrub)/240), r=9+g*7, x=281, y=107;
-  return '<g><circle cx="'+n1(x-r*0.8)+'" cy="'+n1(y+3)+'" r="'+n1(r*0.75)+'" fill="#5CB85C" stroke="#253253" stroke-width="2"/>'+
-         '<circle cx="'+x+'" cy="'+y+'" r="'+n1(r)+'" fill="#4FA85A" stroke="#253253" stroke-width="2"/></g>';
-}
-function drawPond(pts){
-  if(pts<MILE.pond) return "";
-  return '<g><ellipse cx="208" cy="132" rx="34" ry="11" fill="#7FC4E8" stroke="#253253" stroke-width="2"/>'+
-         '<path d="M192 130 q5 -3 10 0 M212 135 q5 -3 10 0" stroke="#FFFEFB" stroke-width="2" fill="none" stroke-linecap="round"/></g>';
-}
-function drawGrass(op,pts){
-  var rnd=mulberry32(seedFor(op)^0x9E3779B9), n=Math.min(14,3+Math.floor(pts/70)), s="";
-  for(var i=0;i<n;i++){
-    var x=n1(6+rnd()*288), y=n1(GROUND+3+rnd()*38), h=n1(5+rnd()*5);
-    s += '<path d="M'+x+' '+y+' l-3 -'+h+' M'+x+' '+y+' l0 -'+n1(h+2)+' M'+x+' '+y+' l3 -'+h+'" stroke="#6FBF5A" stroke-width="1.6" stroke-linecap="round" fill="none"/>';
-  }
-  return s;
-}
-function drawFliers(op,pts){
-  var rnd=mulberry32(seedFor(op)^0x5F356495), s="", n=0;
-  if(pts>=MILE.fly1) n++;
-  if(pts>=MILE.fly2) n++;
-  if(pts>GOAL) n += Math.min(3, Math.floor((pts-GOAL)/400));
-  for(var i=0;i<n;i++){
-    var x=n1(34+rnd()*230), y=n1(26+rnd()*52), col=BLOOMS[Math.floor(rnd()*BLOOMS.length)].c;
-    s += '<g><ellipse cx="'+n1(x-4)+'" cy="'+y+'" rx="4.6" ry="6" fill="'+col+'" stroke="#253253" stroke-width="1.2"/>'+
-         '<ellipse cx="'+n1(x+4)+'" cy="'+y+'" rx="4.6" ry="6" fill="'+col+'" stroke="#253253" stroke-width="1.2"/>'+
-         '<path d="M'+x+' '+n1(y-5)+' V'+n1(y+5)+'" stroke="#253253" stroke-width="2" stroke-linecap="round"/></g>';
-  }
-  if(pts>=MILE.bird)
-    s += '<path d="M104 42 q7 -7 14 0 q7 -7 14 0" stroke="#253253" stroke-width="2.2" fill="none" stroke-linecap="round"/>';
-  return s;
-}
-function drawRainbow(pts){
-  if(pts<MILE.rainbow) return "";
-  var cols=["#EF5B3F","#FFC93C","#4FA85A","#2E7DD1"], s='<g fill="none" stroke-width="5" opacity=".7">';
-  for(var i=0;i<cols.length;i++){
-    var r=74-i*5;
-    s += '<path d="M'+(150-r)+' '+GROUND+' A'+r+' '+r+' 0 0 1 '+(150+r)+' '+GROUND+'" stroke="'+cols[i]+'"/>';
-  }
-  return s+'</g>';
-}
-function gardenAlt(op,pts){
-  var plan=gardenPlan(op), n=0, bloomed=0;
-  for(var i=0;i<plan.length;i++) if(pts>=plan[i].t){ n++; if(pts-plan[i].t>=BLOOM_AT) bloomed++; }
-  if(!n) return OP_NAME[op]+" garden: bare soil, waiting for a first seed.";
-  var extra = (pts>=MILE.tree?", a tree":"") + (pts>=MILE.pond?", a pond":"") + (pts>=MILE.rainbow?" and a rainbow":"");
-  return OP_NAME[op]+" garden: "+n+" plant"+(n===1?"":"s")+", "+bloomed+" in full bloom"+extra+".";
-}
-function gardenSVG(op,pts,interactive){
-  var s='<svg class="garden-art" viewBox="0 0 300 150" role="img" aria-label="'+gardenAlt(op,pts)+'">';
-  s += '<rect width="300" height="150" fill="'+(SKYCOL[op]||"#E2F4F4")+'"/>';
-  s += '<circle cx="266" cy="27" r="15" fill="#FFC93C" stroke="#253253" stroke-width="2"/>';
-  s += drawRainbow(pts);
-  s += '<g fill="#FFFEFB" stroke="#253253" stroke-width="1.8">'+
-       '<ellipse cx="58" cy="29" rx="17" ry="11"/><ellipse cx="74" cy="31" rx="12" ry="8"/>'+
-       (pts>=300 ? '<ellipse cx="176" cy="19" rx="14" ry="9"/><ellipse cx="189" cy="21" rx="10" ry="7"/>' : '')+
-       '</g>';
-  s += '<path d="M0 '+GROUND+' H300 V150 H0 Z" fill="#E6D9BC"/>';
-  s += '<path d="M0 '+GROUND+' H300" stroke="#6FBF5A" stroke-width="7"/>';
-  s += drawGrass(op,pts);
-  s += drawTree(pts);
-  s += drawShrub(pts);
-  s += drawPond(pts);
-  var plan=gardenPlan(op);
-  for(var i=0;i<plan.length;i++) if(pts>=plan[i].t) s += drawFlower(plan[i],pts,op,interactive);
-  s += drawFliers(op,pts);
-  return s+'</svg>';
-}
-function gardenNote(op,p){
-  if(p<=0) return "Bare soil — practise "+OP_NAME[op].toLowerCase()+" to plant your first flower.";
-  if(p>=GOAL) return "In full bloom! 🌈";
-  /* Thresholds rise with the flower number, so walk those in order — the
-     plan itself is sorted back-to-front for drawing, not by threshold. */
-  for(var i=1;i<=FLOWERS;i++){
-    var t=flowerThreshold(i);
-    if(p<t) return (t-p)+" points to the next flower.";
-  }
-  return (GOAL-p)+" points to full bloom.";
-}
-function flowerCount(pts){
-  var n=0;
-  for(var i=1;i<=FLOWERS;i++) if(pts>=flowerThreshold(i)) n++;
+function slotCount(pts){
+  var n=0; for(var i=1;i<=SLOTS;i++) if(pts>=slotThreshold(i)) n++;
   return n;
 }
-function gardenBlock(op,pts,label,interactive,withBar,withNote){
-  var pct=Math.min(100, pts/GOAL*100);
-  return '<div class="garden" data-op="'+op+'">'+
-    '<div class="garden-head"><span class="garden-name"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</span>'+
-    '<span class="garden-pts">'+label+'</span></div>'+
-    gardenSVG(op,pts,interactive)+
-    (withBar ? '<div class="garden-bar"><i style="width:'+n1(pct)+'%"></i></div>' : '')+
-    (withNote ? '<p class="garden-note">'+gardenNote(op,pts)+'</p>' : '')+
+
+/* ---- earned items ----
+   Each scene grows its own thing, otherwise every landscape ends up reading
+   as the same garden with a different backdrop. All of them keep the bold
+   ink outline so earned pieces sit clearly on top of the soft scenery, and
+   all of them carry a tappable colour. */
+var GROWER_NAME = {forest:"Tree", meadow:"Flower", beach:"Palm", fjord:"Cabin",
+                   rocky:"Dome", ice:"Mast", gas:"Balloon", station:"Pod"};
+
+function gFlower(f, stage, col){
+  var h = stage===2?26 : stage===1?19 : 12;
+  var top=f.y-h, x=n1(f.x), tip=n1(f.x+f.lean);
+  var s='<path d="M'+x+' '+n1(f.y)+' Q'+x+' '+n1(top+h*0.4)+' '+tip+' '+n1(top)+'" stroke="#3E8E41" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+  s+='<ellipse cx="'+n1(f.x-5)+'" cy="'+n1(f.y-h*0.42)+'" rx="5" ry="2.8" fill="#5CB85C" stroke="#2F6E33" stroke-width="1" transform="rotate(-20 '+n1(f.x-5)+' '+n1(f.y-h*0.42)+')"/>';
+  if(stage>0)
+    s+='<ellipse cx="'+n1(f.x+5)+'" cy="'+n1(f.y-h*0.64)+'" rx="4.6" ry="2.6" fill="#5CB85C" stroke="#2F6E33" stroke-width="1" transform="rotate(20 '+n1(f.x+5)+' '+n1(f.y-h*0.64)+')"/>';
+  if(stage===0) return s+'<circle cx="'+tip+'" cy="'+n1(top)+'" r="2.4" fill="#5CB85C" stroke="#2F6E33" stroke-width="1"/>';
+  if(stage===1) return s+'<ellipse cx="'+tip+'" cy="'+n1(top)+'" rx="3.6" ry="4.8" fill="'+col.c+'" stroke="'+INK+'" stroke-width="1.3"/>';
+  for(var p=0;p<5;p++){
+    var ang=(Math.PI*2/5)*p-Math.PI/2;
+    s+='<circle cx="'+n1(f.x+f.lean+Math.cos(ang)*5)+'" cy="'+n1(top+Math.sin(ang)*5)+'" r="4" fill="'+col.c+'" stroke="'+INK+'" stroke-width="1.3"/>';
+  }
+  return s+'<circle cx="'+tip+'" cy="'+n1(top)+'" r="2.8" fill="'+(col.n==="yellow"?"#EF5B3F":"#FFC93C")+'" stroke="'+INK+'" stroke-width="1.1"/>';
+}
+function gConifer(f, stage, col){
+  var h = stage===2?27 : stage===1?19 : 11, x=n1(f.x), y=n1(f.y);
+  var tiers = stage===2?3 : stage===1?2 : 1, w=h*0.34;
+  var s='<path d="M'+n1(f.x-1.5)+' '+y+' h3 v-'+n1(h*0.2)+' h-3 Z" fill="#6B4A32" stroke="'+INK+'" stroke-width="1"/>';
+  for(var k=0;k<tiers;k++){
+    var ty=f.y-h*0.16-k*(h*0.30), tw=w*(1-k*0.2), th=h*0.46;
+    s+='<path d="M'+x+' '+n1(ty-th)+' L'+n1(f.x+tw)+' '+n1(ty)+' L'+n1(f.x-tw)+' '+n1(ty)+' Z" fill="'+(k===tiers-1?"#4FA85A":"#3E7A46")+'" stroke="'+INK+'" stroke-width="1.3"/>';
+  }
+  if(stage===2)
+    for(var b=0;b<3;b++)
+      s+='<circle cx="'+n1(f.x-5+b*5)+'" cy="'+n1(f.y-h*0.42-(b%2)*5)+'" r="2.1" fill="'+col.c+'" stroke="'+INK+'" stroke-width="1"/>';
+  return s;
+}
+function gPalm(f, stage, col){
+  var h = stage===2?27 : stage===1?19 : 10, x=n1(f.x), y=n1(f.y);
+  if(stage===0){
+    return '<path d="M'+x+' '+y+' q-4 -6 -6 -9 M'+x+' '+y+' q0 -6 1 -10 M'+x+' '+y+' q4 -6 7 -9" stroke="#4FA85A" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+  }
+  var top=f.y-h, tipx=f.x+f.lean*0.8;
+  var s='<path d="M'+x+' '+y+' q'+n1(f.lean*0.4)+' -'+n1(h*0.6)+' '+n1(tipx-f.x)+' -'+n1(h)+'" stroke="#8A5A33" stroke-width="'+(stage===2?3.4:2.6)+'" fill="none" stroke-linecap="round"/>';
+  var n=stage===2?5:3;
+  for(var q=0;q<n;q++){
+    var a2=-Math.PI/2+(q-(n-1)/2)*0.62, r=stage===2?13:9;
+    s+='<path d="M'+n1(tipx)+' '+n1(top)+' q'+n1(Math.cos(a2)*r*0.6)+' '+n1(Math.sin(a2)*r*0.5)+' '+n1(Math.cos(a2)*r)+' '+n1(Math.sin(a2)*r*0.45+3)+'" stroke="#3E8E41" stroke-width="2.6" fill="none" stroke-linecap="round"/>';
+  }
+  if(stage===2)
+    s+='<circle cx="'+n1(tipx-2.5)+'" cy="'+n1(top+3)+'" r="2.4" fill="'+col.c+'" stroke="'+INK+'" stroke-width="1"/>'+
+       '<circle cx="'+n1(tipx+2.5)+'" cy="'+n1(top+4)+'" r="2.4" fill="'+col.c+'" stroke="'+INK+'" stroke-width="1"/>';
+  return s;
+}
+function gCabin(f, stage, col){
+  var w = stage===2?21 : stage===1?15 : 10, h=w*0.62, x=f.x, y=f.y;
+  var s='<path d="M'+n1(x-w/2)+' '+n1(y)+' h'+n1(w)+' v-'+n1(h)+' h-'+n1(w)+' Z" fill="'+col.c+'" stroke="'+INK+'" stroke-width="1.5"/>';
+  s+='<path d="M'+n1(x-w/2-2.5)+' '+n1(y-h)+' L'+n1(x)+' '+n1(y-h-w*0.42)+' L'+n1(x+w/2+2.5)+' '+n1(y-h)+' Z" fill="#5A4636" stroke="'+INK+'" stroke-width="1.5"/>';
+  if(stage>0)
+    s+='<rect x="'+n1(x-w*0.14)+'" y="'+n1(y-h*0.62)+'" width="'+n1(w*0.28)+'" height="'+n1(h*0.62)+'" fill="#5A4636" stroke="'+INK+'" stroke-width="1"/>';
+  if(stage===2){
+    s+='<rect x="'+n1(x+w*0.16)+'" y="'+n1(y-h*0.72)+'" width="'+n1(w*0.22)+'" height="'+n1(w*0.2)+'" fill="#FFD98A" stroke="'+INK+'" stroke-width="1"/>';
+    s+='<rect x="'+n1(x-w*0.4)+'" y="'+n1(y-h-w*0.36)+'" width="'+n1(w*0.14)+'" height="'+n1(w*0.2)+'" fill="#5A4636" stroke="'+INK+'" stroke-width="1"/>';
+  }
+  return s;
+}
+function gDome(f, stage, col){
+  var r = stage===2?12 : stage===1?9 : 5.5, x=n1(f.x), y=n1(f.y);
+  var s='<path d="M'+n1(f.x-r)+' '+y+' a'+n1(r)+' '+n1(r)+' 0 0 1 '+n1(r*2)+' 0 Z" fill="'+col.c+'" fill-opacity=".88" stroke="'+INK+'" stroke-width="1.5"/>';
+  s+='<path d="M'+n1(f.x-r*0.45)+' '+y+' a'+n1(r*0.45)+' '+n1(r*0.9)+' 0 0 1 '+n1(r*0.9)+' 0" fill="none" stroke="#FFFEFB" stroke-width="1" opacity=".7"/>';
+  if(stage>0) s+='<rect x="'+n1(f.x-r-4)+'" y="'+n1(f.y-3.5)+'" width="4" height="3.5" fill="#7FD3E0" stroke="'+INK+'" stroke-width="1"/>';
+  if(stage===2)
+    s+='<path d="M'+x+' '+n1(f.y-r)+' v-4" stroke="'+INK+'" stroke-width="1.3"/><circle cx="'+x+'" cy="'+n1(f.y-r-5)+'" r="1.7" fill="#FFC93C" stroke="'+INK+'" stroke-width="1"/>';
+  return s;
+}
+function gMast(f, stage, col){
+  var h = stage===2?26 : stage===1?18 : 10, x=n1(f.x), y=n1(f.y);
+  var s='<path d="M'+x+' '+y+' v-'+n1(h)+'" stroke="#C3D6E4" stroke-width="2.6" stroke-linecap="round"/>';
+  s+='<path d="M'+n1(f.x-4)+' '+y+' L'+x+' '+n1(f.y-h*0.5)+' L'+n1(f.x+4)+' '+y+'" fill="none" stroke="#8FB6CC" stroke-width="1.6"/>';
+  if(stage>0)
+    s+='<path d="M'+n1(f.x-5)+' '+n1(f.y-h*0.72)+' h10" stroke="#C3D6E4" stroke-width="2" stroke-linecap="round"/>';
+  s+='<circle cx="'+x+'" cy="'+n1(f.y-h-2)+'" r="'+(stage===2?3.2:2.2)+'" fill="'+col.c+'" stroke="'+INK+'" stroke-width="1.2"/>';
+  if(stage===2)
+    s+='<circle cx="'+x+'" cy="'+n1(f.y-h-2)+'" r="6" fill="'+col.c+'" opacity=".28"/>';
+  return s;
+}
+function gBalloon(f, stage, col){
+  var r = stage===2?9 : stage===1?6.5 : 4, cy=f.y-(stage===2?26:stage===1?18:10);
+  var x=n1(f.x);
+  var s='<path d="M'+x+' '+n1(f.y)+' V'+n1(cy+r)+'" stroke="'+INK+'" stroke-width="1.1" opacity=".8"/>';
+  s+='<ellipse cx="'+x+'" cy="'+n1(cy)+'" rx="'+n1(r)+'" ry="'+n1(r*1.12)+'" fill="'+col.c+'" stroke="'+INK+'" stroke-width="1.4"/>';
+  s+='<path d="M'+n1(f.x-r*0.5)+' '+n1(cy-r*0.6)+' a'+n1(r*0.6)+' '+n1(r*0.8)+' 0 0 1 '+n1(r*0.5)+' -'+n1(r*0.2)+'" fill="none" stroke="#FFFEFB" stroke-width="1" opacity=".65"/>';
+  if(stage>0)
+    s+='<rect x="'+n1(f.x-2.4)+'" y="'+n1(cy+r*1.1)+'" width="4.8" height="3.6" rx="1" fill="#8A6A4A" stroke="'+INK+'" stroke-width="1.1"/>';
+  return s;
+}
+function gPod(f, stage, col){
+  var w = stage===2?20 : stage===1?14 : 9, h=w*0.55, x=f.x, y=f.y;
+  var s='<rect x="'+n1(x-w/2)+'" y="'+n1(y-h)+'" width="'+n1(w)+'" height="'+n1(h)+'" rx="'+n1(h*0.42)+'" fill="'+col.c+'" stroke="'+INK+'" stroke-width="1.5"/>';
+  s+='<circle cx="'+n1(x)+'" cy="'+n1(y-h*0.5)+'" r="'+n1(h*0.26)+'" fill="#7FD3E0" stroke="'+INK+'" stroke-width="1.1"/>';
+  if(stage>0)
+    s+='<path d="M'+n1(x-w/2-4)+' '+n1(y-h*0.5)+' h4 M'+n1(x+w/2)+' '+n1(y-h*0.5)+' h4" stroke="'+INK+'" stroke-width="1.6"/>';
+  if(stage===2)
+    s+='<rect x="'+n1(x-w/2-9)+'" y="'+n1(y-h*0.9)+'" width="5" height="'+n1(h*0.8)+'" fill="#3E6BA8" stroke="'+INK+'" stroke-width="1.1"/>'+
+       '<rect x="'+n1(x+w/2+4)+'" y="'+n1(y-h*0.9)+'" width="5" height="'+n1(h*0.8)+'" fill="#3E6BA8" stroke="'+INK+'" stroke-width="1.1"/>';
+  return s;
+}
+var GROWERS = {forest:gConifer, meadow:gFlower, beach:gPalm, fjord:gCabin,
+               rocky:gDome, ice:gMast, gas:gBalloon, station:gPod};
+
+function drawGrower(kind, f, pts, op, interactive){
+  var age=pts-f.t, stage = age>=BLOOM_AT?2 : age>=BUD_AT?1 : 0;
+  var col=bloomColor(op,f);
+  var a='class="fl" data-op="'+op+'" data-i="'+f.i+'"';
+  if(stage===2 && interactive)
+    a+=' tabindex="0" role="button" aria-label="'+GROWER_NAME[kind]+' '+f.i+', '+col.n+
+       '. Tap to change its colour."';
+  return '<g '+a+'>'+GROWERS[kind](f,stage,col)+'</g>';
+}
+
+/* ---- the big earned pieces, per world ---- */
+function bigWild(kind, pts, sc){
+  var s="";
+  if(pts>=MILE.small){
+    var g=Math.min(1,(pts-MILE.small)/240), r=8+g*6, x=283, y=GROUND+4;
+    s+='<g><circle cx="'+n1(x-r*0.8)+'" cy="'+n1(y+3)+'" r="'+n1(r*0.75)+'" fill="#5CB85C" stroke="'+INK+'" stroke-width="1.8"/>'+
+       '<circle cx="'+x+'" cy="'+y+'" r="'+n1(r)+'" fill="#4FA85A" stroke="'+INK+'" stroke-width="1.8"/></g>';
+  }
+  if(pts>=MILE.big){
+    var t=Math.min(1,(pts-MILE.big)/550), bx=30, by=GROUND+8;
+    var th=24+t*26, tw=5+t*4, top=by-th, rr=11+t*10;
+    if(kind==="beach"){
+      s+='<g><path d="M'+bx+' '+by+' q-3 -'+n1(th*0.6)+' 3 -'+n1(th)+'" stroke="#8A5A33" stroke-width="'+n1(tw)+'" fill="none" stroke-linecap="round"/>';
+      for(var q=0;q<5;q++){
+        var a2=-Math.PI/2+(q-2)*0.58;
+        s+='<path d="M'+n1(bx+3)+' '+n1(top)+' q'+n1(Math.cos(a2)*rr*0.6)+' '+n1(Math.sin(a2)*rr*0.5)+' '+n1(Math.cos(a2)*rr*1.5)+' '+n1(Math.sin(a2)*rr*0.45+4)+'" stroke="#3E8E41" stroke-width="3" fill="none" stroke-linecap="round"/>';
+      }
+      s+='</g>';
+    }else{
+      /* a broadleaf for forest and meadow; fjord gets a tall spruce instead */
+      var leaf = (kind==="fjord") ? "#3E7A46" : "#4FA85A", leaf2 = (kind==="fjord") ? "#33663B" : "#3E8E41";
+      if(kind==="fjord"){
+        s+='<g><path d="M'+bx+' '+by+' V'+n1(top+6)+'" stroke="#6B4A32" stroke-width="'+n1(tw)+'" stroke-linecap="round"/>';
+        for(var k2=0;k2<4;k2++){
+          var ty=by-6-k2*(th*0.24), tw2=(rr*0.95)*(1-k2*0.18), th2=th*0.32;
+          s+='<path d="M'+bx+' '+n1(ty-th2)+' L'+n1(bx+tw2)+' '+n1(ty)+' L'+n1(bx-tw2)+' '+n1(ty)+' Z" fill="'+(k2===3?leaf:leaf2)+'" stroke="'+INK+'" stroke-width="1.6"/>';
+        }
+        s+='</g>';
+      }else{
+        s+='<g><path d="M'+bx+' '+by+' V'+n1(top)+'" stroke="#6B4A32" stroke-width="'+n1(tw)+'" stroke-linecap="round"/>'+
+           '<circle cx="'+n1(bx-rr*0.7)+'" cy="'+n1(top+rr*0.22)+'" r="'+n1(rr*0.68)+'" fill="'+leaf2+'" stroke="'+INK+'" stroke-width="1.8"/>'+
+           '<circle cx="'+n1(bx+rr*0.7)+'" cy="'+n1(top+rr*0.22)+'" r="'+n1(rr*0.68)+'" fill="'+leaf2+'" stroke="'+INK+'" stroke-width="1.8"/>'+
+           '<circle cx="'+bx+'" cy="'+n1(top-rr*0.3)+'" r="'+n1(rr)+'" fill="'+leaf+'" stroke="'+INK+'" stroke-width="1.8"/></g>';
+      }
+    }
+  }
+  if(pts>=MILE.water && kind!=="beach" && kind!=="fjord")
+    s+='<g><ellipse cx="205" cy="'+(GROUND+26)+'" rx="30" ry="9" fill="#7FC4E8" stroke="'+INK+'" stroke-width="1.8"/>'+
+       '<path d="M191 '+(GROUND+24)+' q5 -3 10 0 M209 '+(GROUND+29)+' q5 -3 10 0" stroke="#FFFEFB" stroke-width="1.8" fill="none" stroke-linecap="round"/></g>';
+  return s;
+}
+function bigSpace(kind, pts, sc){
+  var s="";
+  if(pts>=MILE.small){
+    var g=Math.min(1,(pts-MILE.small)/240), h=10+g*8, bx=283, by=GROUND+10;
+    s+='<g><path d="M'+bx+' '+n1(by)+' v-'+n1(h)+'" stroke="#C3D6E4" stroke-width="2.2"/>'+
+       '<path d="M'+n1(bx-h*0.4)+' '+n1(by-h)+' h'+n1(h*0.8)+'" stroke="#C3D6E4" stroke-width="2.2"/>'+
+       '<circle cx="'+bx+'" cy="'+n1(by-h-2.5)+'" r="2.2" fill="#FF6B6B" stroke="'+INK+'" stroke-width="1"/></g>';
+  }
+  if(pts>=MILE.big){
+    var t=Math.min(1,(pts-MILE.big)/550), w=16+t*14, bx2=32, by2=GROUND+12;
+    s+='<g><rect x="'+n1(bx2-w/2)+'" y="'+n1(by2-w*0.6)+'" width="'+n1(w)+'" height="'+n1(w*0.6)+'" rx="3" fill="#B9C6DA" stroke="'+INK+'" stroke-width="1.8"/>'+
+       '<rect x="'+n1(bx2-w*0.2)+'" y="'+n1(by2-w*0.44)+'" width="'+n1(w*0.4)+'" height="'+n1(w*0.26)+'" fill="#7FD3E0" stroke="'+INK+'" stroke-width="1.2"/>'+
+       '<rect x="'+n1(bx2-w/2-12)+'" y="'+n1(by2-w*0.68)+'" width="6" height="'+n1(w*0.42)+'" fill="#3E6BA8" stroke="'+INK+'" stroke-width="1.2"/>'+
+       '<rect x="'+n1(bx2+w/2+6)+'" y="'+n1(by2-w*0.68)+'" width="6" height="'+n1(w*0.42)+'" fill="#3E6BA8" stroke="'+INK+'" stroke-width="1.2"/></g>';
+  }
+  if(pts>=MILE.water)
+    s+='<g><ellipse cx="205" cy="'+(GROUND+26)+'" rx="27" ry="8" fill="#2E6B8A" stroke="'+INK+'" stroke-width="1.8" opacity=".92"/>'+
+       '<path d="M192 '+(GROUND+24)+' q5 -3 10 0" stroke="#9FE0F0" stroke-width="1.6" fill="none" stroke-linecap="round"/></g>';
+  return s;
+}
+function fliers(uid, kind, pts, gold){
+  var rnd=mulberry32(seedFor(uid+"fly")), s="", n=0;
+  if(pts>=MILE.fly1) n++;
+  if(pts>=MILE.fly2) n++;
+  if(pts>GOAL) n+=Math.min(3, Math.floor((pts-GOAL)/400));
+  var sk=SCENE[kind];
+  var mode = sk.stars ? "sat" : (kind==="meadow" ? "fly" : "bird");
+  /* scenes with a planet hanging in the sky keep their traffic to the right
+     of it, so satellites don't end up pinned to the rings */
+  var lo = (sk.giant||sk.homeworld) ? 158 : 34, hi = (sk.giant||sk.homeworld) ? 272 : 254;
+  for(var i=0;i<n;i++){
+    var x=n1(lo+rnd()*(hi-lo)), y=n1(24+rnd()*46);
+    if(mode==="sat"){
+      s+='<g><circle cx="'+x+'" cy="'+y+'" r="3.2" fill="#C9D6EA" stroke="'+INK+'" stroke-width="1.2"/>'+
+         '<path d="M'+n1(x-7.5)+' '+y+' h4.3 M'+n1(x+3.2)+' '+y+' h4.3" stroke="'+INK+'" stroke-width="1.5"/>'+
+         '<rect x="'+n1(x-10.5)+'" y="'+n1(y-2.4)+'" width="3.2" height="4.8" fill="#3E6BA8" stroke="'+INK+'" stroke-width="1"/>'+
+         '<rect x="'+n1(x+7.3)+'" y="'+n1(y-2.4)+'" width="3.2" height="4.8" fill="#3E6BA8" stroke="'+INK+'" stroke-width="1"/></g>';
+    }else if(mode==="fly"){
+      var col=BLOOMS[Math.floor(rnd()*BLOOMS.length)].c;
+      s+='<g><ellipse cx="'+n1(x-3.4)+'" cy="'+y+'" rx="4" ry="5.2" fill="'+col+'" stroke="'+INK+'" stroke-width="1.2"/>'+
+         '<ellipse cx="'+n1(x+3.4)+'" cy="'+y+'" rx="4" ry="5.2" fill="'+col+'" stroke="'+INK+'" stroke-width="1.2"/>'+
+         '<path d="M'+x+' '+n1(y-4.4)+' V'+n1(y+4.4)+'" stroke="'+INK+'" stroke-width="1.8" stroke-linecap="round"/></g>';
+    }else{
+      s+='<path d="M'+n1(x-9)+' '+y+' q4.5 -5 9 0 q4.5 -5 9 0" stroke="'+INK+'" stroke-width="1.9" fill="none" stroke-linecap="round" opacity=".85"/>';
+    }
+  }
+  return s;
+}
+
+/* ---- the completion landmark: unmistakably different from "lots of plants" ---- */
+function landmark(kind){
+  if(kind==="forest")
+    return '<g><path d="M243 128 v-16 M243 112 l-7 -8 M243 112 l7 -8 M243 118 l-5 -5 M243 118 l5 -5" stroke="#6B4A32" stroke-width="2" stroke-linecap="round" fill="none"/>'+
+      '<ellipse cx="246" cy="132" rx="13" ry="7" fill="#8A6A4A" stroke="'+INK+'" stroke-width="1.8"/>'+
+      '<circle cx="236" cy="127" r="5" fill="#8A6A4A" stroke="'+INK+'" stroke-width="1.8"/>'+
+      '<path d="M254 130 q6 4 2 9" stroke="'+INK+'" stroke-width="1.8" fill="none" stroke-linecap="round"/>'+
+      '<circle cx="233.5" cy="126" r="1" fill="'+INK+'"/></g>';
+  if(kind==="meadow"){
+    var cols=["#EF5B3F","#FFC93C","#4FA85A","#2E7DD1"], s='<g fill="none" stroke-width="5" opacity=".75">';
+    for(var i=0;i<cols.length;i++){
+      var r=70-i*5;
+      s+='<path d="M'+(150-r)+' '+GROUND+' A'+r+' '+r+' 0 0 1 '+(150+r)+' '+GROUND+'" stroke="'+cols[i]+'"/>';
+    }
+    return s+'</g>';
+  }
+  if(kind==="beach")
+    return '<g><path d="M250 128 l4 -30 h6 l4 30 Z" fill="#FFFEFB" stroke="'+INK+'" stroke-width="2"/>'+
+      '<path d="M253 112 h10" stroke="#EF5B3F" stroke-width="4"/>'+
+      '<rect x="252.5" y="92" width="9" height="8" rx="1.5" fill="#FFE9A8" stroke="'+INK+'" stroke-width="1.8"/>'+
+      '<path d="M262 96 l16 -5 M262 96 l16 5" stroke="#FFE9A8" stroke-width="2.5" opacity=".85" stroke-linecap="round"/></g>';
+  if(kind==="fjord")   /* a boat, so it must sit on the water not the shore */
+    return '<g><path d="M40 112 h34 l-5 7 h-24 Z" fill="#8A5A33" stroke="'+INK+'" stroke-width="1.8"/>'+
+      '<path d="M57 112 v-16" stroke="'+INK+'" stroke-width="2"/>'+
+      '<path d="M57 97 l13 12 h-13 Z" fill="#FFFEFB" stroke="'+INK+'" stroke-width="1.6"/></g>';
+  if(kind==="rocky"||kind==="ice"||kind==="gas"||kind==="station")
+    return '<g><path d="M150 126 l7 -22 l7 22 Z" fill="#E4EAF6" stroke="'+INK+'" stroke-width="1.8"/>'+
+      '<path d="M157 104 v-9" stroke="'+INK+'" stroke-width="2"/>'+
+      '<path d="M157 95 h15 v9 h-15 Z" fill="#EF5B3F" stroke="'+INK+'" stroke-width="1.6"/>'+
+      '<circle cx="157" cy="118" r="2.6" fill="#7FD3E0" stroke="'+INK+'" stroke-width="1.2"/></g>';
+  return "";
+}
+
+/* ---- scene assembly ---- */
+function sceneSVG(op, pts, interactive, done, asWorld){
+  var world=asWorld||worldOf(), kind=kindFor(op,world), sc=SCENE[kind];
+  var uid=world+"-"+op, sky=done?sc.gold:sc.sky;
+  var rb=mulberry32(seedFor(uid+"back")), rg=mulberry32(seedFor(uid+"gnd"));
+  var s='<svg class="garden-art" viewBox="0 0 300 150" role="img" aria-label="'+sceneAlt(op,pts,done)+'">';
+
+  s+='<defs>'+
+    '<linearGradient id="'+rid(uid,"sky")+'" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0" stop-color="'+sky[0]+'"/><stop offset="1" stop-color="'+sky[1]+'"/></linearGradient>'+
+    '<radialGradient id="'+rid(uid,"glow")+'">'+
+      '<stop offset="0" stop-color="'+sc.sun+'" stop-opacity=".95"/>'+
+      '<stop offset="1" stop-color="'+sc.sun+'" stop-opacity="0"/></radialGradient>'+
+    '<linearGradient id="'+rid(uid,"gnd")+'" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0" stop-color="'+sc.ground+'"/><stop offset="1" stop-color="'+sc.ground2+'"/></linearGradient>'+
+    (sc.water ? '<linearGradient id="'+rid(uid,"sea")+'" x1="0" y1="0" x2="0" y2="1">'+
+      '<stop offset="0" stop-color="'+sc.water[1]+'"/><stop offset="1" stop-color="'+sc.water[0]+'"/></linearGradient>' : '')+
+    (sc.snow ? '<clipPath id="'+rid(uid,"snow")+'"><rect x="0" y="0" width="300" height="'+(GROUND-30)+'"/></clipPath>' : '')+
+    '</defs>';
+
+  /* sky */
+  s+='<rect width="300" height="150" fill="url(#'+rid(uid,"sky")+')"/>';
+  if(sc.stars) s+=starField(mulberry32(seedFor(uid+"star")), 46, GROUND-6);
+  if(sc.aurora) s+=auroraBands(uid, mulberry32(seedFor(uid+"aur")), done);
+  /* sun / light source */
+  s+='<circle cx="252" cy="30" r="30" fill="url(#'+rid(uid,"glow")+')"/>';
+  s+='<circle cx="252" cy="30" r="'+(sc.stars?7:13)+'" fill="'+sc.sun+'"/>';
+  /* a planet or ring giant hanging in the sky */
+  if(sc.giant){
+    s+='<g><circle cx="96" cy="46" r="30" fill="#B487C4"/>'+
+       '<path d="M66 46 a30 30 0 0 0 60 0 Z" fill="#8E5F9E" opacity=".45"/>'+
+       '<path d="M70 34 h52 M68 54 h56 M76 62 h40" stroke="#E0BEE8" stroke-width="3" opacity=".5"/>'+
+       '<ellipse cx="96" cy="46" rx="48" ry="12" fill="none" stroke="#E6C9A8" stroke-width="4" opacity=".75"/>'+
+       '<path d="M48 46 a48 12 0 0 0 96 0" fill="none" stroke="#F0DCC0" stroke-width="4" opacity=".9"/></g>';
+  }
+  if(sc.homeworld){
+    s+='<g><circle cx="72" cy="52" r="26" fill="#2E6BA8"/>'+
+       '<path d="M52 40 q14 6 26 2 q12 -4 20 6 q-10 16 -30 16 q-18 0 -22 -12 Z" fill="#4FA85A" opacity=".85"/>'+
+       '<circle cx="72" cy="52" r="26" fill="none" stroke="#9FD0F0" stroke-width="2" opacity=".55"/></g>';
+  }
+  /* distant haze layer */
+  s+='<path d="'+ridgePath(rb, GROUND-16, 22, 5)+'" fill="'+sc.far+'" opacity=".55"/>';
+  if(sc.snow){
+    /* one path drawn twice — rock, then snow clipped to the tops — so the
+       white caps actually belong to the peaks under them */
+    var pk=peakPath(mulberry32(seedFor(uid+"peak")), GROUND-8, 40, 4);
+    s+='<path d="'+pk+'" fill="'+sc.far+'"/>';
+    s+='<path d="'+pk+'" fill="#FFFEFB" opacity=".95" clip-path="url(#'+rid(uid,"snow")+')"/>';
+  }
+  /* mid layer */
+  s+='<path d="'+ridgePath(rb, GROUND-6, 14, 7)+'" fill="'+sc.mid+'" opacity=".9"/>';
+  if(kind==="forest"){
+    var rf=mulberry32(seedFor(uid+"trees"));
+    for(var t=0;t<11;t++) s+=conifer(n1(6+rf()*292), GROUND+1, 16+rf()*12, sc.mid, "#3E6A48");
+  }
+  if(kind==="fjord"){
+    /* a waterfall down the cliff face */
+    s+='<path d="M84 '+(GROUND-30)+' q3 14 -1 30" stroke="#EAF6FF" stroke-width="4" fill="none" opacity=".8"/>'+
+       '<ellipse cx="83" cy="'+(GROUND+2)+'" rx="7" ry="2.6" fill="#EAF6FF" opacity=".6"/>';
+  }
+
+  /* ground or water */
+  if(sc.water){
+    /* foreground shore, so the earned pieces stand on land not water */
+    var shore=plantTop(kind)-8, band=shore-GROUND;
+    s+='<rect x="0" y="'+GROUND+'" width="300" height="'+(150-GROUND)+'" fill="url(#'+rid(uid,"sea")+')"/>';
+    s+='<path d="M252 '+GROUND+' L258 '+n1(shore+3)+' L246 '+n1(shore+3)+' Z" fill="'+sc.sun+'" opacity=".3"/>';
+    for(var w=0;w<5;w++){
+      var wy=n1(GROUND+3+rg()*Math.max(4,band-4)), wx=n1(rg()*240);
+      s+='<path d="M'+wx+' '+wy+' q9 -3 18 0" stroke="#FFFEFB" stroke-width="1.6" fill="none" opacity="'+n1(0.25+rg()*0.3)+'"/>';
+    }
+    if(kind==="beach")
+      s+='<path d="M0 '+shore+' q60 11 130 6 q80 -5 170 10 L300 150 L0 150 Z" fill="url(#'+rid(uid,"gnd")+')"/>'+
+         '<path d="M0 '+shore+' q60 11 130 6 q80 -5 170 10" stroke="#FFFEFB" stroke-width="2.4" fill="none" opacity=".8"/>';
+    if(kind==="fjord")
+      s+='<path d="M0 '+(shore+4)+' q52 -7 104 1 q76 6 196 -3 L300 150 L0 150 Z" fill="url(#'+rid(uid,"gnd")+')"/>'+
+         '<path d="M0 '+(shore+4)+' q52 -7 104 1 q76 6 196 -3" stroke="#EAF6FF" stroke-width="1.8" fill="none" opacity=".5"/>';
+  }else{
+    s+='<rect x="0" y="'+GROUND+'" width="300" height="'+(150-GROUND)+'" fill="url(#'+rid(uid,"gnd")+')"/>';
+    s+='<path d="M0 '+GROUND+' H300" stroke="'+sc.mid+'" stroke-width="3" opacity=".7"/>';
+  }
+  if(sc.craters){
+    for(var c=0;c<7;c++){
+      var cx=n1(rg()*300), cy=n1(GROUND+6+rg()*36), cr=n1(3+rg()*7);
+      s+='<ellipse cx="'+cx+'" cy="'+cy+'" rx="'+cr+'" ry="'+n1(cr*0.42)+'" fill="'+sc.ground2+'" opacity=".8"/>';
+    }
+  }
+  if(kind==="ice"){
+    for(var p2=0;p2<5;p2++){
+      var px=n1(rg()*300), ph=n1(8+rg()*12);
+      s+='<path d="M'+px+' '+(GROUND+8)+' l'+n1(ph*0.3)+' -'+ph+' l'+n1(ph*0.3)+' '+ph+' Z" fill="#EAF6FF" opacity=".85"/>';
+    }
+  }
+  if(kind==="station"){
+    s+='<path d="M0 '+(GROUND+8)+' H300" stroke="#5A7092" stroke-width="2" opacity=".8"/>';
+    for(var h2=0;h2<8;h2++)
+      s+='<rect x="'+n1(h2*38+4)+'" y="'+(GROUND+12)+'" width="30" height="12" rx="2" fill="'+sc.ground2+'" opacity=".55"/>';
+  }
+  if(!sc.water && !sc.stars){
+    var rgr=mulberry32(seedFor(uid+"grass")), gn=Math.min(14,3+Math.floor(pts/70));
+    for(var i2=0;i2<gn;i2++){
+      var x2=n1(6+rgr()*288), y2=n1(GROUND+3+rgr()*38), h3=n1(5+rgr()*5);
+      s+='<path d="M'+x2+' '+y2+' l-3 -'+h3+' M'+x2+' '+y2+' l0 -'+n1(h3+2)+' M'+x2+' '+y2+' l3 -'+h3+'" stroke="'+sc.ground2+'" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".8"/>';
+    }
+  }
+
+  /* earned pieces */
+  s += (world==="space" ? bigSpace(kind,pts,sc) : bigWild(kind,pts,sc));
+  var plan=scenePlan(op,world);
+  for(var i=0;i<plan.length;i++)
+    if(pts>=plan[i].t)
+      s += drawGrower(kind, plan[i], pts, op, interactive);
+  s += fliers(uid,kind,pts,done);
+  if(done) s += landmark(kind);
+  return s+'</svg>';
+}
+function sceneAlt(op,pts,done){
+  var kind=kindFor(op), n=slotCount(pts), what=(worldOf()==="space"?"dome":"plant");
+  if(done) return OP_NAME[op]+" "+SCENE[kind].label+", complete — every fact mastered.";
+  if(!n) return OP_NAME[op]+" "+SCENE[kind].label+", bare and waiting for a first "+what+".";
+  return OP_NAME[op]+" "+SCENE[kind].label+" with "+n+" "+what+(n===1?"":"s")+".";
+}
+function sceneNote(op,p){
+  if(p<=0) return "Empty — practise "+OP_NAME[op].toLowerCase()+" to start it off.";
+  if(p>=GOAL) return "Every corner filled in! ✨";
+  for(var i=1;i<=SLOTS;i++){
+    var t=slotThreshold(i);
+    if(p<t) return (t-p)+" points to the next one.";
+  }
+  return (GOAL-p)+" points to fill it up.";
+}
+
+/* ---------------- mastery & completion ----------------
+   Points decorate the scene; mastery is what finishes it. Both derive from
+   state that already exists, so nothing extra is stored and nothing goes
+   stale. "Complete" means every fact in the section is mastered. */
+function totalFacts(op){ return (MAX+1)*(MAX+1-minB(op)); }
+function masteryOf(op){
+  var done=0, b0=minB(op);
+  for(var a=0;a<=MAX;a++) for(var b=b0;b<=MAX;b++)
+    if(factStatus(op,a,b)==="mastered") done++;
+  return {done:done, total:totalFacts(op)};
+}
+function sectionComplete(op){
+  var m=masteryOf(op);
+  return m.done===m.total;
+}
+function completeBadge(){
+  return '<svg class="badge" viewBox="0 0 24 24" role="img" aria-label="Complete">'+
+    '<circle cx="12" cy="10" r="7.5" fill="#FFC93C" stroke="'+INK+'" stroke-width="1.8"/>'+
+    '<path d="M8.5 16.5 L7 23 l5-2.6 5 2.6 -1.5-6.5" fill="#EF5B3F" stroke="'+INK+'" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<path d="M12 6.2 l1.5 3 3.3.4 -2.4 2.3.6 3.3 -3-1.6 -3 1.6.6-3.3 -2.4-2.3 3.3-.4Z" fill="#FFFEFB"/></svg>';
+}
+function sceneBlock(op, pts, label, interactive, withBar, withNote){
+  var done=sectionComplete(op), m=masteryOf(op);
+  var pct=Math.min(100, pts/GOAL*100), mpct=m.total? (m.done/m.total*100) : 0;
+  return '<div class="garden'+(done?" done":"")+'" data-op="'+op+'">'+
+    '<div class="garden-head">'+
+      '<span class="garden-name"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</span>'+
+      (done?completeBadge():"")+
+      '<span class="garden-pts">'+label+'</span></div>'+
+    '<div class="scene-wrap">'+sceneSVG(op,pts,interactive,done)+
+      (withBar?'<div class="scene-bar" role="img" aria-label="Scene '+Math.round(pct)+
+        '% filled in"><i style="width:'+n1(pct)+'%"></i></div>':'')+'</div>'+
+    (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
+      '<span class="mastery-txt">'+(done?"All "+m.total+" facts mastered ✓":m.done+" of "+m.total+" facts mastered")+
+      '</span></div>':'')+
+    (withNote?'<p class="garden-note">'+(done?"Finished — nothing left to learn here! ✨":sceneNote(op,pts))+'</p>':'')+
     '</div>';
 }
 
@@ -854,7 +1341,7 @@ var S = null;
 function startSession(){
   S = { ops:state.ops.slice(), asked:0, len:SESSION_LEN, points:0,
         requeue:[], missed:{}, newlyMastered:[], missedList:[],
-        gained:{add:0,sub:0,mul:0,div:0}, completed:false,
+        gained:{add:0,sub:0,mul:0,div:0}, completed:false, finished:[],
         q:null, entry:"", lastKey:"", busy:false, t0:0 };
   disarmQuit();
   document.body.classList.add("quizzing");
@@ -896,6 +1383,9 @@ function submitAnswer(){
     if(after==="mastered" && before!=="mastered"){
       pts+=20; star=true;
       S.newlyMastered.push(q.text+" = "+q.answer);
+      /* A section can only tip into "complete" on the answer that masters its
+         last fact, so this is the one moment worth the full check. */
+      if(S.finished.indexOf(q.op)<0 && sectionComplete(q.op)) S.finished.push(q.op);
     }
     state.pts[q.op]+=pts; S.points+=pts; S.gained[q.op]+=pts;
     /* re-check a fact missed earlier this session one more time */
@@ -958,18 +1448,22 @@ function streak(){
 
 /* ---------------- rendering ---------------- */
 var el = {};
-["screen-home","screen-quiz","screen-summary","startBtn","modeRow","pickNote","gardens","totalLine",
- "factGrid","cellInfo","gridTabs","dayStrip","streakLine","resetBtn","quitBtn","quitNote","qbar","qcount",
- "opChip","factLine","answerSlot","feedback","sessionPoints","soundBtn","sumTitle","sumPoints","sumStopped",
+["screen-home","screen-quiz","screen-summary","screen-setup","startBtn","modeRow","pickNote","gardens","totalLine",
+ "factGrid","cellInfo","gridTabs","dayStrip","streakLine","resetBtn","renameBtn","quitBtn","quitNote","qbar","qcount",
+ "opChip","factLine","answerSlot","feedback","sessionPoints","soundBtn","sumTitle","sumPoints","sumStopped","sumDone",
  "sumGardens","sumGardensTitle","sumGardenArt","sumMastered","sumMasteredChips","sumWork","sumWorkChips","sumNote",
- "againBtn","homeBtn"
+ "againBtn","homeBtn","welcome","heroTag","worldTitle","stepName","stepWorld","nameInput","nameNext","worldPick"
 ].forEach(function(id){
   el[id.replace("screen-","")] = document.getElementById(id);
 });
 var gridOp = "add";
 
 function renderHome(){
-  renderModeRow(); renderGardens(); renderGrid(); renderDays();
+  el.heroTag.textContent = state.name
+    ? state.name+"’s world" : "Grow your maths, grow your world";
+  el.worldTitle.innerHTML = "Your "+WORLDS[worldOf()].mine+
+    ' <span class="note">tap to recolour</span>';
+  renderModeRow(); renderScenes(); renderGrid(); renderDays();
 }
 function renderModeRow(){
   var btns=el.modeRow.querySelectorAll("button");
@@ -980,15 +1474,17 @@ function renderModeRow(){
     : names.length===OPS.length ? "All four, mixed together"
     : names.slice(0,-1).join(", ")+" and "+names[names.length-1]+", mixed";
 }
-function renderGardens(){
-  var html="", total=0;
+function renderScenes(){
+  var html="", total=0, finished=0;
   for(var i=0;i<OPS.length;i++){
     var op=OPS[i], p=state.pts[op]||0;
     total+=p;
-    html+=gardenBlock(op,p,p+" pts",true,true,true);
+    if(sectionComplete(op)) finished++;
+    html+=sceneBlock(op,p,p+" pts",true,true,true);
   }
   el.gardens.innerHTML=html;
-  el.totalLine.textContent=total+" points in all";
+  el.totalLine.textContent = total+" points in all"+
+    (finished ? " · "+finished+" of "+OPS.length+" finished 🏅" : "");
 }
 function renderGrid(){
   var g=el.factGrid, b0=minB(gridOp);
@@ -1091,16 +1587,28 @@ function renderSummary(){
       " still to go, so this one doesn’t count as a practice day. Your points are safe — finish a whole set to fill in today.";
   }
 
+  /* finishing a whole section is the biggest thing that can happen here */
+  el.sumDone.hidden = S.finished.length===0;
+  if(S.finished.length){
+    el.sumTitle.textContent = "Finished! 🏅";
+    el.sumDone.innerHTML = S.finished.map(function(o){
+      return "<h3>"+completeBadge()+" "+OP_NAME[o]+" complete!</h3>"+
+        "<p>Every one of the "+totalFacts(o)+" "+OP_NAME[o].toLowerCase()+
+        " facts is mastered, and your "+SCENE[kindFor(o)].label+" is finished.</p>";
+    }).join("");
+  }
+
   var grew=OPS.filter(function(o){ return S.gained[o]>0; });
+  var thing = worldOf()==="space" ? "dome" : "flower";
   var sprouted=grew.some(function(o){
-    return flowerCount(state.pts[o]) > flowerCount(state.pts[o]-S.gained[o]);
+    return slotCount(state.pts[o]) > slotCount(state.pts[o]-S.gained[o]);
   });
   el.sumGardens.hidden = grew.length===0;
   el.sumGardensTitle.textContent = sprouted
-    ? (grew.length>1 ? "🌱 New flowers grew!" : "🌱 A new flower grew!")
-    : "🌱 Your garden";
+    ? (grew.length>1 ? "🌱 New "+thing+"s appeared!" : "🌱 A new "+thing+" appeared!")
+    : "🌱 Your world";
   el.sumGardenArt.innerHTML = grew.map(function(o){
-    return gardenBlock(o, state.pts[o], "+"+S.gained[o]+" pts", false, false, true);
+    return sceneBlock(o, state.pts[o], "+"+S.gained[o]+" pts", false, false, true);
   }).join("");
 
   el.sumMastered.hidden = S.newlyMastered.length===0;
@@ -1162,14 +1670,14 @@ el.gridTabs.addEventListener("click", function(e){
 el.factGrid.addEventListener("click", function(e){
   var c=e.target.closest(".cell"); if(c) cellTapped(c);
 });
-/* tap a bloomed flower to recolour it */
+/* tap a grown flower (or dome, in Space) to recolour it */
 function cycleBloom(op,i){
-  var plan=gardenPlan(op), cur;
+  var plan=scenePlan(op,worldOf()), cur;
   for(var k=0;k<plan.length;k++) if(plan[k].i===i) cur=bloomIndex(op,plan[k]);
   if(cur===undefined) return;
   state.blooms[op][i]=(cur+1)%BLOOMS.length;
   saveState(); sfx.tap();
-  renderGardens();
+  renderScenes();
   var again=el.gardens.querySelector('.fl[data-op="'+op+'"][data-i="'+i+'"][tabindex]');
   if(again) again.focus();
 }
@@ -1207,7 +1715,8 @@ el.quitBtn.addEventListener("click", function(){
   el.quitNote.textContent="Tap × again to stop. This session won’t count as a practice day.";
   quitArmed=setTimeout(disarmQuit,3000);
 });
-/* two-tap reset — no confirm() popups */
+/* two-tap reset — no confirm() popups. Erasing is also the only way to pick a
+   different world, which is why the setup screen comes back after it. */
 var resetArmed=null;
 el.resetBtn.addEventListener("click", function(){
   if(resetArmed){
@@ -1215,7 +1724,7 @@ el.resetBtn.addEventListener("click", function(){
     state=defaultState(); saveState();
     el.resetBtn.textContent="Erase all progress";
     el.resetBtn.classList.remove("arming");
-    renderHome();
+    boot();
   }else{
     el.resetBtn.textContent="Tap again to erase everything";
     el.resetBtn.classList.add("arming");
@@ -1227,8 +1736,101 @@ el.resetBtn.addEventListener("click", function(){
   }
 });
 
+/* ---------------- first run: name, then world ----------------
+   The world is asked once and then fixed, so the picker states that plainly
+   and nothing in the app reassigns it afterwards. */
+var renaming=false;
+function showSetup(){
+  el.home.hidden=true; el.quiz.hidden=true; el.summary.hidden=true;
+  el.setup.hidden=false;
+  document.body.classList.remove("quizzing");
+  var needName=!state.name;
+  el.stepName.hidden=!needName;
+  el.stepWorld.hidden=needName || !!state.world;
+  if(needName){
+    el.nameInput.value="";
+    setTimeout(function(){ try{ el.nameInput.focus(); }catch(e){} },50);
+  }else if(!state.world){
+    renderWorldPick();
+  }
+  window.scrollTo(0,0);
+}
+function renderWorldPick(){
+  var html="";
+  ["wild","space"].forEach(function(w){
+    html+='<button class="world-opt" data-world="'+w+'">'+
+      '<h3>'+WORLDS[w].name+'</h3><p>'+WORLDS[w].blurb+'</p>'+
+      '<span class="strip">'+sceneSVG("add",560,false,false,w)+
+      sceneSVG("div",560,false,false,w)+'</span></button>';
+  });
+  el.worldPick.innerHTML=html;
+}
+function submitName(){
+  var v=el.nameInput.value.replace(/\s+/g," ").trim().slice(0,16);
+  if(!v){
+    el.nameInput.classList.remove("shake"); void el.nameInput.offsetWidth;
+    el.nameInput.classList.add("shake");
+    try{ el.nameInput.focus(); }catch(e){}
+    return;
+  }
+  state.name=v; saveState(); sfx.tap();
+  if(!renaming && !state.world){
+    el.stepName.hidden=true; el.stepWorld.hidden=false;
+    renderWorldPick(); window.scrollTo(0,0);
+    return;
+  }
+  renaming=false;
+  finishSetup();
+}
+function finishSetup(){
+  el.setup.hidden=true; el.home.hidden=false;
+  renderHome(); showWelcome(); window.scrollTo(0,0);
+}
+el.nameNext.addEventListener("click", submitName);
+el.nameInput.addEventListener("keydown", function(e){
+  if(e.key==="Enter"){ e.preventDefault(); submitName(); }
+});
+el.worldPick.addEventListener("click", function(e){
+  var b=e.target.closest ? e.target.closest("button[data-world]") : null;
+  if(!b || state.world) return;        // chosen once, never reassigned
+  state.world=b.dataset.world;
+  saveState(); sfx.star();
+  finishSetup();
+});
+el.renameBtn.addEventListener("click", function(){
+  renaming=true;
+  el.home.hidden=true; el.setup.hidden=false;
+  el.stepName.hidden=false; el.stepWorld.hidden=true;
+  el.nameInput.value=state.name||"";
+  setTimeout(function(){ try{ el.nameInput.focus(); el.nameInput.select(); }catch(e){} },50);
+  window.scrollTo(0,0);
+});
+
+var welcomeTimer=null, welcomeTimer2=null;
+function showWelcome(){
+  if(!state.name) return;
+  clearTimeout(welcomeTimer); clearTimeout(welcomeTimer2);
+  el.welcome.textContent="Welcome back, "+state.name+"! 👋";
+  el.welcome.hidden=false;
+  el.welcome.classList.remove("out","in"); void el.welcome.offsetWidth;
+  el.welcome.classList.add("in");
+  welcomeTimer=setTimeout(function(){
+    el.welcome.classList.remove("in");
+    el.welcome.classList.add("out");
+    welcomeTimer2=setTimeout(function(){
+      el.welcome.hidden=true; el.welcome.classList.remove("out");
+    },520);
+  },1800);
+}
+function boot(){
+  if(!state.name || !state.world){ showSetup(); return; }
+  el.setup.hidden=true; el.home.hidden=false;
+  renderHome();
+  showWelcome();
+}
+
 renderSoundBtn();
-renderHome();
+boot();
 })();
 </script>
 </body>

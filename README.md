@@ -5,8 +5,9 @@ multiplication and division facts.
 
 It adapts to the learner: facts unlock gradually, missed facts come back sooner
 and more often, and facts count as mastered only once they can be recalled both
-correctly and quickly. Each of the four sections grows a garden of its own —
-the more points earned in a section, the fuller and busier its garden gets.
+correctly and quickly. Each of the four sections has a landscape of its own that
+fills in as it is practised, and is finished only when every fact in it is
+mastered.
 
 Built for phones and tablets, but it works fine with a keyboard on a desktop.
 
@@ -17,11 +18,27 @@ manager, and no server required. You can open it straight from the filesystem,
 or drop the two files on any static host.
 
 The app makes **no network requests at all**. Both fonts (Fredoka and Nunito)
-are embedded in the file as base64 woff2, which is why `index.html` is around
-145 KB despite being a single page. Once the page has loaded it works offline.
+are embedded in the file as base64 woff2, and every scene is drawn in SVG at
+runtime rather than loaded as an image, which is why `index.html` is around
+175 KB despite being a single page. Once the page has loaded it works offline.
 
 `robots.txt` disallows everything and the page sends `noindex, nofollow,
 noarchive`, so it stays out of search results.
+
+## First run
+
+Numo asks two things the first time it opens:
+
+1. **A name**, so the app is visibly the child's own. It appears in the header,
+   and a `Welcome back, NAME` banner fades in and out on each visit. It can be
+   changed later from **Change name** at the bottom of the home screen.
+2. **A world** — *Wild Places* or *Space*. The four sections get four different
+   scenes either way, so the picture always says which kind of maths it belongs
+   to.
+
+**The world is chosen once and then fixed.** The picker says so plainly, and
+nothing in the app reassigns it afterwards. Erasing all progress is the only way
+to choose again.
 
 ## Choosing what to practise
 
@@ -29,8 +46,8 @@ The four buttons at the top — `+ − × ÷` — are toggles, and any combinati
 works. Pick one for a single-section session, or several to interleave them.
 At least one always stays selected.
 
-Points from each answer go to that operation's own garden, so a mixed session
-waters several gardens at once.
+Points from each answer go to that operation's own scene, so a mixed session
+grows several of them at once.
 
 ## How a session works
 
@@ -112,34 +129,66 @@ handed the whole unlocked band at once. This does mean the very first session
 repeats a handful of facts several times, which is intentional — the pool is
 small on purpose.
 
-## The gardens
+## The worlds
 
-Each section has a garden that fills in on its own as its points rise. There is
-nothing to buy, place or arrange: the picture is a pure function of the points
-earned, so it can't end up empty-looking or badly arranged, and it always
-reflects real practice.
+Every section has its own scene, and each grows something different so the four
+never blur together:
 
-A flower appears every so often, sprouting, budding and then blooming as more
-points come in. Along the way a shrub, a tree, a pond, butterflies and finally a
-rainbow arrive at milestones. Each section's garden is laid out from a seed
-derived from its name, so the four look distinct but never change shape between
-visits.
+| | Wild Places | Space |
+| --- | --- | --- |
+| **+** | Forest — young conifers | Rocky planet — habitat domes |
+| **−** | Mountain meadow — wildflowers | Ice moon — comms masts |
+| **×** | Beach — palms | Ring giant — tethered balloons |
+| **÷** | Fjord — cabins along the shore | Station — docked pods |
 
-**Tap any bloomed flower to change its colour.** That choice is remembered.
+Things appear one at a time and grow through three stages as more points come
+in. Bigger pieces — a tree, a shrub, a pond, birds or satellites — arrive at
+milestones, and the scene is comfortably full around 1000 points.
 
-A garden reaches full bloom at 1000 points, and the occasional extra visitor
-still turns up beyond that.
+**Tap anything fully grown to change its colour.** That choice is remembered.
+
+There is nothing to buy, place or arrange. A scene's layout comes from a seed
+derived from its world and section, so it is stable between visits, different
+from its neighbours, and impossible to leave in a broken state — none of it
+needs saving.
+
+## Two meters, doing different jobs
+
+Each section shows two, and the split is deliberate:
+
+- **The bar inside the scene** tracks **points**. It moves every session and
+  shows how full the scene is.
+- **The meter below it** tracks **facts mastered** — "84 of 169 facts mastered".
+  It moves slowly, and it is the one that decides when a section is *finished*.
+
+Early on the mastery meter reads close to empty. That's honest: the points bar
+is what carries short-term motivation, which is exactly why both are there.
+
+## Finishing a section
+
+A section is complete when **every fact in it is mastered** — 169 facts for
+`+`, `−` and `×`, and 156 for `÷`. When the last one falls:
+
+- **The scene transforms.** It shifts to warm golden-hour light and gains a
+  landmark it never had before — a stag in the forest, a lit lighthouse on the
+  beach, a rainbow over the meadow, a boat on the fjord, a planted flag in
+  Space.
+- **A badge** appears beside the section's name and stays there.
+- **The session summary announces it**, and the home screen counts how many of
+  the four are done.
 
 ## Progress and streaks
 
-The home screen shows the four gardens with their points, a fact map per
-section (tap any dot for that fact's history), and the last 10 days of practice.
+The home screen shows the four scenes with their points and mastery, a fact map
+per section (tap any dot for that fact's history), and the last 10 days of
+practice.
 
 A streak continues from yesterday, so practising later in the day doesn't break
 it — but only completed sets count, as described above.
 
 **Erase all progress** requires two taps — the first arms it, and it disarms
-itself after 3 seconds if you don't confirm.
+itself after 3 seconds if you don't confirm. It also clears the name and world,
+so setup runs again.
 
 ## Sound and haptics
 
@@ -162,15 +211,17 @@ session rather than failing.
 
 ```js
 {
-  v: 2,
-  pts:      { add:0, sub:0, mul:0, div:0 },    // points per section, drives the gardens
+  v: 3,
+  name:     "Alex",                             // "" until asked
+  world:    "wild",                             // "wild" | "space" — set once, then fixed
+  pts:      { add:0, sub:0, mul:0, div:0 },     // points per section, fills the scenes
   ops:      ["add","sub"],                      // sections selected to practise
   unlocked: { add:3, sub:2, mul:2, div:2 },     // highest band unlocked per section
   facts: {
     add: { "3,4": { n, s, r: [], t: [] } },     // keyed "a,b"
     sub: {}, mul: {}, div: {}
   },
-  blooms:   { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // recoloured flowers
+  blooms:   { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // recoloured growers
   days:     { "2026-08-09": 1 },                // sessions completed per day
   sound:    true
 }
@@ -179,12 +230,18 @@ session rather than failing.
 Per fact: `n` total attempts, `s` current correct streak, `r` last five results
 as 1/0, `t` last five correct response times in milliseconds.
 
-Saves from the earlier Plus & Minus version (`plusminus.v1`) are migrated
-automatically on first load. Facts, unlocked bands, practice days and the sound
-setting carry over as they are; the old single points total is split between the
-addition and subtraction gardens in proportion to how much of each was actually
-practised, since points were never recorded per operation back then. The old key
-is left in place as a fallback.
+Mastery counts and completion are **derived** from `facts` rather than stored,
+so they can never fall out of step with the real history.
+
+Older saves migrate automatically on load, and the upgraded save is written
+immediately so the migration survives even if the app is closed straight away:
+
+- **v2** (Numo before worlds) keeps everything — points, facts, bands, days,
+  recoloured growers, sound — and is simply asked for a name and a world.
+- **v1** (`plusminus.v1`, the original Plus & Minus) carries over facts, bands,
+  days and sound. Its single points total predates per-operation scoring, so it
+  is split between the addition and subtraction scenes in proportion to how much
+  of each was actually practised. The old key is left in place as a fallback.
 
 Clearing site data resets progress, as does the erase button.
 
@@ -203,17 +260,18 @@ The constants that shape the difficulty curve are at the top of the script in
 | Constant | Default | Controls |
 | --- | --- | --- |
 | `MAX` | 12 | Largest operand |
-| `GOAL` | 1000 | Points for one garden in full bloom |
+| `GOAL` | 1000 | Points for a comfortably full scene |
 | `SESSION_LEN` | 20 | Questions per session |
 | `SESSION_MAX` | 24 | Ceiling when re-asking missed facts |
 | `FAST_MS` | 4000 | Speed-bonus threshold |
 | `MASTER_MS` | 7000 | Average recall time required for mastery |
 | `RECENT_N` | 5 | How many recent results and times are kept per fact |
 
-Garden pacing lives beside them: `flowerThreshold(i)` sets when flower `i`
-appears, `BUD_AT` and `BLOOM_AT` how quickly each one opens, and the `MILE`
-table when the shrub, tree, pond, butterflies and rainbow arrive. Changing any
-of these restyles every garden immediately — no saved data depends on them.
+Scene pacing lives beside them: `slotThreshold(i)` sets when the `i`th thing
+appears, `BUD_AT` and `BLOOM_AT` how quickly each grows up, and the `MILE` table
+when the bigger pieces arrive. Colours and layers for all eight scenes are in
+the `SCENE` table, and `WORLDS` maps sections to scenes. Changing any of it
+restyles every scene immediately — no saved data depends on it.
 
 Lowering `MASTER_MS` makes mastery stricter; raising `SESSION_LEN` makes
 sessions longer. Changing `LSKEY` starts everyone from scratch.
