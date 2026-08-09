@@ -182,6 +182,10 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
 .garden[data-op="mul"] .scene-bar i{background:var(--grape)}
 .garden[data-op="div"] .scene-bar i{background:var(--sky)}
 .garden.done .garden-art{box-shadow:0 4px 0 var(--sun-deep)}
+.garden.slipped .garden-art{box-shadow:0 4px 0 var(--warn)}
+.garden.slipped .mastery-txt{color:var(--warn)}
+.garden.slipped .garden-note{color:var(--warn)}
+.garden.slipped .mastery-meter i{background:var(--warn)}
 .mastery{display:flex;align-items:center;gap:8px;margin-top:9px}
 .mastery-meter{
   flex:1;height:7px;border-radius:99px;background:var(--line);overflow:hidden;
@@ -427,7 +431,7 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
         <button id="renameBtn" class="linkish">Change name</button>
         <button id="resetBtn" class="linkish">Erase all progress</button>
       </p>
-      <p class="version-line">v5 · worlds</p>
+      <p class="version-line">v6 · mastery takes time</p>
     </section>
 
     <!-- ============ QUIZ ============ -->
@@ -496,8 +500,17 @@ var GOAL = 1000;               // points for one garden in full bloom
 var SESSION_LEN = 20;
 var SESSION_MAX = 24;          // room for re-asking misses at the end
 var FAST_MS = 4000;            // speed bonus threshold
-var MASTER_MS = 7000;          // avg recall time required for "mastered"
+/* Mastery is deliberately hard to reach: a fact has to be recalled quickly,
+   five times running, on five separate days. Three correct answers inside one
+   session is short-term memory, not learning, and used to be enough. */
+var MASTER_MS = 5000;          // avg recall time required for "mastered"
+var MASTER_STREAK = 5;         // correct answers in a row
+var MASTER_DAYS = 5;           // separate days it must be right on
 var RECENT_N = 5;              // how many recent answers/timings we keep
+var DAYS_N = 6;                // how many correct-day stamps we keep per fact
+/* Opening the next band uses a lighter bar than mastery — see checkUnlock. */
+var UNLOCK_MS = 7000;
+var UNLOCK_STREAK = 3;
 var LSKEY = "numo.v1";
 var OLDKEY = "plusminus.v1";   // pre-Numo saves, migrated on first load
 
@@ -507,7 +520,8 @@ var OP_NAME = {add:"Addition", sub:"Subtraction", mul:"Multiplication", div:"Div
 
 /* ---------------- state ---------------- */
 var defaultState = function(){ return {
-  v:3, sound:true,
+  v:4, sound:true,
+  finishedOn:{},                      // section -> date first completed; never cleared
   name:"",                            // "" until the child tells us
   world:null,                         // "wild" | "space" — chosen once, then fixed
   pts:{add:0, sub:0, mul:0, div:0},   // points per section — decorates the scenes
@@ -526,7 +540,7 @@ function fill(s){
   var d = defaultState();
   s.pts = s.pts || {}; s.unlocked = s.unlocked || {};
   s.facts = s.facts || {}; s.blooms = s.blooms || {};
-  s.days = s.days || {};
+  s.days = s.days || {}; s.finishedOn = s.finishedOn || {};
   if(s.sound === undefined) s.sound = true;
   if(typeof s.name !== "string") s.name = "";
   if(s.world !== "wild" && s.world !== "space") s.world = null;
@@ -536,6 +550,10 @@ function fill(s){
     if(typeof s.unlocked[o] !== "number") s.unlocked[o] = d.unlocked[o];
     if(!s.facts[o]) s.facts[o] = {};
     if(!s.blooms[o]) s.blooms[o] = {};
+    for(var k in s.facts[o]){                 // records saved before day tracking
+      if(Object.prototype.hasOwnProperty.call(s.facts[o],k) && s.facts[o][k] && !s.facts[o][k].d)
+        s.facts[o][k].d = [];
+    }
   }
   s.ops = Object.prototype.toString.call(s.ops)==="[object Array]"
     ? s.ops.filter(function(o){ return OPS.indexOf(o)>=0; }) : [];
@@ -568,6 +586,28 @@ function migrate(old){
    over and leave name/world unset, so the setup screen asks once. */
 function migrateV2(old){
   old.v = 3; old.name = ""; old.world = null;
+  return old;
+}
+/* v3 and earlier called a fact mastered after 3 correct in a row, which could
+   all happen in one sitting. Facts that met that bar keep partial credit —
+   3 of the 5 days now required — so real work isn't erased, but the too-easy
+   mastery this rule exists to remove isn't grandfathered in either. */
+function migrateV4(old){
+  old.v = 4;
+  old.finishedOn = old.finishedOn || {};
+  var seed=[], today=new Date(), i, d2;
+  for(i=3;i>=1;i--){ d2=new Date(today); d2.setDate(d2.getDate()-i); seed.push(dayKey(d2)); }
+  for(i=0;i<OPS.length;i++){
+    var m = old.facts && old.facts[OPS[i]];
+    if(!m) continue;
+    for(var k in m){
+      if(!Object.prototype.hasOwnProperty.call(m,k)) continue;
+      var r = m[k];
+      if(!r || r.d) continue;
+      var wasMastered = r.s>=3 && r.t && r.t.length && avg(r.t.slice(-3))<=7000;
+      r.d = wasMastered ? seed.slice() : [];
+    }
+  }
   return fill(old);
 }
 function loadState(){
@@ -575,14 +615,14 @@ function loadState(){
     var raw = localStorage.getItem(LSKEY);
     if(raw){
       var s = JSON.parse(raw);
-      if(s && s.v===3) return fill(s);
-      if(s && s.v===2){ didMigrate = true; return migrateV2(s); }
+      if(s && s.v===4) return fill(s);
+      if(s && s.v===3){ didMigrate = true; return migrateV4(s); }
+      if(s && s.v===2){ didMigrate = true; return migrateV4(migrateV2(s)); }
     }
     var oldRaw = localStorage.getItem(OLDKEY);
     if(oldRaw){
       var o = JSON.parse(oldRaw);
-      /* migrate() builds on defaultState(), so it already lands on v3 */
-      if(o && o.v===1){ didMigrate = true; return migrate(o); }
+      if(o && o.v===1){ didMigrate = true; return migrateV4(migrate(o)); }
     }
   }catch(e){ if(memFallback) return memFallback; }
   return defaultState();
@@ -664,6 +704,14 @@ function questionFor(op,a,b){
   return {op:op,a:a,b:b,x:a*b,y:b,answer:a,text:(a*b)+" ÷ "+b};
 }
 function avg(arr){ if(!arr.length) return Infinity; var s=0; for(var i=0;i<arr.length;i++) s+=arr[i]; return s/arr.length; }
+/* The clock runs while the child taps the answer in, so a three-digit product
+   costs more than a single digit before any thinking is counted. Give longer
+   answers a matching allowance — this pays for typing, not for working it out. */
+function answerOf(op,a,b){ return op==="add" ? a+b : op==="mul" ? a*b : a; }
+function allowanceFor(op,a,b,base){
+  var v=answerOf(op,a,b);
+  return base + (v<10 ? 0 : v<100 ? 900 : 1800);
+}
 
 /* Status: na | locked | new | learning | tricky | mastered */
 function factStatus(op,a,b){
@@ -674,7 +722,8 @@ function factStatus(op,a,b){
   for(var i=0;i<r.r.length;i++) if(!r.r[i]) misses++;
   if(r.r.length && r.r[r.r.length-1]===0) return "tricky";   // just missed it
   if(misses>=2) return "tricky";                              // keeps getting missed
-  if(r.s>=3 && avg(r.t.slice(-3))<=MASTER_MS) return "mastered";
+  if(r.s>=MASTER_STREAK && (r.d?r.d.length:0)>=MASTER_DAYS
+     && avg(r.t.slice(-3))<=allowanceFor(op,a,b,MASTER_MS)) return "mastered";
   return "learning";
 }
 function unlockedFacts(op){
@@ -685,19 +734,35 @@ function unlockedFacts(op){
 }
 function recordAnswer(op,a,b,correct,ms){
   var k=key(a,b), r=state.facts[op][k];
-  if(!r){ r={n:0,s:0,r:[],t:[]}; state.facts[op][k]=r; }
+  if(!r){ r={n:0,s:0,r:[],t:[],d:[]}; state.facts[op][k]=r; }
+  if(!r.d) r.d=[];
   r.n++;
   r.r.push(correct?1:0); if(r.r.length>RECENT_N) r.r.shift();
-  if(correct){ r.s++; r.t.push(Math.min(ms,30000)); if(r.t.length>RECENT_N) r.t.shift(); }
+  if(correct){
+    r.s++;
+    r.t.push(Math.min(ms,30000)); if(r.t.length>RECENT_N) r.t.shift();
+    /* one stamp per day, however many times it comes up today */
+    var d=todayKey();
+    if(r.d[r.d.length-1]!==d){ r.d.push(d); if(r.d.length>DAYS_N) r.d.shift(); }
+  }
+  /* A miss resets the run but keeps the banked days: those are evidence built
+     up over weeks, and one bad morning shouldn't erase them. */
   else r.s=0;
 }
-/* Unlock the next band once 80% of everything unlocked is mastered */
+/* Good enough to open the next band — deliberately easier than mastery.
+   Gating unlocks on the full five-days rule would leave a child drilling the
+   same handful of facts for over a month before seeing a new one. */
+function factSolid(op,a,b){
+  var r=rec(op,a,b);
+  return !!r && r.s>=UNLOCK_STREAK && avg(r.t.slice(-3))<=allowanceFor(op,a,b,UNLOCK_MS);
+}
+/* Unlock the next band once 80% of everything unlocked is solid */
 function checkUnlock(op){
   var grew=false;
   while(state.unlocked[op]<MAX){
     var facts=unlockedFacts(op), g=0;
     for(var i=0;i<facts.length;i++)
-      if(factStatus(op,facts[i].a,facts[i].b)==="mastered") g++;
+      if(factSolid(op,facts[i].a,facts[i].b)) g++;
     if(g/facts.length>=0.8){ state.unlocked[op]++; grew=true; }
     else break;
   }
@@ -1157,11 +1222,29 @@ function landmark(kind){
     return '<g><path d="M40 112 h34 l-5 7 h-24 Z" fill="#8A5A33" stroke="'+INK+'" stroke-width="1.8"/>'+
       '<path d="M57 112 v-16" stroke="'+INK+'" stroke-width="2"/>'+
       '<path d="M57 97 l13 12 h-13 Z" fill="#FFFEFB" stroke="'+INK+'" stroke-width="1.6"/></g>';
-  if(kind==="rocky"||kind==="ice"||kind==="gas"||kind==="station")
-    return '<g><path d="M150 126 l7 -22 l7 22 Z" fill="#E4EAF6" stroke="'+INK+'" stroke-width="1.8"/>'+
-      '<path d="M157 104 v-9" stroke="'+INK+'" stroke-width="2"/>'+
-      '<path d="M157 95 h15 v9 h-15 Z" fill="#EF5B3F" stroke="'+INK+'" stroke-width="1.6"/>'+
-      '<circle cx="157" cy="118" r="2.6" fill="#7FD3E0" stroke="'+INK+'" stroke-width="1.2"/></g>';
+  if(kind==="rocky")      /* a rocket lifting off its pad */
+    return '<g><path d="M138 128 h30 v-4 h-30 Z" fill="#6E7C96" stroke="'+INK+'" stroke-width="1.6"/>'+
+      '<path d="M153 122 q-7 -12 0 -26 q7 14 0 26 Z" fill="#E4EAF6" stroke="'+INK+'" stroke-width="1.8"/>'+
+      '<path d="M147 121 l-5 7 h11 Z M159 121 l5 7 h-11 Z" fill="#EF5B3F" stroke="'+INK+'" stroke-width="1.5"/>'+
+      '<circle cx="153" cy="104" r="2.6" fill="#7FD3E0" stroke="'+INK+'" stroke-width="1.2"/>'+
+      '<path d="M153 129 q-4 7 0 13 q4 -6 0 -13 Z" fill="#FFC93C" stroke="'+INK+'" stroke-width="1.4"/></g>';
+  if(kind==="ice")        /* an observatory with its dome open */
+    return '<g><path d="M136 128 h34 v-9 h-34 Z" fill="#B9C6DA" stroke="'+INK+'" stroke-width="1.6"/>'+
+      '<path d="M137 119 a16 16 0 0 1 32 0 Z" fill="#E4EAF6" stroke="'+INK+'" stroke-width="1.8"/>'+
+      '<path d="M150 105 l14 -9 l3 5 l-14 9 Z" fill="#8FB6CC" stroke="'+INK+'" stroke-width="1.6"/>'+
+      '<path d="M164 96 l16 -7" stroke="#FFF3C4" stroke-width="2.4" stroke-linecap="round" opacity=".9"/></g>';
+  if(kind==="gas")        /* a solar-sail ship crossing the rings */
+    return '<g><path d="M140 116 l26 -13 l3 6 l-26 13 Z" fill="#FFF3C4" stroke="'+INK+'" stroke-width="1.6"/>'+
+      '<path d="M144 122 l26 -13 l3 6 l-26 13 Z" fill="#E0BEE8" stroke="'+INK+'" stroke-width="1.6"/>'+
+      '<circle cx="157" cy="120" r="4.4" fill="#C9D6EA" stroke="'+INK+'" stroke-width="1.5"/>'+
+      '<path d="M161 122 l9 4" stroke="'+INK+'" stroke-width="1.6" stroke-linecap="round"/></g>';
+  if(kind==="station")    /* a shuttle docked, lights on */
+    return '<g><path d="M134 126 h40 v-11 h-40 Z" rx="3" fill="#B9C6DA" stroke="'+INK+'" stroke-width="1.8"/>'+
+      '<path d="M174 115 l10 5 l-10 6 Z" fill="#8C9AB4" stroke="'+INK+'" stroke-width="1.6"/>'+
+      '<circle cx="143" cy="120" r="2.4" fill="#FFD98A" stroke="'+INK+'" stroke-width="1.1"/>'+
+      '<circle cx="152" cy="120" r="2.4" fill="#FFD98A" stroke="'+INK+'" stroke-width="1.1"/>'+
+      '<circle cx="161" cy="120" r="2.4" fill="#FFD98A" stroke="'+INK+'" stroke-width="1.1"/>'+
+      '<path d="M134 121 h-11" stroke="'+INK+'" stroke-width="2"/></g>';
   return "";
 }
 
@@ -1312,27 +1395,42 @@ function sectionComplete(op){
   var m=masteryOf(op);
   return m.done===m.total;
 }
-function completeBadge(){
-  return '<svg class="badge" viewBox="0 0 24 24" role="img" aria-label="Complete">'+
-    '<circle cx="12" cy="10" r="7.5" fill="#FFC93C" stroke="'+INK+'" stroke-width="1.8"/>'+
-    '<path d="M8.5 16.5 L7 23 l5-2.6 5 2.6 -1.5-6.5" fill="#EF5B3F" stroke="'+INK+'" stroke-width="1.6" stroke-linejoin="round"/>'+
-    '<path d="M12 6.2 l1.5 3 3.3.4 -2.4 2.3.6 3.3 -3-1.6 -3 1.6.6-3.3 -2.4-2.3 3.3-.4Z" fill="#FFFEFB"/></svg>';
+/* Once earned the badge is never taken away — it goes amber when the section
+   has slipped out of full mastery, and back to gold when it's fixed. */
+function completeBadge(warn){
+  var disc = warn ? "#FCEED2" : "#FFC93C";
+  var ring = warn ? "#F0A013" : INK;
+  var star = warn ? "#F0A013" : "#FFFEFB";
+  var tail = warn ? "#D8CFB8" : "#EF5B3F";
+  return '<svg class="badge'+(warn?" warn":"")+'" viewBox="0 0 24 24" role="img" aria-label="'+
+    (warn?"Finished, but some facts have slipped":"Finished")+'">'+
+    '<path d="M8.5 16.5 L7 23 l5-2.6 5 2.6 -1.5-6.5" fill="'+tail+'" stroke="'+INK+'" stroke-width="1.6" stroke-linejoin="round"/>'+
+    '<circle cx="12" cy="10" r="7.5" fill="'+disc+'" stroke="'+ring+'" stroke-width="1.8"/>'+
+    '<path d="M12 6.2 l1.5 3 3.3.4 -2.4 2.3.6 3.3 -3-1.6 -3 1.6.6-3.3 -2.4-2.3 3.3-.4Z" fill="'+star+'"/></svg>';
 }
 function sceneBlock(op, pts, label, interactive, withBar, withNote){
   var done=sectionComplete(op), m=masteryOf(op);
+  var everDone=!!state.finishedOn[op], slipped=everDone && !done;
+  var short=m.total-m.done;
   var pct=Math.min(100, pts/GOAL*100), mpct=m.total? (m.done/m.total*100) : 0;
-  return '<div class="garden'+(done?" done":"")+'" data-op="'+op+'">'+
+  var mtxt = done ? "All "+m.total+" facts mastered ✓"
+    : slipped ? short+" fact"+(short===1?"":"s")+" slipped"
+    : m.done+" of "+m.total+" facts mastered";
+  var note = slipped
+    ? "Badge at risk — practise "+short+" fact"+(short===1?"":"s")+" to win your gold back."
+    : done ? "Finished — every fact mastered! ✨" : sceneNote(op,pts);
+  /* the scene keeps its golden light and landmark once earned */
+  return '<div class="garden'+(everDone?" done":"")+(slipped?" slipped":"")+'" data-op="'+op+'">'+
     '<div class="garden-head">'+
       '<span class="garden-name"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</span>'+
-      (done?completeBadge():"")+
+      (everDone?completeBadge(slipped):"")+
       '<span class="garden-pts">'+label+'</span></div>'+
-    '<div class="scene-wrap">'+sceneSVG(op,pts,interactive,done)+
+    '<div class="scene-wrap">'+sceneSVG(op,pts,interactive,everDone)+
       (withBar?'<div class="scene-bar" role="img" aria-label="Scene '+Math.round(pct)+
         '% filled in"><i style="width:'+n1(pct)+'%"></i></div>':'')+'</div>'+
     (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
-      '<span class="mastery-txt">'+(done?"All "+m.total+" facts mastered ✓":m.done+" of "+m.total+" facts mastered")+
-      '</span></div>':'')+
-    (withNote?'<p class="garden-note">'+(done?"Finished — nothing left to learn here! ✨":sceneNote(op,pts))+'</p>':'')+
+      '<span class="mastery-txt">'+mtxt+'</span></div>':'')+
+    (withNote?'<p class="garden-note">'+note+'</p>':'')+
     '</div>';
 }
 
@@ -1385,7 +1483,10 @@ function submitAnswer(){
       S.newlyMastered.push(q.text+" = "+q.answer);
       /* A section can only tip into "complete" on the answer that masters its
          last fact, so this is the one moment worth the full check. */
-      if(S.finished.indexOf(q.op)<0 && sectionComplete(q.op)) S.finished.push(q.op);
+      if(S.finished.indexOf(q.op)<0 && sectionComplete(q.op)){
+        S.finished.push(q.op);
+        if(!state.finishedOn[q.op]) state.finishedOn[q.op]=todayKey();
+      }
     }
     state.pts[q.op]+=pts; S.points+=pts; S.gained[q.op]+=pts;
     /* re-check a fact missed earlier this session one more time */
@@ -1474,7 +1575,18 @@ function renderModeRow(){
     : names.length===OPS.length ? "All four, mixed together"
     : names.slice(0,-1).join(", ")+" and "+names[names.length-1]+", mixed";
 }
+/* A section can reach full mastery in a save that predates finishedOn (or via
+   a migration), so record the badge the first time we notice it. */
+function reconcileFinished(){
+  var changed=false;
+  for(var i=0;i<OPS.length;i++){
+    var o=OPS[i];
+    if(!state.finishedOn[o] && sectionComplete(o)){ state.finishedOn[o]=todayKey(); changed=true; }
+  }
+  if(changed) saveState();
+}
 function renderScenes(){
+  reconcileFinished();
   var html="", total=0, finished=0;
   for(var i=0;i<OPS.length;i++){
     var op=OPS[i], p=state.pts[op]||0;

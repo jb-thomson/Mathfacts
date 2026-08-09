@@ -109,13 +109,34 @@ Every fact is in one of five states, shown as a dot on the fact map:
 | **New** | Unlocked but never practised |
 | **Learning** | Practised, not yet mastered |
 | **Tricky** | Missed last time, or missed at least twice in the last five tries |
-| **Mastered** | At least 3 correct in a row, *and* the last 3 correct answers averaged 7 seconds or less |
+| **Mastered** | 5 correct in a row, on **5 different days**, averaging about 5 seconds |
 
-The speed requirement is deliberate. Recall that needs counting-on isn't
-fluency, so a fact answered correctly but slowly stays in "learning".
+Mastery is deliberately hard to reach, and the day requirement is the important
+half. Three — or five — correct answers inside one sitting is short-term memory:
+a child can be told `7 + 8 = 15` and echo it back minutes later. Requiring five
+*separate days* means she has to still know it tomorrow, and next week. Cramming
+cannot buy it.
+
+The speed requirement is the other half. Recall that needs counting-on isn't
+fluency, so a fact answered correctly but slowly stays in "learning". Because the
+clock runs while she taps the answer in, longer answers get a matching
+allowance — about a second more for two digits and two for three — so the bar
+pays for typing, not for working it out.
+
+A miss resets the streak but **keeps the banked days**: those are evidence built
+up over weeks, and one bad morning shouldn't erase them.
 
 Only the five most recent results and times are kept per fact, so old struggles
 age out once a fact is genuinely known.
+
+### Unlocking uses an easier bar than mastery
+
+These are deliberately separate. If bands only opened once facts were *mastered*
+under the rule above, a child would drill the same 16 starting facts for over a
+month before seeing a new one. So a fact counts toward opening the next band as
+soon as it's reliable — 3 correct in a row at a gentler speed — while mastery,
+the fact map and the badge keep the strict rule. Practice keeps moving; finishing
+still has to be earned.
 
 ### Mix
 
@@ -173,9 +194,26 @@ A section is complete when **every fact in it is mastered** — 169 facts for
   landmark it never had before — a stag in the forest, a lit lighthouse on the
   beach, a rainbow over the meadow, a boat on the fjord, a planted flag in
   Space.
-- **A badge** appears beside the section's name and stays there.
+- **A badge** appears beside the section's name and is **never taken away**. If a
+  fact later slips out of mastery the badge turns amber and the note says how
+  many need a refresh — a warning to act on, not an achievement snatched back.
+  It returns to gold once they're fixed.
 - **The session summary announces it**, and the home screen counts how many of
   the four are done.
+
+### How long this actually takes
+
+Simulating a child practising one session a day, with the real scheduling and
+mastery code:
+
+| | Addition | Multiplication |
+| --- | --- | --- |
+| A child who picks facts up steadily | ~74 days | ~95 days |
+| A child who is still missing flashcards | ~185 days | ~246 days |
+
+So somewhere between two and eight months of daily practice per section. That is
+the point: it takes as long as it takes to actually know them. New bands still
+open within the first week, so practice never feels stuck while that plays out.
 
 ## Progress and streaks
 
@@ -211,24 +249,26 @@ session rather than failing.
 
 ```js
 {
-  v: 3,
+  v: 4,
   name:     "Alex",                             // "" until asked
   world:    "wild",                             // "wild" | "space" — set once, then fixed
   pts:      { add:0, sub:0, mul:0, div:0 },     // points per section, fills the scenes
   ops:      ["add","sub"],                      // sections selected to practise
   unlocked: { add:3, sub:2, mul:2, div:2 },     // highest band unlocked per section
   facts: {
-    add: { "3,4": { n, s, r: [], t: [] } },     // keyed "a,b"
+    add: { "3,4": { n, s, r: [], t: [], d: [] } },   // keyed "a,b"
     sub: {}, mul: {}, div: {}
   },
-  blooms:   { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // recoloured growers
-  days:     { "2026-08-09": 1 },                // sessions completed per day
-  sound:    true
+  blooms:     { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // recoloured growers
+  finishedOn: { add: "2026-08-09" },            // first completion; never cleared
+  days:       { "2026-08-09": 1 },              // sessions completed per day
+  sound:      true
 }
 ```
 
 Per fact: `n` total attempts, `s` current correct streak, `r` last five results
-as 1/0, `t` last five correct response times in milliseconds.
+as 1/0, `t` last five correct response times in milliseconds, and `d` the
+separate days it has been answered correctly on — the thing cramming can't fake.
 
 Mastery counts and completion are **derived** from `facts` rather than stored,
 so they can never fall out of step with the real history.
@@ -236,6 +276,9 @@ so they can never fall out of step with the real history.
 Older saves migrate automatically on load, and the upgraded save is written
 immediately so the migration survives even if the app is closed straight away:
 
+- **v3** (before the day requirement) keeps everything. Facts that met the old,
+  easier bar are credited with **3 of the 5 days** now required, so real work
+  isn't erased but the too-easy mastery isn't grandfathered in either.
 - **v2** (Numo before worlds) keeps everything — points, facts, bands, days,
   recoloured growers, sound — and is simply asked for a name and a world.
 - **v1** (`plusminus.v1`, the original Plus & Minus) carries over facts, bands,
@@ -264,7 +307,10 @@ The constants that shape the difficulty curve are at the top of the script in
 | `SESSION_LEN` | 20 | Questions per session |
 | `SESSION_MAX` | 24 | Ceiling when re-asking missed facts |
 | `FAST_MS` | 4000 | Speed-bonus threshold |
-| `MASTER_MS` | 7000 | Average recall time required for mastery |
+| `MASTER_MS` | 5000 | Base recall time for mastery (longer answers get more) |
+| `MASTER_STREAK` | 5 | Correct answers in a row required |
+| `MASTER_DAYS` | 5 | Separate days a fact must be right on |
+| `UNLOCK_MS` / `UNLOCK_STREAK` | 7000 / 3 | The gentler bar that opens new bands |
 | `RECENT_N` | 5 | How many recent results and times are kept per fact |
 
 Scene pacing lives beside them: `slotThreshold(i)` sets when the `i`th thing
