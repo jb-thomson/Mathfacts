@@ -439,7 +439,7 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
         <button id="renameBtn" class="linkish">Change name</button>
         <button id="resetBtn" class="linkish">Erase all progress</button>
       </p>
-      <p class="version-line">v7 · painted worlds</p>
+      <p class="version-line">v8 · painted worlds</p>
     </section>
 
     <!-- ============ QUIZ ============ -->
@@ -506,7 +506,6 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
 var MAX = 12;
 var GOAL = 1000;               // points for one garden in full bloom
 var SESSION_LEN = 20;
-var SESSION_MAX = 24;          // room for re-asking misses at the end
 var FAST_MS = 4000;            // speed bonus threshold
 /* Mastery is deliberately hard to reach: a fact has to be recalled quickly,
    five times running, on five separate days. Three correct answers inside one
@@ -1390,12 +1389,12 @@ function startSession(){
 }
 function nextQuestion(){
   disarmQuit();
-  /* extend a little if misses still need to be re-asked */
-  if(S.asked>=S.len){
-    if(S.requeue.length && S.len<SESSION_MAX)
-      S.len=Math.min(SESSION_MAX, S.len+S.requeue.length);
-    else return endSession(true);
-  }
+  /* The set is exactly SESSION_LEN questions and the target never moves.
+     It used to stretch to fit facts still waiting to be re-asked, which meant
+     a child who missed more got a longer session and watched "20" turn into
+     21, 22, 23 — the child most in need of finishing was the least able to.
+     Missed facts already come back inside the set via the requeue, and
+     anything still queued at the end is marked tricky and leads next time. */
   if(S.asked>=S.len) return endSession(true);
   var f=nextFact();
   if(!f) return endSession(true);
@@ -1456,9 +1455,12 @@ function submitAnswer(){
 /* A practice day is only earned by working through the whole set.
    Stopping early keeps the points but not the day. */
 function endSession(completed){
-  S.completed = !!completed;
+  /* Getting through the whole set is what earns the day. Once she has
+     answered them all, stopping cannot take it back. */
+  var earned = !!completed || S.asked>=S.len;
+  S.completed = earned;
   disarmQuit();
-  if(completed && S.asked>0){
+  if(earned && S.asked>0){
     var d=todayKey();
     state.days[d]=(state.days[d]||0)+1;
   }
