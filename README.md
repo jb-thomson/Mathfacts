@@ -203,9 +203,21 @@ Two larger copies of that tall piece arrive at milestones to anchor the left and
 right edges, birds or comets cross the sky, and once the meadow is really full a
 balloon drifts over it. The scene is comfortably full around 1000 points.
 
-**Tap anything fully grown that has real colour in it to change its colour** —
-flowers, huts, cabins, benches, rovers, solar arrays, crates, landers. That
-choice is remembered.
+**Tap anything fully grown to pick it up.** A small strip of controls appears
+under the scene:
+
+- **−** and **+** resize it. Depth gets the scale roughly right, but not always
+  — a close-up thing may want to be bigger and a far one smaller — so the size
+  is hers to set. The steps multiply rather than add, so each tap changes a
+  piece by the same proportion whatever size it started at, between 0.55× and
+  1.9×.
+- **A colour dot**, on the pieces that have real colour in the paint — flowers,
+  huts, cabins, benches, rovers, solar arrays, crates, landers. A hue shift on a
+  white dome would do nothing, so those don't offer it.
+- **✓** puts it down. So does tapping anywhere else.
+
+Dragging still moves a piece, and it stays held afterwards so it can be resized
+where it now stands. All of it works the same in the full-screen view.
 
 ### Placing what you earn
 
@@ -311,7 +323,7 @@ session rather than failing.
     sub: {}, mul: {}, div: {}
   },
   placed: {                                     // where each earned piece was put
-    add: [ { i:1, v:0, c:2, x:112.4, y:126.1 } ],    // slot, which thing, colour, position
+    add: [ { i:1, v:0, c:2, x:112.4, y:126.1, z:1.15 } ],  // slot, item, colour, position, size
     sub: [], mul: [], div: []
   },
   blooms:     { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // recoloured pieces
@@ -327,6 +339,9 @@ response time, and a mastery snapshot per section — for up to 400 days, about
 60 bytes a day. The per-fact history only keeps the last five results, which
 says how a child is *now* but nothing about last month, and history can't be
 reconstructed after the fact, so it is written as it happens.
+
+`z` is the size the child set; it is absent until she changes one, and anything
+without it draws at 1×. That is why adding it needed no migration.
 
 Per fact: `n` total attempts, `s` current correct streak, `r` last five results
 as 1/0, `t` last five correct response times in milliseconds, and `d` the

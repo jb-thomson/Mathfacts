@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="theme-color" content="#FAF3E4">
 <title>Numo — Math Fact Practice</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='46' fill='%230FA3A8'/%3E%3Cpath d='M50 78 V50' stroke='%23FFFFFF' stroke-width='7' stroke-linecap='round'/%3E%3Ccircle cx='50' cy='36' r='9' fill='%23FFC93C'/%3E%3Ccircle cx='36' cy='45' r='9' fill='%23FFC93C'/%3E%3Ccircle cx='64' cy='45' r='9' fill='%23FFC93C'/%3E%3Ccircle cx='50' cy='45' r='7' fill='%23EF5B3F'/%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20x='0'%20y='0'%20width='100'%20height='100'%20rx='23'%20fill='%23F9EFD5'/%3E%3Cpath%20d='M22%2050%20A27.5%2027.5%200%200%201%2077%2050%20L54%2050%20A4.5%204.5%200%200%200%2045%2050%20Z'%20fill='%23056673'/%3E%3Crect%20x='22'%20y='24'%20width='23'%20height='58'%20rx='5'%20fill='%23056673'/%3E%3Crect%20x='54'%20y='44'%20width='23'%20height='38'%20rx='5'%20fill='%23056673'/%3E%3Crect%20x='35'%20y='54'%20width='29'%20height='10'%20rx='5'%20fill='%23F9EFD5'/%3E%3Cg%20transform='rotate%2818%2068%2033%29'%3E%3Cpath%20d='M68%2035%20V15'%20stroke='%234C8B4C'%20stroke-width='5.4'%20stroke-linecap='round'/%3E%3Cg%20transform='translate%2868%2C19%29'%3E%3Cpath%20d='M0%202.4%20q-12%20-1%20-14.4%20-10.4%20q11.2%20-1%2014.4%207.2%20Z'%20fill='%236FBE6F'%20stroke='%234C8B4C'%20stroke-width='2.6'%20stroke-linejoin='round'/%3E%3Cpath%20d='M0%200%20q12%20-2%2014.4%20-12%20q-11.2%20-1%20-14.4%208.8%20Z'%20fill='%236FBE6F'%20stroke='%234C8B4C'%20stroke-width='2.6'%20stroke-linejoin='round'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
 <style>
 @font-face{
   font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;
@@ -234,6 +234,15 @@ body.bigopen{overflow:hidden}
   background:var(--paper);border:1.5px solid var(--ink);white-space:nowrap}
 .garden-art{touch-action:none}
 .garden-art .fl{cursor:grab}
+/* the strip that appears when a piece is picked up, for sizing and colour */
+.piece-bar{position:absolute;left:50%;transform:translateX(-50%);bottom:24px;z-index:3;
+  display:flex;gap:6px;align-items:center;padding:4px 6px;border-radius:999px;
+  background:rgba(255,254,251,.94);border:2px solid var(--ink);box-shadow:0 3px 10px rgba(0,0,0,.22)}
+.piece-bar button{width:34px;height:34px;border-radius:50%;border:0;background:var(--bg-dot);
+  color:var(--ink);font:800 18px/1 'Fredoka',system-ui;display:grid;place-items:center;padding:0}
+.piece-bar button[disabled]{opacity:.32}
+.piece-bar .pb-col{border:2px solid var(--ink)}
+.piece-bar .pb-done{background:var(--good-tint);color:var(--good-deep)}
 .mastery{display:flex;align-items:center;gap:8px;margin-top:9px}
 .mastery-meter{
   flex:1;height:7px;border-radius:99px;background:var(--line);overflow:hidden;
@@ -399,12 +408,8 @@ body.bigopen{overflow:hidden}
 <div id="app">
   <header class="hero">
     <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
-      <circle cx="50" cy="50" r="46" fill="var(--teal)" stroke="var(--ink)" stroke-width="4"/>
-      <path d="M50 80 V50" stroke="#fff" stroke-width="7" stroke-linecap="round"/>
-      <circle cx="50" cy="34" r="10" fill="var(--sun)"/>
-      <circle cx="35" cy="44" r="10" fill="var(--sun)"/>
-      <circle cx="65" cy="44" r="10" fill="var(--sun)"/>
-      <circle cx="50" cy="44" r="7.5" fill="var(--coral)"/>
+      <rect x="0" y="0" width="100" height="100" rx="23" fill="#F9EFD5"/>
+      <path d="M22 50 A27.5 27.5 0 0 1 77 50 L54 50 A4.5 4.5 0 0 0 45 50 Z" fill="#056673"/><rect x="22" y="24" width="23" height="58" rx="5" fill="#056673"/><rect x="54" y="44" width="23" height="38" rx="5" fill="#056673"/><rect x="35" y="54" width="29" height="10" rx="5" fill="#F9EFD5"/><g transform="rotate(18 68 33)"><path d="M68 35 V15" stroke="#4C8B4C" stroke-width="5.4" stroke-linecap="round"/><g transform="translate(68,19)"><path d="M0 2.4 q-12 -1 -14.4 -10.4 q11.2 -1 14.4 7.2 Z" fill="#6FBE6F" stroke="#4C8B4C" stroke-width="2.6" stroke-linejoin="round"/><path d="M0 0 q12 -2 14.4 -12 q-11.2 -1 -14.4 8.8 Z" fill="#6FBE6F" stroke="#4C8B4C" stroke-width="2.6" stroke-linejoin="round"/></g></g>
     </svg>
     <div>
       <h1>Numo</h1>
@@ -490,7 +495,7 @@ body.bigopen{overflow:hidden}
         <button id="renameBtn" class="linkish">Change name</button>
         <button id="resetBtn" class="linkish">Erase all progress</button>
       </p>
-      <p class="version-line">v11 · a place worth filling</p>
+      <p class="version-line">v12 · your world, your size</p>
     </section>
 
     <!-- ============ LEARN ============ -->
@@ -1020,6 +1025,30 @@ function depthScale(kind, y){
   var top=SCENE[kind].ground-3, span=Math.max(7, 137-top);
   return 0.82 + Math.max(0, Math.min(1, (y-top)/span)) * 0.42;
 }
+/* On top of that, a size the child sets herself. Depth gets it roughly right;
+   this is for the times it doesn't — a close-up thing that wants to be bigger,
+   a far one that wants to shrink back. The steps multiply, so each tap changes
+   a piece by the same amount whatever size it started at. */
+var SIZE_MIN = 0.55, SIZE_MAX = 1.9, SIZE_STEP = 1.15;
+function sizeOf(f){
+  var z = f && f.z;
+  return (typeof z === "number" && z > 0) ? Math.max(SIZE_MIN, Math.min(SIZE_MAX, z)) : 1;
+}
+function pieceAt(op, i){
+  var arr=placedList(op);
+  for(var k=0;k<arr.length;k++) if(arr[k].i===i) return arr[k];
+  return null;
+}
+function resizePiece(op, i, dir){
+  var rec=pieceAt(op,i);
+  if(!rec) return false;
+  var was=sizeOf(rec);
+  var z=Math.max(SIZE_MIN, Math.min(SIZE_MAX, was * (dir>0 ? SIZE_STEP : 1/SIZE_STEP)));
+  if(Math.abs(z-was) < 0.001) return false;
+  rec.z = Math.round(z*1000)/1000;
+  saveState();
+  return true;
+}
 function itemOf(kind, f){
   var list=ITEMS[kind];
   return list ? list[(f.v||0) % list.length] : null;
@@ -1253,26 +1282,42 @@ function gCabin(f, stage, col){
    the wild scenes, which are also the ones a child can recolour. */
 var GROWERS = {forest:gConifer, meadow:gFlower, beach:gPalm, fjord:gCabin};
 
+/* Which piece is currently being adjusted — {op, i}, or null. */
+var sel = null;
+
 function drawGrower(kind, f, pts, op, interactive){
   var age=pts-f.t, stage = age>=BLOOM_AT?2 : age>=BUD_AT?1 : 0;
   var col=bloomColor(op,f), it=itemOf(kind,f), sp=it && SPRITES[it.s];
-  var tappable = stage===2 && interactive && (!sp || it.hue);
+  /* Every grown piece can be picked up — the ones with colour in them can be
+     recoloured too, but all of them can be resized, so all of them respond. */
+  var tappable = stage===2 && interactive;
   /* every piece names itself, whether or not it can be tapped, so a screen
      reader describes the place rather than announcing a dozen anonymous groups */
   var name = it ? it.s : GROWER_NAME[kind].toLowerCase();
-  var a='class="fl" data-op="'+op+'" data-i="'+f.i+'" data-item="'+name+'"';
+  var picked = tappable && sel && sel.op===op && sel.i===f.i;
+  var a='class="fl'+(picked?" picked":"")+'" data-op="'+op+'" data-i="'+f.i+
+        '" data-item="'+name+'"';
   a += tappable
     ? ' tabindex="0" role="button" aria-label="'+name+' '+f.i+
-      (it&&it.hue?', '+col.n+'. Tap to change its colour.':'.')+'"'
+      (it&&it.hue?', '+col.n:'')+'. Tap to resize'+(it&&it.hue?' or recolour':'')+'."'
     : ' role="img" aria-label="'+name+'"';
   if(sp){
-    var h=it.h[stage]*depthScale(kind,f.y), w=h*sp.ratio;
+    var h=it.h[stage]*depthScale(kind,f.y)*sizeOf(f), w=h*sp.ratio;
     var cls = it.hue ? (" c"+(((bloomIndex(op,f)%BLOOMS.length)+BLOOMS.length)%BLOOMS.length)) : "";
     return '<g '+a+'>'+shadow(f.x, f.y, w*0.38)+
+      (picked?pickRing(f.x, f.y, w):"")+
       '<image class="gw'+cls+'" href="'+sp.uri+'" x="'+n1(f.x-w/2)+'" y="'+n1(f.y-h)+
       '" width="'+n1(w)+'" height="'+n1(h)+'"/></g>';
   }
   return '<g '+a+'>'+(GROWERS[kind] ? GROWERS[kind](f,stage,col) : "")+'</g>';
+}
+/* a dashed ring on the ground under whichever piece is being adjusted */
+function pickRing(x, y, w){
+  var r=Math.max(6, w*0.5);
+  return '<ellipse cx="'+n1(x)+'" cy="'+n1(y+1)+'" rx="'+n1(r)+'" ry="'+n1(r*0.34)+
+    '" fill="none" stroke="#FFFEFB" stroke-width="2.6"/>'+
+    '<ellipse cx="'+n1(x)+'" cy="'+n1(y+1)+'" rx="'+n1(r)+'" ry="'+n1(r*0.34)+
+    '" fill="none" stroke="'+INK+'" stroke-width="1.4" stroke-dasharray="4 3"/>';
 }
 
 /* ---- the bigger earned pieces ----
@@ -1370,7 +1415,7 @@ function sceneSVG(op, pts, interactive, done, asWorld){
     .sort(function(p,q){ return p.y-q.y; });          // back to front
   for(var i=0;i<list.length;i++){
     var f=list[i];
-    s += drawGrower(kind, {i:f.i, v:f.v, x:f.x, y:f.y, c:f.c,
+    s += drawGrower(kind, {i:f.i, v:f.v, x:f.x, y:f.y, c:f.c, z:f.z,
                            lean:0, t:slotThreshold(f.i)}, pts, op, interactive);
   }
   s += fliers(uid,kind,pts);
@@ -1450,6 +1495,41 @@ function completeBadge(warn){
     '<circle cx="12" cy="10" r="7.5" fill="'+disc+'" stroke="'+ring+'" stroke-width="1.8"/>'+
     '<path d="M12 6.2 l1.5 3 3.3.4 -2.4 2.3.6 3.3 -3-1.6 -3 1.6.6-3.3 -2.4-2.3 3.3-.4Z" fill="'+star+'"/></svg>';
 }
+/* The controls for whichever piece has been picked up. It sits in a fixed spot
+   at the bottom of the scene rather than following the piece around: a bar that
+   moves is a bar a child has to chase, and near the edges it would fall off. */
+function pieceBar(op){
+  if(!sel || sel.op!==op) return "";
+  var rec=pieceAt(op, sel.i);
+  if(!rec) return "";
+  var kind=kindFor(op), it=itemOf(kind, rec), z=sizeOf(rec);
+  var name=it?it.s:"piece";
+  var canHue = !!(it && it.hue);
+  var col = bloomColor(op, rec);
+  return '<div class="piece-bar" data-op="'+op+'">'+
+    '<button class="pb-small" data-act="small"'+(z<=SIZE_MIN+0.001?' disabled':'')+
+      ' aria-label="Make this '+name+' smaller">−</button>'+
+    '<button class="pb-big" data-act="big"'+(z>=SIZE_MAX-0.001?' disabled':'')+
+      ' aria-label="Make this '+name+' bigger">+</button>'+
+    (canHue?'<button class="pb-col" data-act="colour" style="background:'+col.c+
+      '" aria-label="Change this '+name+' from '+col.n+'"></button>':'')+
+    '<button class="pb-done" data-act="done" aria-label="Done with this '+name+'">✓</button>'+
+    '</div>';
+}
+function selectPiece(op, i){
+  sel = {op:op, i:i};
+  refreshScenes();
+  /* the piece itself is gone from the DOM after the re-render, so move focus to
+     the controls — otherwise a keyboard user is left nowhere */
+  var bar=(bigOp?el.bigBody:el.gardens).querySelector('.piece-bar[data-op="'+op+'"] button');
+  if(bar) bar.focus();
+}
+function clearSel(){
+  if(!sel) return false;
+  sel = null;
+  refreshScenes();
+  return true;
+}
 function sceneBlock(op, pts, label, interactive, withBar, withNote){
   var done=sectionComplete(op), m=masteryOf(op);
   var everDone=!!state.finishedOn[op], slipped=everDone && !done;
@@ -1470,6 +1550,7 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote){
     '<div class="scene-wrap">'+sceneSVG(op,pts,interactive,everDone)+
       (interactive?'<button class="scene-expand" data-op="'+op+'" aria-label="Show '+
         OP_NAME[op]+' bigger">⤢</button>':'')+
+      (interactive?pieceBar(op):'')+
       (withBar?'<div class="scene-bar" role="img" aria-label="Scene '+Math.round(pct)+
         '% filled in"><i style="width:'+n1(pct)+'%"></i></div>':'')+'</div>'+
     (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
@@ -1871,16 +1952,13 @@ el.gridTabs.addEventListener("click", function(e){
 el.factGrid.addEventListener("click", function(e){
   var c=e.target.closest(".cell"); if(c) cellTapped(c);
 });
-/* tap a grown flower (or dome, in Space) to recolour it */
+/* step a piece on to its next colour */
 function cycleBloom(op,i){
-  var arr=placedList(op), cur;
-  for(var k=0;k<arr.length;k++) if(arr[k].i===i) cur=bloomIndex(op,arr[k]);
-  if(cur===undefined) return;
-  state.blooms[op][i]=(cur+1)%BLOOMS.length;
+  var rec=pieceAt(op,i);
+  if(!rec) return;
+  state.blooms[op][i]=(bloomIndex(op,rec)+1)%BLOOMS.length;
   saveState(); sfx.tap();
   refreshScenes();
-  var again=(bigOp?el.bigBody:el.gardens).querySelector('.fl[data-op="'+op+'"][data-i="'+i+'"][tabindex]');
-  if(again) again.focus();
 }
 /* Pieces are earned by practising but positioned by the child: tap the picture
    to drop the next one, drag one that is already there to move it. */
@@ -1903,7 +1981,7 @@ function openBig(op){
   window.scrollTo(0,0);
 }
 function closeBig(){
-  bigOp = null;
+  bigOp = null; sel = null;
   el.bigScene.hidden = true;
   el.bigBody.innerHTML = "";        // or the scene exists twice in the document
   document.body.classList.remove("bigopen");
@@ -1941,8 +2019,10 @@ document.addEventListener("pointerdown", function(e){
   }
   if(waitingCount(op)>0){
     var p = svgPoint(svg, e);
-    if(placePiece(op, p.x, p.y)){ sfx.yes(); refreshScenes(); }
+    if(placePiece(op, p.x, p.y)){ sel=null; sfx.yes(); refreshScenes(); }
+    return;
   }
+  clearSel();          // tapping bare ground puts the current piece down
 });
 document.addEventListener("pointermove", function(e){
   if(!drag) return;
@@ -1960,17 +2040,31 @@ document.addEventListener("pointerup", function(e){
     var p = svgPoint(svg, e);
     var c = clampTo(d.op, d.ox + (p.x-d.sx), d.oy + (p.y-d.sy));
     d.rec.x = c.x; d.rec.y = c.y;
-    saveState(); sfx.tap(); refreshScenes();
+    saveState(); sfx.tap();
+    /* stay held after a move, so it can be resized where it now stands */
+    if(d.el.hasAttribute("tabindex")) sel = {op:d.op, i:d.rec.i};
+    refreshScenes();
     return;
   }
-  /* A tap on a piece recolours it. This has to happen here rather than on the
-     click event: capturing the pointer for the drag retargets the click to the
-     picture, so the piece never sees it. */
-  if(d.el.hasAttribute("tabindex")) cycleBloom(d.op, d.rec.i);
+  /* A tap on a piece picks it up, which brings up its size and colour controls.
+     This has to happen here rather than on the click event: capturing the
+     pointer for the drag retargets the click to the picture, so the piece never
+     sees it. */
+  if(d.el.hasAttribute("tabindex")){ sfx.tap(); selectPiece(d.op, d.rec.i); }
 });
+/* the size / colour / done buttons on a held piece */
+function pieceAction(bar, act){
+  var op=bar.getAttribute("data-op");
+  if(!sel || sel.op!==op) return;
+  if(act==="done"){ sfx.tap(); clearSel(); return; }
+  if(act==="colour"){ cycleBloom(op, sel.i); return; }
+  if(resizePiece(op, sel.i, act==="big" ? 1 : -1)){ sfx.tap(); refreshScenes(); }
+}
 document.addEventListener("click", function(e){
+  var pb = e.target.closest ? e.target.closest(".piece-bar button") : null;
+  if(pb){ pieceAction(pb.closest(".piece-bar"), pb.getAttribute("data-act")); return; }
   var ex = e.target.closest ? e.target.closest(".scene-expand") : null;
-  if(ex){ openBig(ex.getAttribute("data-op")); return; }
+  if(ex){ sel=null; openBig(ex.getAttribute("data-op")); return; }
   var b = e.target.closest ? e.target.closest(".tray-auto") : null;
   if(b){
     var op = b.getAttribute("data-op"), world = worldOf(), plan = scenePlan(op, world);
@@ -1980,17 +2074,26 @@ document.addEventListener("click", function(e){
       for(var k=0;k<plan.length;k++) if(plan[k].i===slot) spot = plan[k];
       placePiece(op, spot?spot.x:150, spot?spot.y:SCENE[kindFor(op)].ground+8);
     }
-    sfx.star(); refreshScenes();
+    sel=null; sfx.star(); refreshScenes();
     return;
   }
   if(didDrag){ didDrag=false; return; }
   var g=e.target.closest ? e.target.closest(".fl[tabindex]") : null;
-  if(g) cycleBloom(g.getAttribute("data-op"), +g.getAttribute("data-i"));
+  if(g){ selectPiece(g.getAttribute("data-op"), +g.getAttribute("data-i")); return; }
+  /* a tap anywhere else puts down whatever was being held */
+  if(!(e.target.closest && e.target.closest("svg.garden-art"))) clearSel();
 });
 document.addEventListener("keydown", function(e){
+  /* the held piece can be sized from the keyboard too */
+  if(sel && (e.key==="+" || e.key==="=" || e.key==="-" || e.key==="_")){
+    e.preventDefault();
+    if(resizePiece(sel.op, sel.i, (e.key==="+"||e.key==="=") ? 1 : -1)){ sfx.tap(); refreshScenes(); }
+    return;
+  }
+  if(e.key==="Escape" && sel && !bigOp){ clearSel(); return; }
   if(e.key!=="Enter" && e.key!==" ") return;
   var g=e.target.closest ? e.target.closest(".fl[tabindex]") : null;
-  if(g){ e.preventDefault(); cycleBloom(g.getAttribute("data-op"), +g.getAttribute("data-i")); }
+  if(g){ e.preventDefault(); selectPiece(g.getAttribute("data-op"), +g.getAttribute("data-i")); }
 });
 el.startBtn.addEventListener("click", startSession);
 el.againBtn.addEventListener("click", startSession);
