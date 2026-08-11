@@ -194,6 +194,34 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
 .garden.slipped .mastery-txt{color:var(--warn)}
 .garden.slipped .garden-note{color:var(--warn)}
 .garden.slipped .mastery-meter i{background:var(--warn)}
+/* display:flex beats the hidden attribute, so say so explicitly or the
+   invisible overlay keeps swallowing taps on the page behind it */
+.big[hidden]{display:none}
+.big{position:fixed;inset:0;z-index:40;background:var(--ink);display:flex;flex-direction:column;
+  padding:calc(8px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom))}
+.big-bar{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+.big-title{flex:1;font-family:'Fredoka';font-weight:600;font-size:17px;color:#FFFEFB}
+.big-close{width:38px;height:38px;flex:0 0 auto;border-radius:11px;background:var(--paper);
+  border:2px solid var(--ink);font-family:'Fredoka';font-weight:600;font-size:20px}
+.big-body{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden}
+.big-body .garden{margin:0;width:100%;max-height:100%;display:flex;flex-direction:column}
+.big-body .garden-head{color:#FFFEFB}
+.big-body .garden-note,.big-body .mastery-txt{color:#C9D3E6}
+.big-body .scene-wrap{flex:1;min-height:0;display:flex}
+.big-body .garden-art{width:100%;height:100%;object-fit:contain}
+.big-hint{flex:0 0 auto;text-align:center;color:#9FB0CC;font-size:12px;font-weight:700;margin-top:4px}
+@media (orientation:landscape){ .big-hint{display:none} }
+body.bigopen{overflow:hidden}
+.scene-expand{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:9px;
+  background:rgba(255,254,251,.88);border:2px solid var(--ink);font-size:15px;line-height:1;
+  display:grid;place-items:center}
+.tray{display:flex;align-items:center;gap:8px;margin-top:8px;background:var(--sun-tint);
+  border:1.5px solid var(--sun-deep);border-radius:10px;padding:6px 8px 6px 10px}
+.tray-txt{flex:1;font-size:12.5px;font-weight:800;color:var(--ink)}
+.tray-auto{font-family:'Fredoka';font-weight:600;font-size:12px;padding:5px 10px;border-radius:8px;
+  background:var(--paper);border:1.5px solid var(--ink);white-space:nowrap}
+.garden-art{touch-action:none}
+.garden-art .fl{cursor:grab}
 .mastery{display:flex;align-items:center;gap:8px;margin-top:9px}
 .mastery-meter{
   flex:1;height:7px;border-radius:99px;background:var(--line);overflow:hidden;
@@ -374,6 +402,16 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
 
   <div id="welcome" class="welcome" hidden aria-live="polite"></div>
 
+  <!-- full-screen view of one scene, for placing things comfortably -->
+  <div id="bigScene" class="big" hidden>
+    <div class="big-bar">
+      <span id="bigTitle" class="big-title"></span>
+      <button id="bigClose" class="big-close" aria-label="Close the big view">×</button>
+    </div>
+    <div id="bigBody" class="big-body"></div>
+    <p id="bigHint" class="big-hint">Turn your phone sideways to fill the screen</p>
+  </div>
+
   <main>
     <!-- ============ SETUP (first run) ============ -->
     <section id="screen-setup" hidden>
@@ -439,7 +477,7 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
         <button id="renameBtn" class="linkish">Change name</button>
         <button id="resetBtn" class="linkish">Erase all progress</button>
       </p>
-      <p class="version-line">v8 · painted worlds</p>
+      <p class="version-line">v9 · place your own world</p>
     </section>
 
     <!-- ============ QUIZ ============ -->
@@ -527,9 +565,10 @@ var OP_NAME = {add:"Addition", sub:"Subtraction", mul:"Multiplication", div:"Div
 
 /* ---------------- state ---------------- */
 var defaultState = function(){ return {
-  v:5, sound:true,
+  v:6, sound:true,
   finishedOn:{},                      // section -> date first completed; never cleared
   log:{},                             // "YYYY-MM-DD" -> a day's totals, for the report
+  placed:{add:[], sub:[], mul:[], div:[]},  // where each earned piece has been put
   name:"",                            // "" until the child tells us
   world:null,                         // "wild" | "space" — chosen once, then fixed
   pts:{add:0, sub:0, mul:0, div:0},   // points per section — decorates the scenes
@@ -549,6 +588,8 @@ function fill(s){
   s.pts = s.pts || {}; s.unlocked = s.unlocked || {};
   s.facts = s.facts || {}; s.blooms = s.blooms || {};
   s.days = s.days || {}; s.finishedOn = s.finishedOn || {}; s.log = s.log || {};
+  s.placed = s.placed || {};
+  if(s.seedPlaced) s.seedPlaced = true;
   if(s.sound === undefined) s.sound = true;
   if(typeof s.name !== "string") s.name = "";
   if(s.world !== "wild" && s.world !== "space") s.world = null;
@@ -558,6 +599,7 @@ function fill(s){
     if(typeof s.unlocked[o] !== "number") s.unlocked[o] = d.unlocked[o];
     if(!s.facts[o]) s.facts[o] = {};
     if(!s.blooms[o]) s.blooms[o] = {};
+    if(Object.prototype.toString.call(s.placed[o]) !== "[object Array]") s.placed[o] = [];
     for(var k in s.facts[o]){                 // records saved before day tracking
       if(Object.prototype.hasOwnProperty.call(s.facts[o],k) && s.facts[o][k] && !s.facts[o][k].d)
         s.facts[o][k].d = [];
@@ -624,20 +666,32 @@ function migrateV5(old){
   old.log = old.log || {};
   return fill(old);
 }
+/* v5 scattered pieces automatically. They are placed by the child now, so an
+   existing save keeps the arrangement it already had — nobody opens the app to
+   find their world rearranged. The seeding itself happens at boot, not here:
+   loadState() runs before the scene constants exist, so doing it now would
+   quietly place nothing. */
+function migrateV6(old){
+  old.v = 6;
+  old.placed = old.placed || {};
+  old.seedPlaced = true;
+  return fill(old);
+}
 function loadState(){
   try{
     var raw = localStorage.getItem(LSKEY);
     if(raw){
       var s = JSON.parse(raw);
-      if(s && s.v===5) return fill(s);
-      if(s && s.v===4){ didMigrate = true; return migrateV5(s); }
-      if(s && s.v===3){ didMigrate = true; return migrateV5(migrateV4(s)); }
-      if(s && s.v===2){ didMigrate = true; return migrateV5(migrateV4(migrateV2(s))); }
+      if(s && s.v===6) return fill(s);
+      if(s && s.v===5){ didMigrate = true; return migrateV6(s); }
+      if(s && s.v===4){ didMigrate = true; return migrateV6(migrateV5(s)); }
+      if(s && s.v===3){ didMigrate = true; return migrateV6(migrateV5(migrateV4(s))); }
+      if(s && s.v===2){ didMigrate = true; return migrateV6(migrateV5(migrateV4(migrateV2(s)))); }
     }
     var oldRaw = localStorage.getItem(OLDKEY);
     if(oldRaw){
       var o = JSON.parse(oldRaw);
-      if(o && o.v===1){ didMigrate = true; return migrateV5(migrateV4(migrate(o))); }
+      if(o && o.v===1){ didMigrate = true; return migrateV6(migrateV5(migrateV4(migrate(o)))); }
     }
   }catch(e){ if(memFallback) return memFallback; }
   return defaultState();
@@ -950,11 +1004,36 @@ function scenePlan(op, world){
 }
 function bloomIndex(op,f){
   var pick = state.blooms[op] ? state.blooms[op][f.i] : undefined;
-  return (typeof pick === "number") ? pick : f.c;
+  if(typeof pick === "number") return pick;
+  return (typeof f.c === "number") ? f.c : 0;   // records saved before colours were stored
 }
 function bloomColor(op,f){
   var idx=bloomIndex(op,f);
   return BLOOMS[((idx % BLOOMS.length)+BLOOMS.length)%BLOOMS.length];
+}
+/* Pieces unlock with points but are positioned by the child, so the number
+   earned and the number actually placed are different things. */
+function placedList(op){ return state.placed[op] || (state.placed[op]=[]); }
+function waitingCount(op){
+  return Math.max(0, slotCount(state.pts[op]||0) - placedList(op).length);
+}
+function nextSlot(op){
+  var arr=placedList(op), used={}, i;
+  for(i=0;i<arr.length;i++) used[arr[i].i]=1;
+  for(i=1;i<=SLOTS;i++) if(!used[i]) return i;
+  return SLOTS;
+}
+function placePiece(op, x, y){
+  if(waitingCount(op)<=0) return false;
+  var world=worldOf(), kind=kindFor(op,world);
+  var g=SCENE[kind].ground, lo=g-4, hi=134;
+  var slot=nextSlot(op);
+  var rnd=mulberry32(seedFor("place"+op+slot));
+  placedList(op).push({ i:slot, v:pickItem(kind,rnd), c:Math.floor(rnd()*BLOOMS.length),
+                        x:Math.max(10,Math.min(290,x)),
+                        y:Math.max(lo,Math.min(hi,y)) });
+  saveState();
+  return true;
 }
 function slotCount(pts){
   var n=0; for(var i=1;i<=SLOTS;i++) if(pts>=slotThreshold(i)) n++;
@@ -1268,9 +1347,13 @@ function sceneSVG(op, pts, interactive, done, asWorld){
   /* the painting; a completed section warms it to golden hour via CSS */
   s+='<image class="bg'+(done?" gold":"")+'" href="'+BG[kind]+'" x="0" y="0" width="300" height="150" preserveAspectRatio="xMidYMid slice"/>';
   s += (sc.space ? bigSpace(kind,pts,sc.ground) : bigWild(kind,pts,sc.ground));
-  var plan=scenePlan(op,world);
-  for(var i=0;i<plan.length;i++)
-    if(pts>=plan[i].t) s += drawGrower(kind, plan[i], pts, op, interactive);
+  var list=(asWorld ? scenePlan(op,world).slice(0,slotCount(pts)) : placedList(op).slice())
+    .sort(function(p,q){ return p.y-q.y; });          // back to front
+  for(var i=0;i<list.length;i++){
+    var f=list[i];
+    s += drawGrower(kind, {i:f.i, v:f.v, x:f.x, y:f.y, c:f.c,
+                           lean:0, t:slotThreshold(f.i)}, pts, op, interactive);
+  }
   s += fliers(uid,kind,pts);
   if(done) s += landmark(kind);
   return s+'</svg>';
@@ -1366,10 +1449,18 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote){
       (everDone?completeBadge(slipped):"")+
       '<span class="garden-pts">'+label+'</span></div>'+
     '<div class="scene-wrap">'+sceneSVG(op,pts,interactive,everDone)+
+      (interactive?'<button class="scene-expand" data-op="'+op+'" aria-label="Show '+
+        OP_NAME[op]+' bigger">⤢</button>':'')+
       (withBar?'<div class="scene-bar" role="img" aria-label="Scene '+Math.round(pct)+
         '% filled in"><i style="width:'+n1(pct)+'%"></i></div>':'')+'</div>'+
     (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
       '<span class="mastery-txt">'+mtxt+'</span></div>':'')+
+    (withBar && waitingCount(op)>0
+      ? '<div class="tray"><span class="tray-txt">'+waitingCount(op)+
+        (waitingCount(op)===1?' new thing':' new things')+
+        ' to place — tap the picture</span>'+
+        '<button class="tray-auto" data-op="'+op+'">Place for me</button></div>'
+      : '')+
     (withNote?'<p class="garden-note">'+note+'</p>':'')+
     '</div>';
 }
@@ -1498,7 +1589,8 @@ var el = {};
  "factGrid","cellInfo","gridTabs","dayStrip","streakLine","resetBtn","renameBtn","quitBtn","quitNote","qbar","qcount",
  "opChip","factLine","answerSlot","feedback","sessionPoints","soundBtn","sumTitle","sumPoints","sumStopped","sumDone",
  "sumGardens","sumGardensTitle","sumGardenArt","sumMastered","sumMasteredChips","sumWork","sumWorkChips","sumNote",
- "againBtn","homeBtn","welcome","heroTag","worldTitle","stepName","stepWorld","nameInput","nameNext","worldPick"
+ "againBtn","homeBtn","welcome","heroTag","worldTitle","stepName","stepWorld","nameInput","nameNext","worldPick",
+ "bigScene","bigBody","bigTitle","bigClose","bigHint"
 ].forEach(function(id){
   el[id.replace("screen-","")] = document.getElementById(id);
 });
@@ -1522,6 +1614,21 @@ function renderModeRow(){
 }
 /* A section can reach full mastery in a save that predates finishedOn (or via
    a migration), so record the badge the first time we notice it. */
+/* Lay out a migrated save exactly as it used to look, once the scene tables
+   are available. Runs once, then the flag is cleared. */
+function seedPlacements(){
+  if(!state.seedPlaced) return;
+  var world=worldOf();
+  for(var i=0;i<OPS.length;i++){
+    var op=OPS[i], arr=placedList(op);
+    if(arr.length) continue;
+    var n=slotCount(state.pts[op]||0), plan=scenePlan(op,world);
+    for(var k=0;k<plan.length && arr.length<n;k++)
+      arr.push({i:plan[k].i, v:plan[k].v, c:plan[k].c, x:plan[k].x, y:plan[k].y});
+  }
+  delete state.seedPlaced;
+  saveState();
+}
 function reconcileFinished(){
   var changed=false;
   for(var i=0;i<OPS.length;i++){
@@ -1531,6 +1638,7 @@ function reconcileFinished(){
   if(changed) saveState();
 }
 function renderScenes(){
+  seedPlacements();
   reconcileFinished();
   var html="", total=0, finished=0;
   for(var i=0;i<OPS.length;i++){
@@ -1729,20 +1837,121 @@ el.factGrid.addEventListener("click", function(e){
 });
 /* tap a grown flower (or dome, in Space) to recolour it */
 function cycleBloom(op,i){
-  var plan=scenePlan(op,worldOf()), cur;
-  for(var k=0;k<plan.length;k++) if(plan[k].i===i) cur=bloomIndex(op,plan[k]);
+  var arr=placedList(op), cur;
+  for(var k=0;k<arr.length;k++) if(arr[k].i===i) cur=bloomIndex(op,arr[k]);
   if(cur===undefined) return;
   state.blooms[op][i]=(cur+1)%BLOOMS.length;
   saveState(); sfx.tap();
-  renderScenes();
-  var again=el.gardens.querySelector('.fl[data-op="'+op+'"][data-i="'+i+'"][tabindex]');
+  refreshScenes();
+  var again=(bigOp?el.bigBody:el.gardens).querySelector('.fl[data-op="'+op+'"][data-i="'+i+'"][tabindex]');
   if(again) again.focus();
 }
-el.gardens.addEventListener("click", function(e){
+/* Pieces are earned by practising but positioned by the child: tap the picture
+   to drop the next one, drag one that is already there to move it. */
+var bigOp = null;
+function refreshScenes(){ if(bigOp) renderBig(); else renderScenes(); }
+function renderBig(){
+  if(!bigOp) return;
+  var op=bigOp, p=state.pts[op]||0;
+  el.bigTitle.textContent = OP_NAME[op]+" · "+WORLDS[worldOf()].name;
+  el.bigBody.innerHTML = sceneBlock(op, p, p+" pts", true, true, true);
+}
+function openBig(op){
+  bigOp = op;
+  el.bigScene.hidden = false;
+  document.body.classList.add("bigopen");
+  renderBig();
+  /* iOS Safari has no element fullscreen, but the overlay already fills the
+     viewport, so this is a bonus where it works rather than a requirement. */
+  try{ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }catch(e){}
+  window.scrollTo(0,0);
+}
+function closeBig(){
+  bigOp = null;
+  el.bigScene.hidden = true;
+  el.bigBody.innerHTML = "";        // or the scene exists twice in the document
+  document.body.classList.remove("bigopen");
+  try{ if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); }catch(e){}
+  renderScenes();
+}
+el.bigClose.addEventListener("click", closeBig);
+document.addEventListener("keydown", function(e){
+  if(e.key==="Escape" && bigOp) closeBig();
+});
+function svgPoint(svg, ev){
+  var r=svg.getBoundingClientRect();
+  return { x:(ev.clientX-r.left)/r.width*300, y:(ev.clientY-r.top)/r.height*150 };
+}
+var drag=null, didDrag=false;
+function clampTo(op, x, y){
+  var g=SCENE[kindFor(op)].ground;
+  return { x:Math.max(10,Math.min(290,x)), y:Math.max(g-4,Math.min(134,y)) };
+}
+document.addEventListener("pointerdown", function(e){
+  var svg = e.target.closest ? e.target.closest("svg.garden-art") : null;
+  if(!svg) return;
+  var card = svg.closest(".garden"); if(!card) return;
+  var op = card.getAttribute("data-op");
+  var piece = e.target.closest(".fl");
+  didDrag = false;
+  if(piece){
+    var idx = +piece.getAttribute("data-i"), arr = placedList(op), cur = null;
+    for(var k=0;k<arr.length;k++) if(arr[k].i===idx) cur = arr[k];
+    if(!cur) return;
+    var p0 = svgPoint(svg, e);
+    drag = { op:op, rec:cur, el:piece, sx:p0.x, sy:p0.y, ox:cur.x, oy:cur.y };
+    try{ svg.setPointerCapture(e.pointerId); }catch(err){}
+    return;
+  }
+  if(waitingCount(op)>0){
+    var p = svgPoint(svg, e);
+    if(placePiece(op, p.x, p.y)){ sfx.yes(); refreshScenes(); }
+  }
+});
+document.addEventListener("pointermove", function(e){
+  if(!drag) return;
+  var p = svgPoint(drag.el.ownerSVGElement || drag.el.closest("svg"), e);
+  var dx = p.x-drag.sx, dy = p.y-drag.sy;
+  if(Math.abs(dx)>2 || Math.abs(dy)>2) didDrag = true;
+  drag.el.setAttribute("transform", "translate("+n1(dx)+","+n1(dy)+")");
+});
+document.addEventListener("pointerup", function(e){
+  if(!drag) return;
+  var d = drag; drag = null;
+  var svg = d.el.ownerSVGElement || d.el.closest("svg");
+  try{ svg.releasePointerCapture(e.pointerId); }catch(err){}
+  if(didDrag){
+    var p = svgPoint(svg, e);
+    var c = clampTo(d.op, d.ox + (p.x-d.sx), d.oy + (p.y-d.sy));
+    d.rec.x = c.x; d.rec.y = c.y;
+    saveState(); sfx.tap(); refreshScenes();
+    return;
+  }
+  /* A tap on a piece recolours it. This has to happen here rather than on the
+     click event: capturing the pointer for the drag retargets the click to the
+     picture, so the piece never sees it. */
+  if(d.el.hasAttribute("tabindex")) cycleBloom(d.op, d.rec.i);
+});
+document.addEventListener("click", function(e){
+  var ex = e.target.closest ? e.target.closest(".scene-expand") : null;
+  if(ex){ openBig(ex.getAttribute("data-op")); return; }
+  var b = e.target.closest ? e.target.closest(".tray-auto") : null;
+  if(b){
+    var op = b.getAttribute("data-op"), world = worldOf(), plan = scenePlan(op, world);
+    var guard = 0;
+    while(waitingCount(op)>0 && guard++ < SLOTS){
+      var slot = nextSlot(op), spot = null;
+      for(var k=0;k<plan.length;k++) if(plan[k].i===slot) spot = plan[k];
+      placePiece(op, spot?spot.x:150, spot?spot.y:SCENE[kindFor(op)].ground+8);
+    }
+    sfx.star(); refreshScenes();
+    return;
+  }
+  if(didDrag){ didDrag=false; return; }
   var g=e.target.closest ? e.target.closest(".fl[tabindex]") : null;
   if(g) cycleBloom(g.getAttribute("data-op"), +g.getAttribute("data-i"));
 });
-el.gardens.addEventListener("keydown", function(e){
+document.addEventListener("keydown", function(e){
   if(e.key!=="Enter" && e.key!==" ") return;
   var g=e.target.closest ? e.target.closest(".fl[tabindex]") : null;
   if(g){ e.preventDefault(); cycleBloom(g.getAttribute("data-op"), +g.getAttribute("data-i")); }
