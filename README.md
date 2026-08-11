@@ -17,10 +17,12 @@ Open `index.html`. That's the whole thing — there is no build step, no package
 manager, and no server required. You can open it straight from the filesystem,
 or drop the two files on any static host.
 
-The app makes **no network requests at all**. Both fonts (Fredoka and Nunito)
-are embedded in the file as base64 woff2, and every scene is drawn in SVG at
-runtime rather than loaded as an image, which is why `index.html` is around
-175 KB despite being a single page. Once the page has loaded it works offline.
+The app makes **no network requests at all**. Everything it needs is inside the
+one file: both fonts (Fredoka and Nunito) as base64 woff2, the eight painted
+backdrops and every painted piece as WebP data URIs, and the rest drawn in SVG
+at runtime. That is why `index.html` is around 700 KB despite being a single
+page — it is a whole illustrated app, not a page that fetches one. It works
+offline from the moment it loads, including from `file://`.
 
 `robots.txt` disallows everything and the page sends `noindex, nofollow,
 noarchive`, so it stays out of search results.
@@ -51,9 +53,12 @@ grows several of them at once.
 
 ## How a session works
 
-Tap **Start practicing** and answer 20 questions on the number pad. A session
-can stretch to 24 questions if there are missed facts still waiting to be
-re-asked.
+Tap **Start practicing** and answer 20 questions on the number pad. **The set is
+exactly 20 questions and the target never moves** — missed facts are re-asked
+inside those 20 rather than added on the end. An earlier version extended the
+set to fit them in, which meant the counter climbed away from the child as she
+worked (`20/20`, then `21/21`, then `22/23`) and the set could never be
+finished. It doesn't do that any more.
 
 - **Correct** — 5 points, plus 3 more if you answered within 4 seconds.
 - **Newly mastered** — a 20 point bonus and a star.
@@ -76,6 +81,28 @@ streak, and the summary says so.
 Stopping takes two taps of the × button — the first arms it and warns what will
 happen, and it disarms itself after 3 seconds. A stray tap can't end a set the
 child was most of the way through.
+
+## Learning what the operation means
+
+Practice assumes a child already knows what `7 × 3` *is*. Not every child does,
+and drilling a fact you don't understand is just memorising noise. **Learn**, on
+the home screen, is the part that explains it.
+
+Pick an operation, drag the two sliders, and the same sum is shown three ways at
+once:
+
+- **A number line** with the jump drawn on it. Addition counts on, subtraction
+  counts back, and multiplication and division are drawn as **equal hops** — six
+  hops of three, rather than one leap to eighteen — so grouping is visible
+  rather than asserted.
+- **Counters** underneath: two rows to add, a row with some crossed out to
+  subtract, equal rows for the times tables.
+- **A sentence**: "3 groups with 4 in each group makes 12 altogether."
+
+The line explains the movement and the counters explain the amount, and
+different children need different ones, which is why both are on screen.
+Nothing here is scored and nothing is recorded — it is a place to look, not a
+test.
 
 ## Which facts get asked
 
@@ -157,21 +184,44 @@ never blur together:
 
 | | Wild Places | Space |
 | --- | --- | --- |
-| **+** | Forest — young conifers | Rocky planet — habitat domes |
-| **−** | Mountain meadow — wildflowers | Ice moon — comms masts |
-| **×** | Beach — palms | Ring giant — tethered balloons |
-| **÷** | Fjord — cabins along the shore | Station — docked pods |
+| **+** | Forest — conifers, ferns, mushrooms, rabbits, foxes, hedgehogs, a campfire | Rocky planet — habitat domes, rovers, solar arrays, supply crates |
+| **−** | Mountain meadow — wildflowers, bushes, sheep, a fawn, songbirds, a bench | Ice moon — comms masts, dishes, habitats, a rover |
+| **×** | Beach — palms, huts, shells, driftwood, a campfire | Ring giant — dishes, landers, habitats, solar arrays |
+| **÷** | Fjord — cabins, boathouses, jetties, rowboats, sheep | Station deck — modules, domes, arrays, crates |
 
-Things appear one at a time and grow through three stages as more points come
-in. Bigger pieces — a tree, a shrub, a pond, birds or satellites — arrive at
-milestones, and the scene is comfortably full around 1000 points.
+Each scene is a **painted backdrop** with everything earned drawn over it.
+Pieces appear one at a time and grow through three stages as more points come
+in, and they are drawn smaller toward the back of the ground and larger at the
+front, so a full scene has depth rather than being a row of stickers.
 
-**Tap anything fully grown to change its colour.** That choice is remembered.
+Every third piece is the tall one — a conifer, a palm, a comms mast — so a
+forest always has a canopy and a colony always has its big structure. The rest
+are picked by weight, and no single thing may appear more than twice, because
+weighting alone will cheerfully line up four identical foxes.
 
-There is nothing to buy, place or arrange. A scene's layout comes from a seed
-derived from its world and section, so it is stable between visits, different
-from its neighbours, and impossible to leave in a broken state — none of it
-needs saving.
+Two larger copies of that tall piece arrive at milestones to anchor the left and
+right edges, birds or comets cross the sky, and once the meadow is really full a
+balloon drifts over it. The scene is comfortably full around 1000 points.
+
+**Tap anything fully grown that has real colour in it to change its colour** —
+flowers, huts, cabins, benches, rovers, solar arrays, crates, landers. That
+choice is remembered.
+
+### Placing what you earn
+
+Points **unlock** a piece; the child decides **where it goes**. A tray under the
+scene says how many are waiting, and tapping the picture puts the next one
+there. Anything already down can be dragged to a new spot, and everything stays
+inside the ground. **Place for me** scatters the rest for a child who would
+rather not fiddle.
+
+Tap **⤢** on any scene to open it full screen. Turning the phone to landscape
+fills the display; placing and dragging work there too.
+
+Positions, colours and which thing each piece is are all saved. The starting
+scatter for a save that predates placement comes from a seed derived from the
+world and section, so an existing world is laid out exactly as it used to look
+rather than rearranged.
 
 ## Two meters, doing different jobs
 
@@ -191,9 +241,10 @@ A section is complete when **every fact in it is mastered** — 169 facts for
 `+`, `−` and `×`, and 156 for `÷`. When the last one falls:
 
 - **The scene transforms.** It shifts to warm golden-hour light and gains a
-  landmark it never had before — a stag in the forest, a lit lighthouse on the
-  beach, a rainbow over the meadow, a boat on the fjord, a planted flag in
-  Space.
+  painted landmark it never had before, bigger than anything that grows: a stag
+  in the forest, a windmill over the meadow, a lighthouse on the beach, a
+  sailboat out on the fjord — and in Space, a rocket on its pad, an observatory,
+  a solar-sail ship crossing the rings, and a shuttle at the station.
 - **A badge** appears beside the section's name and is **never taken away**. If a
   fact later slips out of mastery the badge turns amber and the note says how
   many need a refresh — a warning to act on, not an achievement snatched back.
@@ -249,7 +300,7 @@ session rather than failing.
 
 ```js
 {
-  v: 4,
+  v: 7,
   name:     "Alex",                             // "" until asked
   world:    "wild",                             // "wild" | "space" — set once, then fixed
   pts:      { add:0, sub:0, mul:0, div:0 },     // points per section, fills the scenes
@@ -259,12 +310,23 @@ session rather than failing.
     add: { "3,4": { n, s, r: [], t: [], d: [] } },   // keyed "a,b"
     sub: {}, mul: {}, div: {}
   },
-  blooms:     { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // recoloured growers
+  placed: {                                     // where each earned piece was put
+    add: [ { i:1, v:0, c:2, x:112.4, y:126.1 } ],    // slot, which thing, colour, position
+    sub: [], mul: [], div: []
+  },
+  blooms:     { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // recoloured pieces
+  log:        { "2026-08-09": { q:20, c:17, t:41200, m:{add:12,sub:4,mul:0,div:0} } },
   finishedOn: { add: "2026-08-09" },            // first completion; never cleared
   days:       { "2026-08-09": 1 },              // sessions completed per day
   sound:      true
 }
 ```
+
+`log` keeps one small record per day — questions asked, correct, total correct
+response time, and a mastery snapshot per section — for up to 400 days, about
+60 bytes a day. The per-fact history only keeps the last five results, which
+says how a child is *now* but nothing about last month, and history can't be
+reconstructed after the fact, so it is written as it happens.
 
 Per fact: `n` total attempts, `s` current correct streak, `r` last five results
 as 1/0, `t` last five correct response times in milliseconds, and `d` the
@@ -276,6 +338,13 @@ so they can never fall out of step with the real history.
 Older saves migrate automatically on load, and the upgraded save is written
 immediately so the migration survives even if the app is closed straight away:
 
+- **v6** (before the space scenes had things of their own) re-rolls which thing
+  each already-placed space piece is — until v7 they were all the same shape, so
+  every one recorded the same kind. Positions and colours are untouched.
+- **v5** (before pieces were placed by hand) lays the world out exactly as it
+  used to look, from the same seed the old automatic scatter used, so nobody
+  opens the app to find their world rearranged.
+- **v4** (before the daily log) keeps everything; history simply starts now.
 - **v3** (before the day requirement) keeps everything. Facts that met the old,
   easier bar are credited with **3 of the 5 days** now required, so real work
   isn't erased but the too-easy mastery isn't grandfathered in either.
@@ -304,8 +373,7 @@ The constants that shape the difficulty curve are at the top of the script in
 | --- | --- | --- |
 | `MAX` | 12 | Largest operand |
 | `GOAL` | 1000 | Points for a comfortably full scene |
-| `SESSION_LEN` | 20 | Questions per session |
-| `SESSION_MAX` | 24 | Ceiling when re-asking missed facts |
+| `SESSION_LEN` | 20 | Questions per session — fixed; the target never moves |
 | `FAST_MS` | 4000 | Speed-bonus threshold |
 | `MASTER_MS` | 5000 | Base recall time for mastery (longer answers get more) |
 | `MASTER_STREAK` | 5 | Correct answers in a row required |
@@ -315,9 +383,12 @@ The constants that shape the difficulty curve are at the top of the script in
 
 Scene pacing lives beside them: `slotThreshold(i)` sets when the `i`th thing
 appears, `BUD_AT` and `BLOOM_AT` how quickly each grows up, and the `MILE` table
-when the bigger pieces arrive. Colours and layers for all eight scenes are in
-the `SCENE` table, and `WORLDS` maps sections to scenes. Changing any of it
-restyles every scene immediately — no saved data depends on it.
+when the bigger pieces and sky flourishes arrive. `ITEMS` lists what grows in
+each scene with its sizes and weights, `SCENE[kind].ground` says where each
+painting's usable foreground begins, `LAND` places the completion landmarks, and
+`WORLDS` maps sections to scenes. Changing any of it restyles every scene
+immediately — the only thing saved per piece is which slot, which item, which
+colour and where, so nothing breaks as long as an item stays in its list.
 
 Lowering `MASTER_MS` makes mastery stricter; raising `SESSION_LEN` makes
 sessions longer. Changing `LSKEY` starts everyone from scratch.
