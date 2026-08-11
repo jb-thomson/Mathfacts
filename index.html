@@ -70,7 +70,7 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--teal);outl
 .hero .mark{width:52px;height:52px;flex:0 0 auto}
 .hero h1{font-family:'Fredoka';font-weight:700;font-size:38px;letter-spacing:1px;line-height:1.05;text-wrap:balance}
 .hero .tag{color:var(--muted);font-size:14.5px;margin-top:3px}
-body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{display:none}
+body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,body.quizzing #screen-learn{display:none}
 
 /* ---------- cards ---------- */
 .card{
@@ -196,6 +196,18 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary{dis
 .garden.slipped .mastery-meter i{background:var(--warn)}
 /* display:flex beats the hidden attribute, so say so explicitly or the
    invisible overlay keeps swallowing taps on the page behind it */
+.learn-sum{font-family:'Fredoka';font-weight:700;font-size:30px;text-align:center;margin:2px 0 10px}
+.learn-art{display:block;width:100%;height:auto;background:var(--paper);
+  border:2px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink-soft)}
+.learn-ctl{display:flex;align-items:center;gap:10px;margin-top:12px}
+.learn-ctl label{font-family:'Fredoka';font-weight:600;font-size:14.5px;min-width:104px}
+.slider{flex:1;-webkit-appearance:none;appearance:none;height:12px;border-radius:99px;
+  background:var(--line);border:2px solid var(--ink)}
+.slider::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;
+  background:var(--teal);border:2.5px solid var(--ink);box-shadow:0 2px 0 var(--teal-deep)}
+.slider::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--teal);
+  border:2.5px solid var(--ink)}
+.learn-say{margin-top:14px;font-size:15px;font-weight:700;color:var(--muted);text-align:center;min-height:42px}
 .big[hidden]{display:none}
 .big{position:fixed;inset:0;z-index:40;background:var(--ink);display:flex;flex-direction:column;
   padding:calc(8px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom))}
@@ -442,6 +454,7 @@ body.bigopen{overflow:hidden}
       <p id="pickNote" class="pick-note"></p>
 
       <button id="startBtn" class="cta">Start practicing</button>
+      <button id="learnBtn" class="ghost">Show me how it works</button>
 
       <section class="card" aria-label="Your world">
         <h2 class="card-title" id="worldTitle">Your world <span class="note">tap to recolour</span></h2>
@@ -477,7 +490,32 @@ body.bigopen{overflow:hidden}
         <button id="renameBtn" class="linkish">Change name</button>
         <button id="resetBtn" class="linkish">Erase all progress</button>
       </p>
-      <p class="version-line">v9 · place your own world</p>
+      <p class="version-line">v10 · learn it, then place it</p>
+    </section>
+
+    <!-- ============ LEARN ============ -->
+    <section id="screen-learn" hidden>
+      <div class="card">
+        <h2 class="card-title">What does it mean? <span class="note">drag the dots</span></h2>
+        <div class="tabs" id="learnTabs" role="tablist" aria-label="Operation">
+          <button data-op="add" role="tab" aria-selected="true" aria-label="Addition">+</button>
+          <button data-op="sub" role="tab" aria-selected="false" aria-label="Subtraction">−</button>
+          <button data-op="mul" role="tab" aria-selected="false" aria-label="Multiplication">×</button>
+          <button data-op="div" role="tab" aria-selected="false" aria-label="Division">÷</button>
+        </div>
+        <p id="learnSum" class="learn-sum"></p>
+        <div id="learnArt"></div>
+        <div class="learn-ctl">
+          <label id="learnLabA" for="learnA"></label>
+          <input id="learnA" class="slider" type="range" min="0" max="12" value="3">
+        </div>
+        <div class="learn-ctl">
+          <label id="learnLabB" for="learnB"></label>
+          <input id="learnB" class="slider" type="range" min="0" max="12" value="4">
+        </div>
+        <p id="learnSay" class="learn-say"></p>
+      </div>
+      <button id="learnHome" class="ghost">Back home</button>
     </section>
 
     <!-- ============ QUIZ ============ -->
@@ -1475,6 +1513,7 @@ function startSession(){
   disarmQuit();
   document.body.classList.add("quizzing");
   el.quiz.hidden=false; el.summary.hidden=true; el.home.hidden=true;
+  if(el.learn) el.learn.hidden=true;
   el.sessionPoints.textContent="";
   nextQuestion();
 }
@@ -1567,6 +1606,7 @@ function goHome(){
   disarmQuit();
   document.body.classList.remove("quizzing");
   el.quiz.hidden=true; el.summary.hidden=true; el.home.hidden=false;
+  if(el.learn) el.learn.hidden=true;
   renderHome();
   window.scrollTo(0,0);
 }
@@ -1585,7 +1625,8 @@ function streak(){
 
 /* ---------------- rendering ---------------- */
 var el = {};
-["screen-home","screen-quiz","screen-summary","screen-setup","startBtn","modeRow","pickNote","gardens","totalLine",
+["screen-home","screen-quiz","screen-summary","screen-setup","screen-learn","startBtn","learnBtn","modeRow","pickNote","gardens","totalLine",
+ "learnTabs","learnArt","learnSum","learnSay","learnA","learnB","learnLabA","learnLabB","learnHome",
  "factGrid","cellInfo","gridTabs","dayStrip","streakLine","resetBtn","renameBtn","quitBtn","quitNote","qbar","qcount",
  "opChip","factLine","answerSlot","feedback","sessionPoints","soundBtn","sumTitle","sumPoints","sumStopped","sumDone",
  "sumGardens","sumGardensTitle","sumGardenArt","sumMastered","sumMasteredChips","sumWork","sumWorkChips","sumNote",
@@ -2094,6 +2135,120 @@ function boot(){
   renderHome();
   showWelcome();
 }
+
+
+/* ---------------- learn ----------------
+   What the operation actually does, for a child who has no number sense yet.
+   Two sliders, a number line showing the jump, and the same quantity again as
+   counters underneath — the line explains the movement, the counters explain
+   the amount, and different children need different ones. */
+var learnOp = "add", learnA = 3, learnB = 4;
+
+function lnRange(op, a, b){
+  if(op==="add")  return {max:Math.max(10, a+b), from:a, to:a+b, ans:a+b};
+  if(op==="sub")  return {max:Math.max(10, a+b), from:a+b, to:a, ans:a};
+  if(op==="mul")  return {max:Math.max(10, a*b), from:0, to:a*b, ans:a*b};
+  return {max:Math.max(10, a*b), from:a*b, to:0, ans:a};   // div
+}
+function numberLine(op, a, b){
+  var W=300, H=76, r=lnRange(op,a,b);
+  var max=Math.max(1, r.max), x0=14, x1=W-14;
+  var X=function(v){ return x0 + (x1-x0)*(v/max); };
+  var y=52;
+  var step = max<=12 ? 1 : max<=24 ? 2 : max<=60 ? 5 : max<=100 ? 10 : 12;
+  var s='<svg class="learn-art" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Number line from 0 to '+max+'">';
+  s+='<path d="M'+x0+' '+y+' H'+x1+'" stroke="'+INK+'" stroke-width="2.5" stroke-linecap="round"/>';
+  for(var v=0; v<=max; v+=step){
+    var tx=X(v);
+    s+='<path d="M'+n1(tx)+' '+(y-4)+' V'+(y+4)+'" stroke="'+INK+'" stroke-width="1.6"/>';
+    s+='<text x="'+n1(tx)+'" y="'+(y+17)+'" text-anchor="middle" font-family="Nunito,sans-serif" '+
+       'font-size="9" font-weight="800" fill="#68738F">'+v+'</text>';
+  }
+  /* the jumps: multiplication and division are drawn as equal hops, so the
+     grouping is visible rather than just a single leap */
+  var hops=[], i;
+  if(op==="add"){ hops.push([a, a+b]); }
+  else if(op==="sub"){ hops.push([a+b, a]); }
+  else if(op==="mul"){ for(i=0;i<a;i++) hops.push([i*b, (i+1)*b]); }
+  else { for(i=0;i<a;i++) hops.push([a*b-i*b, a*b-(i+1)*b]); }
+  var col = op==="add" ? "#0FA3A8" : op==="sub" ? "#EF5B3F" : op==="mul" ? "#8455E0" : "#2E7DD1";
+  for(i=0;i<hops.length && i<24;i++){
+    var f=X(hops[i][0]), t=X(hops[i][1]), mid=(f+t)/2, up=(i%2?1:1);
+    var h=Math.min(26, 10+Math.abs(t-f)*0.22)*up;
+    s+='<path d="M'+n1(f)+' '+(y-3)+' Q'+n1(mid)+' '+n1(y-3-h*2)+' '+n1(t)+' '+(y-3)+
+       '" fill="none" stroke="'+col+'" stroke-width="2.4" opacity=".9"/>';
+    s+='<circle cx="'+n1(t)+'" cy="'+(y-3)+'" r="2.6" fill="'+col+'"/>';
+  }
+  s+='<circle cx="'+n1(X(r.from))+'" cy="'+y+'" r="5" fill="#FFFEFB" stroke="'+INK+'" stroke-width="2"/>';
+  s+='<circle cx="'+n1(X(r.to))+'" cy="'+y+'" r="6.5" fill="'+col+'" stroke="'+INK+'" stroke-width="2"/>';
+  return s+'</svg>';
+}
+function counters(op, a, b){
+  var W=300, per=12, R=8.5, gap=21, s='';
+  var rows=[], col = op==="add" ? "#0FA3A8" : op==="sub" ? "#EF5B3F" : op==="mul" ? "#8455E0" : "#2E7DD1";
+  if(op==="add"){ rows=[{n:a,c:"#0FA3A8",l:String(a)},{n:b,c:"#FFC93C",l:"+ "+b}]; }
+  else if(op==="sub"){ rows=[{n:a+b,c:"#EF5B3F",l:String(a+b),cross:b}]; }
+  else if(op==="mul"){ for(var g=0;g<Math.min(a,8);g++) rows.push({n:b,c:"#8455E0",l:g===0?a+" groups of "+b:""}); }
+  else { for(var g2=0;g2<Math.min(a,8);g2++) rows.push({n:b,c:"#2E7DD1",l:g2===0?"shared into "+a+" groups":""}); }
+  var H = Math.max(30, rows.length*gap+12);
+  s='<svg class="learn-art" style="margin-top:8px" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Counters">';
+  for(var i=0;i<rows.length;i++){
+    var row=rows[i], y=14+i*gap;
+    if(row.l) s+='<text x="8" y="'+(y+4)+'" font-family="Nunito,sans-serif" font-size="10" font-weight="800" fill="#68738F">'+row.l+'</text>';
+    var startX=96;
+    for(var k=0;k<Math.min(row.n, per*2);k++){
+      var cx=startX+(k%per)*17, cy=y+Math.floor(k/per)*15;
+      var gone = row.cross!==undefined && k >= row.n-row.cross;
+      s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="'+(gone?"#FFFEFB":row.c)+'" stroke="'+INK+
+         '" stroke-width="1.6"'+(gone?' stroke-dasharray="3 2"':'')+'/>';
+      if(gone) s+='<path d="M'+(cx-4)+' '+(cy-4)+' l8 8 M'+(cx+4)+' '+(cy-4)+' l-8 8" stroke="'+INK+'" stroke-width="1.6"/>';
+    }
+    if(row.n > per*2)
+      s+='<text x="'+(startX+per*17+4)+'" y="'+(y+4)+'" font-family="Nunito,sans-serif" font-size="10" font-weight="800" fill="#68738F">…</text>';
+  }
+  return s+'</svg>';
+}
+function learnWords(op,a,b){
+  if(op==="add") return "Start at "+a+", then count on "+b+" more. You land on "+(a+b)+".";
+  if(op==="sub") return "Start at "+(a+b)+", then count back "+b+". You land on "+a+".";
+  if(op==="mul") return a+" groups with "+b+" in each group makes "+(a*b)+" altogether.";
+  return (a*b)+" shared out into groups of "+b+" makes "+a+" groups.";
+}
+function renderLearn(){
+  var op=learnOp, a=learnA, b=learnB;
+  var tabs=el.learnTabs.querySelectorAll("button"), i;
+  for(i=0;i<tabs.length;i++) tabs[i].setAttribute("aria-selected", String(tabs[i].dataset.op===op));
+  /* division needs a divisor, and its slider means "how many in each group" */
+  if(op==="div" && b<1){ b=learnB=1; el.learnB.value=1; }
+  el.learnA.min = 0; el.learnB.min = (op==="div") ? 1 : 0;
+  var text;
+  if(op==="add") text = a+" + "+b+" = "+(a+b);
+  else if(op==="sub") text = (a+b)+" − "+b+" = "+a;
+  else if(op==="mul") text = a+" × "+b+" = "+(a*b);
+  else text = (a*b)+" ÷ "+b+" = "+a;
+  el.learnSum.textContent = text;
+  el.learnLabA.textContent = op==="add" ? "Start at" : op==="sub" ? "Left with"
+                           : op==="mul" ? "How many groups" : "How many groups";
+  el.learnLabB.textContent = op==="add" ? "Count on" : op==="sub" ? "Take away"
+                           : "How many in each";
+  el.learnArt.innerHTML = numberLine(op,a,b) + counters(op,a,b);
+  el.learnSay.textContent = learnWords(op,a,b);
+}
+function showLearn(){
+  el.home.hidden=true; el.learn.hidden=false;
+  el.learnA.value=learnA; el.learnB.value=learnB;
+  renderLearn(); window.scrollTo(0,0);
+}
+el.learnBtn.addEventListener("click", showLearn);
+el.learnHome.addEventListener("click", function(){
+  el.learn.hidden=true; el.home.hidden=false; renderHome(); window.scrollTo(0,0);
+});
+el.learnTabs.addEventListener("click", function(e){
+  var b2=e.target.closest("button"); if(!b2) return;
+  learnOp=b2.dataset.op; sfx.tap(); renderLearn();
+});
+el.learnA.addEventListener("input", function(){ learnA=+this.value; renderLearn(); });
+el.learnB.addEventListener("input", function(){ learnB=+this.value; renderLearn(); });
 
 renderSoundBtn();
 boot();
