@@ -24,6 +24,10 @@ at runtime. That is why `index.html` is around 700 KB despite being a single
 page — it is a whole illustrated app, not a page that fetches one. It works
 offline from the moment it loads, including from `file://`.
 
+The one part of that worth watching is recolouring: every grower carries both
+its painting and a mask of where its body is, which is what makes recolouring
+repaint a part of a thing rather than all of it.
+
 `robots.txt` disallows everything and the page sends `noindex, nofollow,
 noarchive`, so it stays out of search results.
 
@@ -260,20 +264,40 @@ under the scene:
   drawn as a crossed-out circle: a piece keeps its own paint until she
   deliberately changes it.
 
-  Recolouring **repaints the body and leaves the trimmings**. A dome's shell
-  turns pink while its amber window and wooden seat stay; the rover's body
-  shifts but keeps its yellow seats and dark tyres; the beach hut keeps its red
-  awning. How much of its own colour a pixel holds on to comes from how far it
-  already sits from grey — so the large plain areas take the new colour and the
-  small vivid details resist it. That cap sits just below 1 on purpose, or a
-  sprite that is saturated all over, like the rover, would refuse to change at
-  all.
+  Recolouring **repaints the body and leaves everything else exactly as
+  painted**. A dome's shell turns pink and its amber window and wooden seat are
+  untouched; a tree's needles change and its trunk stays brown; the rover keeps
+  its yellow seats and black tyres; the campfire keeps its flames.
 
-  Two earlier versions of this were wrong in opposite directions, and both are
-  worth remembering. Rotating the hue moves a red rover and does *nothing*
-  whatever to a white dome, which is why domes had no colour option at all.
-  Flattening the sprite to a single colour then fixed the dome and destroyed
-  every piece it touched — a painted thing became a sticker.
+  This takes two halves, because **a filter can only ever act on a whole
+  sprite** — any filter alone drags every pixel with it. So the *area* is
+  chosen first. Each sprite carries a small mask marking where its body is,
+  worked out ahead of time by finding the largest run of one material in it.
+  The app draws the sprite untouched, then draws it again through that mask
+  with a filter that replaces the colour and keeps the shading.
+
+  Three earlier attempts are worth recording, because each looked reasonable
+  and each was wrong:
+
+  1. **Rotating the hue.** Moves a red rover; does *nothing whatever* to a
+     white dome. That is why domes had no colour option at all — the flag
+     saying what could be recoloured was describing the filter's limits, not
+     the objects.
+  2. **Flattening the sprite to one colour.** Fixed the dome by ruining
+     everything it touched. A painted thing became a sticker.
+  3. **Tinting in proportion to how plain each pixel is.** Better, and still a
+     global operation: it shifts the whole object's shade rather than
+     repainting a part of it.
+
+  Materials are found by dividing each pixel by its own brightness, so the lit
+  top of a dome and its shaded underside count as the same paint — which is
+  also why a repainted piece keeps its modelling instead of going flat. The
+  largest such run is the body nearly everywhere; a flower is the exception,
+  where the leaves outweigh the bloom and the bloom is the point, so that one
+  names the colour to aim at instead.
+
+  The masks are soft coverage rather than artwork, so they are stored much
+  smaller than the sprites and cost about 86 KB for all thirty.
 - **✓** puts it down. So does tapping anywhere else.
 
 Dragging still moves a piece, and it stays held afterwards so it can be resized
@@ -445,6 +469,14 @@ itself after 3 seconds if you don't confirm. It also clears the name and world,
 so setup runs again.
 
 ## Sound and haptics
+
+**Sound** can be switched from the home screen as well as from the speaker in
+the quiz header. It used to be only the latter — a small speaker crammed beside
+the quit button, easy to hit by accident, with nothing anywhere afterwards
+saying sound was off.
+
+On an iPhone, note that Web Audio also obeys the physical silent switch: if the
+phone is on silent, the app is silent, whatever this setting says.
 
 All sound is synthesised with the Web Audio API; there are no audio files.
 Vibration fires only where the browser supports it, which in practice means
