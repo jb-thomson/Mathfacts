@@ -6,6 +6,17 @@
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="theme-color" content="#FAF3E4">
 <title>Numo — Math Fact Practice</title>
+<!-- Home Screen icons. iOS ignores the SVG favicon below for this and will
+     screenshot the page instead, so it needs a real PNG; it also masks the
+     corners itself, which is why the PNGs are square. The manifest is what
+     Android reads, and what makes both open without browser chrome. -->
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Numo">
+<meta name="application-name" content="Numo">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20x='0'%20y='0'%20width='100'%20height='100'%20rx='23'%20fill='%23FFFFFF'/%3E%3Cpath%20d='M22%2050%20A27.5%2027.5%200%200%201%2077%2050%20L54%2050%20A4.5%204.5%200%200%200%2045%2050%20Z'%20fill='%23056673'/%3E%3Crect%20x='22'%20y='24'%20width='23'%20height='58'%20rx='5'%20fill='%23056673'/%3E%3Crect%20x='54'%20y='44'%20width='23'%20height='38'%20rx='5'%20fill='%23056673'/%3E%3Crect%20x='35'%20y='54'%20width='29'%20height='10'%20rx='5'%20fill='%23FFFFFF'/%3E%3Cg%20transform='rotate%2818%2068%2033%29'%3E%3Cpath%20d='M68%2035%20V15'%20stroke='%234C8B4C'%20stroke-width='5.4'%20stroke-linecap='round'/%3E%3Cg%20transform='translate%2868%2C19%29'%3E%3Cpath%20d='M0%202.4%20q-12%20-1%20-14.4%20-10.4%20q11.2%20-1%2014.4%207.2%20Z'%20fill='%236FBE6F'%20stroke='%234C8B4C'%20stroke-width='2.6'%20stroke-linejoin='round'/%3E%3Cpath%20d='M0%200%20q12%20-2%2014.4%20-12%20q-11.2%20-1%20-14.4%208.8%20Z'%20fill='%236FBE6F'%20stroke='%234C8B4C'%20stroke-width='2.6'%20stroke-linejoin='round'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
 <style>
 @font-face{
@@ -555,7 +566,7 @@ body.bigopen{overflow:hidden}
       </p>
       <input id="loadFile" type="file" accept="application/json,.json" hidden>
       <p id="backupNote" class="backup-note" hidden></p>
-      <p class="version-line">v14 · rewind, and a report for grown-ups</p>
+      <p class="version-line">v15 · a proper icon on the Home Screen</p>
     </section>
 
     <!-- ============ LEARN ============ -->

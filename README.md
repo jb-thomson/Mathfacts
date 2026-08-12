@@ -469,11 +469,40 @@ still opens.
 
 Clearing site data resets progress, as does the erase button.
 
+## Adding it to a Home Screen
+
+On iOS: Safari → Share → **Add to Home Screen**. Do this before a child starts,
+because iOS evicts `localStorage` for sites unused for about a week *unless*
+they have been installed this way. On Android: Chrome → menu → **Install app**.
+
+Both then launch without browser chrome, and both show the Numo mark rather
+than a screenshot of the page.
+
+That last part needs real files, which is the one place the single-file rule
+bends. iOS ignores the inline SVG favicon when picking a Home Screen icon and
+falls back to screenshotting the page, so it needs a PNG at
+`apple-touch-icon.png`. iOS also applies its own rounded-corner mask, and
+composites black behind transparency, so the PNGs are square and opaque —
+rounding them here would show as a double-rounded corner.
+
+`manifest.webmanifest` is what Android reads. Its `maskable` icon carries extra
+padding, because Android may crop an icon to a circle and would otherwise clip
+the sprout.
+
+None of this is needed to *run* the app: `index.html` on its own still works
+offline from `file://`, and simply ignores the manifest link when it isn't
+there.
+
 ## Layout
 
 ```
-index.html    the entire app — markup, styles, fonts, and logic
-robots.txt    keeps the app out of search engines
+index.html               the entire app — markup, styles, fonts, and logic
+manifest.webmanifest     name, colours and icons for an installed app
+apple-touch-icon.png     180px, the iOS Home Screen icon
+icon-192.png             Android
+icon-512.png             Android, and app-store style listings
+icon-maskable.png        Android again, padded so a circle crop doesn't clip it
+robots.txt               keeps the app out of search engines
 ```
 
 ## Tuning
