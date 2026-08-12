@@ -500,57 +500,192 @@ body.bigopen{overflow:hidden}
 </style>
 </head>
 <body>
-<!-- One set of tint filters for every scene on the page. Each drains the
-     colour out of a sprite and re-tints the shading that is left, so it works
-     the same on a red rover and on a white dome. -->
+<!-- One set of tint filters for every scene on the page.
+
+     Each one recolours the parts of a sprite that have little colour of their
+     own and mostly leaves the parts that do, so a dome's shell turns pink while
+     its amber window and wooden seat stay put. Flattening the whole sprite to a
+     single colour — which is what this did first — loses every one of those
+     details and makes a painted thing look like a sticker.
+
+     `keep` is how much of its own colour a pixel is allowed to hold on to,
+     taken from how far it already sits from grey. It is capped below 1 on
+     purpose: a sprite that is saturated all over, like the rover, would
+     otherwise refuse to change at all. -->
 <svg class="tint-defs" aria-hidden="true" focusable="false"><defs>
     <filter id="tint1" color-interpolation-filters="sRGB">
-      <feColorMatrix type="saturate" values="0"/>
-      <feComponentTransfer>
+      <feColorMatrix type="saturate" values="0" result="grey"/>
+      <feComponentTransfer in="grey" result="tint">
         <feFuncR type="linear" slope="0.872" intercept="0.07"/>
         <feFuncG type="linear" slope="0.332" intercept="0.07"/>
         <feFuncB type="linear" slope="0.230" intercept="0.07"/>
       </feComponentTransfer>
+      <feColorMatrix in="SourceGraphic" result="diff" type="matrix" values="
+         1 -1  0 0 0
+         0  1 -1 0 0
+        -1  0  1 0 0
+         0  0  0 0 1"/>
+      <feColorMatrix in="diff" result="spread" type="matrix" values="
+         1 1 1 0 0
+         1 1 1 0 0
+         1 1 1 0 0
+         0 0 0 1 0"/>
+      <feComponentTransfer in="spread" result="keep">
+        <feFuncR type="linear" slope="2.040" intercept="0"/>
+        <feFuncG type="linear" slope="2.040" intercept="0"/>
+        <feFuncB type="linear" slope="2.040" intercept="0"/>
+      </feComponentTransfer>
+      <feComposite in="SourceGraphic" in2="keep" operator="arithmetic"
+        k1="1" k2="0" k3="0" k4="0" result="own"/>
+      <feComposite in="tint" in2="keep" operator="arithmetic"
+        k1="-1" k2="1" k3="0" k4="0" result="body"/>
+      <feComposite in="own" in2="body" operator="arithmetic"
+        k1="0" k2="1" k3="1" k4="0"/>
     </filter>
     <filter id="tint2" color-interpolation-filters="sRGB">
-      <feColorMatrix type="saturate" values="0"/>
-      <feComponentTransfer>
+      <feColorMatrix type="saturate" values="0" result="grey"/>
+      <feComponentTransfer in="grey" result="tint">
         <feFuncR type="linear" slope="0.930" intercept="0.07"/>
         <feFuncG type="linear" slope="0.733" intercept="0.07"/>
         <feFuncB type="linear" slope="0.219" intercept="0.07"/>
       </feComponentTransfer>
+      <feColorMatrix in="SourceGraphic" result="diff" type="matrix" values="
+         1 -1  0 0 0
+         0  1 -1 0 0
+        -1  0  1 0 0
+         0  0  0 0 1"/>
+      <feColorMatrix in="diff" result="spread" type="matrix" values="
+         1 1 1 0 0
+         1 1 1 0 0
+         1 1 1 0 0
+         0 0 0 1 0"/>
+      <feComponentTransfer in="spread" result="keep">
+        <feFuncR type="linear" slope="2.040" intercept="0"/>
+        <feFuncG type="linear" slope="2.040" intercept="0"/>
+        <feFuncB type="linear" slope="2.040" intercept="0"/>
+      </feComponentTransfer>
+      <feComposite in="SourceGraphic" in2="keep" operator="arithmetic"
+        k1="1" k2="0" k3="0" k4="0" result="own"/>
+      <feComposite in="tint" in2="keep" operator="arithmetic"
+        k1="-1" k2="1" k3="0" k4="0" result="body"/>
+      <feComposite in="own" in2="body" operator="arithmetic"
+        k1="0" k2="1" k3="1" k4="0"/>
     </filter>
     <filter id="tint3" color-interpolation-filters="sRGB">
-      <feColorMatrix type="saturate" values="0"/>
-      <feComponentTransfer>
+      <feColorMatrix type="saturate" values="0" result="grey"/>
+      <feComponentTransfer in="grey" result="tint">
         <feFuncR type="linear" slope="0.875" intercept="0.07"/>
         <feFuncG type="linear" slope="0.390" intercept="0.07"/>
         <feFuncB type="linear" slope="0.613" intercept="0.07"/>
       </feComponentTransfer>
+      <feColorMatrix in="SourceGraphic" result="diff" type="matrix" values="
+         1 -1  0 0 0
+         0  1 -1 0 0
+        -1  0  1 0 0
+         0  0  0 0 1"/>
+      <feColorMatrix in="diff" result="spread" type="matrix" values="
+         1 1 1 0 0
+         1 1 1 0 0
+         1 1 1 0 0
+         0 0 0 1 0"/>
+      <feComponentTransfer in="spread" result="keep">
+        <feFuncR type="linear" slope="2.040" intercept="0"/>
+        <feFuncG type="linear" slope="2.040" intercept="0"/>
+        <feFuncB type="linear" slope="2.040" intercept="0"/>
+      </feComponentTransfer>
+      <feComposite in="SourceGraphic" in2="keep" operator="arithmetic"
+        k1="1" k2="0" k3="0" k4="0" result="own"/>
+      <feComposite in="tint" in2="keep" operator="arithmetic"
+        k1="-1" k2="1" k3="0" k4="0" result="body"/>
+      <feComposite in="own" in2="body" operator="arithmetic"
+        k1="0" k2="1" k3="1" k4="0"/>
     </filter>
     <filter id="tint4" color-interpolation-filters="sRGB">
-      <feColorMatrix type="saturate" values="0"/>
-      <feComponentTransfer>
+      <feColorMatrix type="saturate" values="0" result="grey"/>
+      <feComponentTransfer in="grey" result="tint">
         <feFuncR type="linear" slope="0.481" intercept="0.07"/>
         <feFuncG type="linear" slope="0.310" intercept="0.07"/>
         <feFuncB type="linear" slope="0.817" intercept="0.07"/>
       </feComponentTransfer>
+      <feColorMatrix in="SourceGraphic" result="diff" type="matrix" values="
+         1 -1  0 0 0
+         0  1 -1 0 0
+        -1  0  1 0 0
+         0  0  0 0 1"/>
+      <feColorMatrix in="diff" result="spread" type="matrix" values="
+         1 1 1 0 0
+         1 1 1 0 0
+         1 1 1 0 0
+         0 0 0 1 0"/>
+      <feComponentTransfer in="spread" result="keep">
+        <feFuncR type="linear" slope="2.040" intercept="0"/>
+        <feFuncG type="linear" slope="2.040" intercept="0"/>
+        <feFuncB type="linear" slope="2.040" intercept="0"/>
+      </feComponentTransfer>
+      <feComposite in="SourceGraphic" in2="keep" operator="arithmetic"
+        k1="1" k2="0" k3="0" k4="0" result="own"/>
+      <feComposite in="tint" in2="keep" operator="arithmetic"
+        k1="-1" k2="1" k3="0" k4="0" result="body"/>
+      <feComposite in="own" in2="body" operator="arithmetic"
+        k1="0" k2="1" k3="1" k4="0"/>
     </filter>
     <filter id="tint5" color-interpolation-filters="sRGB">
-      <feColorMatrix type="saturate" values="0"/>
-      <feComponentTransfer>
+      <feColorMatrix type="saturate" values="0" result="grey"/>
+      <feComponentTransfer in="grey" result="tint">
         <feFuncR type="linear" slope="0.226" intercept="0.07"/>
         <feFuncG type="linear" slope="0.522" intercept="0.07"/>
         <feFuncB type="linear" slope="0.788" intercept="0.07"/>
       </feComponentTransfer>
+      <feColorMatrix in="SourceGraphic" result="diff" type="matrix" values="
+         1 -1  0 0 0
+         0  1 -1 0 0
+        -1  0  1 0 0
+         0  0  0 0 1"/>
+      <feColorMatrix in="diff" result="spread" type="matrix" values="
+         1 1 1 0 0
+         1 1 1 0 0
+         1 1 1 0 0
+         0 0 0 1 0"/>
+      <feComponentTransfer in="spread" result="keep">
+        <feFuncR type="linear" slope="2.040" intercept="0"/>
+        <feFuncG type="linear" slope="2.040" intercept="0"/>
+        <feFuncB type="linear" slope="2.040" intercept="0"/>
+      </feComponentTransfer>
+      <feComposite in="SourceGraphic" in2="keep" operator="arithmetic"
+        k1="1" k2="0" k3="0" k4="0" result="own"/>
+      <feComposite in="tint" in2="keep" operator="arithmetic"
+        k1="-1" k2="1" k3="0" k4="0" result="body"/>
+      <feComposite in="own" in2="body" operator="arithmetic"
+        k1="0" k2="1" k3="1" k4="0"/>
     </filter>
     <filter id="tint6" color-interpolation-filters="sRGB">
-      <feColorMatrix type="saturate" values="0"/>
-      <feComponentTransfer>
+      <feColorMatrix type="saturate" values="0" result="grey"/>
+      <feComponentTransfer in="grey" result="tint">
         <feFuncR type="linear" slope="0.930" intercept="0.07"/>
         <feFuncG type="linear" slope="0.926" intercept="0.07"/>
         <feFuncB type="linear" slope="0.915" intercept="0.07"/>
       </feComponentTransfer>
+      <feColorMatrix in="SourceGraphic" result="diff" type="matrix" values="
+         1 -1  0 0 0
+         0  1 -1 0 0
+        -1  0  1 0 0
+         0  0  0 0 1"/>
+      <feColorMatrix in="diff" result="spread" type="matrix" values="
+         1 1 1 0 0
+         1 1 1 0 0
+         1 1 1 0 0
+         0 0 0 1 0"/>
+      <feComponentTransfer in="spread" result="keep">
+        <feFuncR type="linear" slope="2.040" intercept="0"/>
+        <feFuncG type="linear" slope="2.040" intercept="0"/>
+        <feFuncB type="linear" slope="2.040" intercept="0"/>
+      </feComponentTransfer>
+      <feComposite in="SourceGraphic" in2="keep" operator="arithmetic"
+        k1="1" k2="0" k3="0" k4="0" result="own"/>
+      <feComposite in="tint" in2="keep" operator="arithmetic"
+        k1="-1" k2="1" k3="0" k4="0" result="body"/>
+      <feComposite in="own" in2="body" operator="arithmetic"
+        k1="0" k2="1" k3="1" k4="0"/>
     </filter>
 </defs></svg>
 <div id="app">
@@ -648,7 +783,7 @@ body.bigopen{overflow:hidden}
       </p>
       <input id="loadFile" type="file" accept="application/json,.json" hidden>
       <p id="backupNote" class="backup-note" hidden></p>
-      <p class="version-line">v17 · softer keys, truer colours</p>
+      <p class="version-line">v18 · repaint the body, keep the trim</p>
     </section>
 
     <!-- ============ LEARN ============ -->

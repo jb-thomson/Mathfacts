@@ -256,16 +256,24 @@ under the scene:
   is hers to set. The steps multiply rather than add, so each tap changes a
   piece by the same proportion whatever size it started at, between 0.55× and
   1.9×.
-- **A colour dot**, on every painted piece. It drains the paint of its own
-  colour and re-tints the shading that is left, so it works the same on a red
-  rover and on a white dome. Rotating the hue instead — which is what this did
-  first — moves a rover and does nothing whatever to a dome, which is why domes
-  used to have no colour option at all.
+- **A colour dot**, on every painted piece. The first swatch is **as it came**,
+  drawn as a crossed-out circle: a piece keeps its own paint until she
+  deliberately changes it.
 
-  The first swatch is **as it came**, drawn as a crossed-out circle: a piece
-  keeps its own paint until she deliberately changes it. That slot used to show
-  red while the piece was in fact unfiltered, so the swatch named a colour the
-  piece did not have and tapping looked like it did nothing.
+  Recolouring **repaints the body and leaves the trimmings**. A dome's shell
+  turns pink while its amber window and wooden seat stay; the rover's body
+  shifts but keeps its yellow seats and dark tyres; the beach hut keeps its red
+  awning. How much of its own colour a pixel holds on to comes from how far it
+  already sits from grey — so the large plain areas take the new colour and the
+  small vivid details resist it. That cap sits just below 1 on purpose, or a
+  sprite that is saturated all over, like the rover, would refuse to change at
+  all.
+
+  Two earlier versions of this were wrong in opposite directions, and both are
+  worth remembering. Rotating the hue moves a red rover and does *nothing*
+  whatever to a white dome, which is why domes had no colour option at all.
+  Flattening the sprite to a single colour then fixed the dome and destroyed
+  every piece it touched — a painted thing became a sticker.
 - **✓** puts it down. So does tapping anywhere else.
 
 Dragging still moves a piece, and it stays held afterwards so it can be resized
