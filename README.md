@@ -91,42 +91,44 @@ nothing is recorded — it is a place to look, not a test.
 
 Three topics: **Numbers**, **Money** and **Clock**.
 
-### Numbers, in two versions
+### Numbers
 
-Numbers exists twice, behind a **Drag the line / Sliders** toggle, because the
-two are being compared with a real child before one is thrown away.
+Two ideas shape it, and an earlier sliders version was tried against it with a
+real child and then removed:
 
-**Drag the line** is the newer one, and the default. Two ideas shape it:
-
-- **Direct manipulation.** In the sliders version the child moves a control and
-  the picture reacts somewhere else. That is one step of indirection too many
-  for someone with no number sense yet. Here she drags the dot along the line
-  itself, and the hop stretches under her finger.
+- **Direct manipulation.** The sliders version had the child move a control
+  while the picture reacted somewhere else. That is one step of indirection too
+  many for someone with no number sense yet. Here she drags the dot along the
+  line itself and the hop stretches under her finger.
 - **No operation tabs.** A child who doesn't know what division means cannot
   pick it from a menu. So the *direction of the drag* names the operation
   instead — drag right and it says you added, drag left and it says you took
   away. Addition and subtraction stop being two topics and become two
   directions.
 
-Underneath, **Make rows** handles × and ÷ with an array rather than hops on a
-line. Drag across the dots and a rectangle of them fills in, captioned both
+Underneath, the second panel handles × and ÷ with an array rather than hops on
+a line. Drag across the dots and a rectangle of them fills in, captioned both
 ways at once: *5 rows of 6 is 30*, and *30 dots put into 5 rows is 6 in each
 row*. That pair is exactly what a child has to learn is the same fact, and
 equal hops on a number line are the abstraction that should come after
 grouping, not before it.
 
-**Sliders** is the original, unchanged: four operation tabs, two sliders, and
-the same sum shown as a number line, as counters, and as a sentence, with ×
-and ÷ drawn as equal hops.
-
 ### Money
 
 A jar you tap coins into — 1¢, 5¢, 10¢, 25¢ — with a running total above it.
-The lesson is that a hundred small things become one big thing, so at 99¢ it
-says what is about to happen, and on the hundredth cent the coins visibly
-*leave the jar* and come back as a single dollar. Overshooting keeps the
-change, in the fewest coins. Coins are laid out in rows rather than scattered,
-because coins that move between taps can't be counted.
+The lesson is that a hundred small things become one big thing, and the timing
+is what carries it:
+
+1. The hundredth cent lands and **the full jar is held on screen for a beat**,
+   counted back as what made it up — *4 × 25¢ — that is 100 cents.* Swapping
+   instantly hides the very thing being taught, which is that those four coins
+   **are** the dollar.
+2. Then those coins sweep across the picture and shrink into the dollar note.
+3. Overshooting keeps the change, in the fewest coins.
+
+Taps are ignored while that is running, so it can't be interrupted halfway.
+Coins are laid out in rows rather than scattered, because coins that move
+between taps can't be counted.
 
 ### Clock
 
@@ -269,6 +271,48 @@ Positions, colours and which thing each piece is are all saved. The starting
 scatter for a save that predates placement comes from a seed derived from the
 world and section, so an existing world is laid out exactly as it used to look
 rather than rearranged.
+
+## Rewinding a scene
+
+The fullness bar under each scene is also a scrubber. **Drag it backwards and
+the scene rewinds through its own growth** — pieces disappear in the order they
+were earned, the landmark and the golden light come off, and a tag shows the
+points it is currently at. Let go and it snaps back to now. Arrow keys work
+too, and `End` returns to the present.
+
+It is **capped at the points actually earned**, so it can only ever look
+backwards; there is no way to peek at what is coming. Nothing is stored for
+this — a piece belongs to a slot, and a slot has a points threshold, so the
+whole history is already implied by what is on screen.
+
+## The parent report
+
+**Parent report**, at the bottom of the home screen, answers the question a
+parent actually has — not "how many points" but "is she getting better, and at
+what". Everything in it is derived from the daily log and the per-fact history
+that already exist. Nothing extra is stored and nothing leaves the device.
+**Print or save as PDF** uses the browser's own print dialog.
+
+- **Headline tiles** — facts mastered out of the total, share answered
+  correctly, average seconds per correct answer, current streak.
+- **Is she improving?** — the first half of the last 30 days against the second
+  half, for both accuracy and speed. A comparison rather than a vibe.
+- **Facts mastered over time** — one line per section, from the daily
+  snapshots.
+- **Each day** — bars for the share right that day, and a line for seconds per
+  correct answer. Seconds go *up* the axis, so the line falling is the line
+  getting faster.
+- **Where she is stuck** — the facts currently marked tricky, worst first.
+- **What would help** — suggestions generated from the numbers above.
+
+The suggestion that names which numbers she is stuck on deserves a note. The
+obvious way to compute it — count how often each number appears among the
+tricky facts — is wrong: if 7 is genuinely hard then `7+0`, `7+1` and `7+2` are
+all tricky, and 0, 1 and 2 come out looking exactly as bad as 7 does. What
+matters is the *share* of a number's own facts that are tricky, so a number
+only gets named when it is hard wherever it appears. And "the 7 times table"
+is meaningful for × and ÷ but nonsense for + and −, so those say "facts with 7
+in them" instead.
 
 ## Two meters, doing different jobs
 

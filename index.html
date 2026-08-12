@@ -6,7 +6,7 @@
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="theme-color" content="#FAF3E4">
 <title>Numo — Math Fact Practice</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20x='0'%20y='0'%20width='100'%20height='100'%20rx='23'%20fill='%23F9EFD5'/%3E%3Cpath%20d='M22%2050%20A27.5%2027.5%200%200%201%2077%2050%20L54%2050%20A4.5%204.5%200%200%200%2045%2050%20Z'%20fill='%23056673'/%3E%3Crect%20x='22'%20y='24'%20width='23'%20height='58'%20rx='5'%20fill='%23056673'/%3E%3Crect%20x='54'%20y='44'%20width='23'%20height='38'%20rx='5'%20fill='%23056673'/%3E%3Crect%20x='35'%20y='54'%20width='29'%20height='10'%20rx='5'%20fill='%23F9EFD5'/%3E%3Cg%20transform='rotate%2818%2068%2033%29'%3E%3Cpath%20d='M68%2035%20V15'%20stroke='%234C8B4C'%20stroke-width='5.4'%20stroke-linecap='round'/%3E%3Cg%20transform='translate%2868%2C19%29'%3E%3Cpath%20d='M0%202.4%20q-12%20-1%20-14.4%20-10.4%20q11.2%20-1%2014.4%207.2%20Z'%20fill='%236FBE6F'%20stroke='%234C8B4C'%20stroke-width='2.6'%20stroke-linejoin='round'/%3E%3Cpath%20d='M0%200%20q12%20-2%2014.4%20-12%20q-11.2%20-1%20-14.4%208.8%20Z'%20fill='%236FBE6F'%20stroke='%234C8B4C'%20stroke-width='2.6'%20stroke-linejoin='round'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Crect%20x='0'%20y='0'%20width='100'%20height='100'%20rx='23'%20fill='%23FFFFFF'/%3E%3Cpath%20d='M22%2050%20A27.5%2027.5%200%200%201%2077%2050%20L54%2050%20A4.5%204.5%200%200%200%2045%2050%20Z'%20fill='%23056673'/%3E%3Crect%20x='22'%20y='24'%20width='23'%20height='58'%20rx='5'%20fill='%23056673'/%3E%3Crect%20x='54'%20y='44'%20width='23'%20height='38'%20rx='5'%20fill='%23056673'/%3E%3Crect%20x='35'%20y='54'%20width='29'%20height='10'%20rx='5'%20fill='%23FFFFFF'/%3E%3Cg%20transform='rotate%2818%2068%2033%29'%3E%3Cpath%20d='M68%2035%20V15'%20stroke='%234C8B4C'%20stroke-width='5.4'%20stroke-linecap='round'/%3E%3Cg%20transform='translate%2868%2C19%29'%3E%3Cpath%20d='M0%202.4%20q-12%20-1%20-14.4%20-10.4%20q11.2%20-1%2014.4%207.2%20Z'%20fill='%236FBE6F'%20stroke='%234C8B4C'%20stroke-width='2.6'%20stroke-linejoin='round'/%3E%3Cpath%20d='M0%200%20q12%20-2%2014.4%20-12%20q-11.2%20-1%20-14.4%208.8%20Z'%20fill='%236FBE6F'%20stroke='%234C8B4C'%20stroke-width='2.6'%20stroke-linejoin='round'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E">
 <style>
 @font-face{
   font-family:'Fredoka';font-style:normal;font-weight:300 700;font-display:swap;
@@ -185,6 +185,13 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
   background:rgba(255,254,251,.7);
 }
 .scene-bar i{display:block;height:100%;border-radius:99px;transition:width .4s ease}
+.scene-bar{cursor:ew-resize;touch-action:none}
+.scene-bar.scrubbing{height:13px;bottom:7px}
+.scene-bar.scrubbing i{transition:none}
+.scrub-tag{position:absolute;left:50%;transform:translateX(-50%);bottom:30px;
+  font:600 13px/1.7 'Fredoka',system-ui;color:var(--ink);
+  background:rgba(255,254,251,.94);border:2px solid var(--ink);border-radius:999px;
+  padding:1px 12px;pointer-events:none;z-index:3;white-space:nowrap}
 .garden[data-op="add"] .scene-bar i{background:var(--teal)}
 .garden[data-op="sub"] .scene-bar i{background:var(--coral)}
 .garden[data-op="mul"] .scene-bar i{background:var(--grape)}
@@ -199,22 +206,39 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 .learn-sum{font-family:'Fredoka';font-weight:700;font-size:30px;text-align:center;margin:2px 0 10px}
 .learn-art{display:block;width:100%;height:auto;background:var(--paper);
   border:2px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink-soft)}
-.learn-ctl{display:flex;align-items:center;gap:10px;margin-top:12px}
-.learn-ctl label{font-family:'Fredoka';font-weight:600;font-size:14.5px;min-width:104px}
-.slider{flex:1;-webkit-appearance:none;appearance:none;height:12px;border-radius:99px;
-  background:var(--line);border:2px solid var(--ink)}
-.slider::-webkit-slider-thumb{-webkit-appearance:none;width:30px;height:30px;border-radius:50%;
-  background:var(--teal);border:2.5px solid var(--ink);box-shadow:0 2px 0 var(--teal-deep)}
-.slider::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--teal);
-  border:2.5px solid var(--ink)}
 .learn-say{margin-top:14px;font-size:15px;font-weight:700;color:var(--muted);text-align:center;min-height:42px}
 .backup-note{margin:8px 0 0;text-align:center;font-size:12.5px;font-weight:800;color:var(--good-deep)}
 .backup-note.bad{color:var(--coral-deep)}
+/* ---- parent report ---- */
+.rep-head{margin:0 0 4px}
+.rep-sub{margin:0 0 14px;font-size:13px;font-weight:700;color:var(--muted)}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:9px;margin-bottom:6px}
+.tile{background:var(--paper);border:2px solid var(--ink);border-radius:13px;padding:10px 12px;
+  box-shadow:0 3px 0 var(--ink-soft)}
+.tile b{display:block;font-family:'Fredoka';font-weight:700;font-size:23px;line-height:1.15}
+.tile span{font-size:11.5px;font-weight:800;color:var(--muted)}
+.rep-chart{display:block;width:100%;height:auto;margin-top:6px}
+.rep-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;font-size:11.5px;font-weight:800;color:var(--muted)}
+.rep-legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:4px;vertical-align:-1px}
+.rep-row{display:flex;align-items:baseline;justify-content:space-between;gap:10px;
+  padding:7px 0;border-bottom:1px solid var(--line);font-size:13.5px;font-weight:700}
+.rep-row:last-child{border-bottom:0}
+.rep-row .val{font-family:'Fredoka';font-weight:600;color:var(--muted);white-space:nowrap}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.chips .chip{font-family:'Fredoka';font-weight:600;font-size:13px;padding:4px 9px;border-radius:9px;
+  background:var(--coral-tint);border:1.5px solid var(--coral-deep);color:var(--coral-deep)}
+.advice{margin:0;padding-left:19px}
+.advice li{font-size:13.5px;font-weight:700;margin:7px 0;line-height:1.45}
+.rep-empty{font-size:14px;font-weight:700;color:var(--muted);text-align:center;padding:18px 4px}
+@media print{
+  body{background:#fff}
+  .noprint,.hero{display:none !important}
+  .card{break-inside:avoid;box-shadow:none}
+  .tile{box-shadow:none}
+}
 .card-title.mt{margin-top:26px}
 /* the two ways into Numbers, and the three topics */
 .tabs.topic button{flex:1;font-size:14px}
-.tabs.mode{margin-bottom:10px}
-.tabs.mode button{flex:1;font-size:13px}
 /* the draggable handles on the number line and the clock */
 .learn-art .grab{cursor:grab;touch-action:none}
 .learn-art{touch-action:none}
@@ -227,7 +251,18 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 .coin-row .ghost.sm{flex:1;font-size:13px;padding:8px 0;background:var(--paper);box-shadow:none}
 .money-pop{animation:moneyPop .55s ease}
 @keyframes moneyPop{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:none}}
-@media (prefers-reduced-motion:reduce){.money-pop{animation:none}}
+/* the hundred cents sit there a beat, then sweep across into the dollar */
+.coins-full{animation:coinsFull .9s ease}
+@keyframes coinsFull{0%,100%{transform:none}45%{transform:translateY(-3px) scale(1.05)}}
+.coins-going{animation:coinsGo .7s ease forwards;transform-origin:200px 90px}
+@keyframes coinsGo{
+  0%{transform:none;opacity:1}
+  100%{transform:translate(-120px,42px) scale(.28);opacity:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .money-pop,.coins-full,.coins-going{animation:none}
+  .coins-going{opacity:0}
+}
 .big[hidden]{display:none}
 .big{position:fixed;inset:0;z-index:40;background:var(--ink);display:flex;flex-direction:column;
   padding:calc(8px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom))}
@@ -428,8 +463,8 @@ body.bigopen{overflow:hidden}
 <div id="app">
   <header class="hero">
     <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
-      <rect x="0" y="0" width="100" height="100" rx="23" fill="#F9EFD5"/>
-      <path d="M22 50 A27.5 27.5 0 0 1 77 50 L54 50 A4.5 4.5 0 0 0 45 50 Z" fill="#056673"/><rect x="22" y="24" width="23" height="58" rx="5" fill="#056673"/><rect x="54" y="44" width="23" height="38" rx="5" fill="#056673"/><rect x="35" y="54" width="29" height="10" rx="5" fill="#F9EFD5"/><g transform="rotate(18 68 33)"><path d="M68 35 V15" stroke="#4C8B4C" stroke-width="5.4" stroke-linecap="round"/><g transform="translate(68,19)"><path d="M0 2.4 q-12 -1 -14.4 -10.4 q11.2 -1 14.4 7.2 Z" fill="#6FBE6F" stroke="#4C8B4C" stroke-width="2.6" stroke-linejoin="round"/><path d="M0 0 q12 -2 14.4 -12 q-11.2 -1 -14.4 8.8 Z" fill="#6FBE6F" stroke="#4C8B4C" stroke-width="2.6" stroke-linejoin="round"/></g></g>
+      <rect x="0" y="0" width="100" height="100" rx="23" fill="#FFFFFF"/>
+      <path d="M22 50 A27.5 27.5 0 0 1 77 50 L54 50 A4.5 4.5 0 0 0 45 50 Z" fill="#056673"/><rect x="22" y="24" width="23" height="58" rx="5" fill="#056673"/><rect x="54" y="44" width="23" height="38" rx="5" fill="#056673"/><rect x="35" y="54" width="29" height="10" rx="5" fill="#FFFFFF"/><g transform="rotate(18 68 33)"><path d="M68 35 V15" stroke="#4C8B4C" stroke-width="5.4" stroke-linecap="round"/><g transform="translate(68,19)"><path d="M0 2.4 q-12 -1 -14.4 -10.4 q11.2 -1 14.4 7.2 Z" fill="#6FBE6F" stroke="#4C8B4C" stroke-width="2.6" stroke-linejoin="round"/><path d="M0 0 q12 -2 14.4 -12 q-11.2 -1 -14.4 8.8 Z" fill="#6FBE6F" stroke="#4C8B4C" stroke-width="2.6" stroke-linejoin="round"/></g></g>
     </svg>
     <div>
       <h1>Numo</h1>
@@ -512,6 +547,7 @@ body.bigopen{overflow:hidden}
       </section>
 
       <p class="footer-row">
+        <button id="reportBtn" class="linkish">Parent report</button>
         <button id="renameBtn" class="linkish">Change name</button>
         <button id="saveBtn" class="linkish">Save a copy</button>
         <button id="loadBtn" class="linkish">Load a copy</button>
@@ -519,7 +555,7 @@ body.bigopen{overflow:hidden}
       </p>
       <input id="loadFile" type="file" accept="application/json,.json" hidden>
       <p id="backupNote" class="backup-note" hidden></p>
-      <p class="version-line">v13 · learn it your way</p>
+      <p class="version-line">v14 · rewind, and a report for grown-ups</p>
     </section>
 
     <!-- ============ LEARN ============ -->
@@ -532,41 +568,15 @@ body.bigopen{overflow:hidden}
 
       <!-- ---- numbers, in two versions while we work out which is clearer ---- -->
       <div class="card" id="learnNumbers">
-        <div class="tabs mode" id="learnMode" role="tablist" aria-label="How to explore">
-          <button data-mode="drag" role="tab" aria-selected="true">Drag the line</button>
-          <button data-mode="slide" role="tab" aria-selected="false">Sliders</button>
-        </div>
-
-        <div id="learnDrag">
-          <h2 class="card-title">Move along the line <span class="note">drag either dot</span></h2>
-          <p id="dragSum" class="learn-sum"></p>
-          <div id="dragArt"></div>
-          <p id="dragSay" class="learn-say"></p>
-          <h2 class="card-title mt">Make rows <span class="note">drag across the dots</span></h2>
-          <div id="gridArt"></div>
-          <p id="gridSay" class="learn-say"></p>
-        </div>
-
-        <div id="learnSlide" hidden>
-          <h2 class="card-title">What does it mean? <span class="note">move the sliders</span></h2>
-          <div class="tabs" id="learnTabs" role="tablist" aria-label="Operation">
-            <button data-op="add" role="tab" aria-selected="true" aria-label="Addition">+</button>
-            <button data-op="sub" role="tab" aria-selected="false" aria-label="Subtraction">−</button>
-            <button data-op="mul" role="tab" aria-selected="false" aria-label="Multiplication">×</button>
-            <button data-op="div" role="tab" aria-selected="false" aria-label="Division">÷</button>
-          </div>
-          <p id="learnSum" class="learn-sum"></p>
-          <div id="learnArt"></div>
-          <div class="learn-ctl">
-            <label id="learnLabA" for="learnA"></label>
-            <input id="learnA" class="slider" type="range" min="0" max="12" value="3">
-          </div>
-          <div class="learn-ctl">
-            <label id="learnLabB" for="learnB"></label>
-            <input id="learnB" class="slider" type="range" min="0" max="12" value="4">
-          </div>
-          <p id="learnSay" class="learn-say"></p>
-        </div>
+        <h2 class="card-title">Watch adding and subtracting come to life
+          <span class="note">drag either dot</span></h2>
+        <p id="dragSum" class="learn-sum"></p>
+        <div id="dragArt"></div>
+        <p id="dragSay" class="learn-say"></p>
+        <h2 class="card-title mt">Watch multiplying and dividing come to life
+          <span class="note">drag across the dots</span></h2>
+        <div id="gridArt"></div>
+        <p id="gridSay" class="learn-say"></p>
       </div>
 
       <!-- ---- money: 100 pennies becoming one dollar ---- -->
@@ -596,6 +606,15 @@ body.bigopen{overflow:hidden}
       </div>
 
       <button id="learnHome" class="ghost">Back home</button>
+    </section>
+
+    <!-- ============ PARENT REPORT ============ -->
+    <section id="screen-report" hidden>
+      <div id="reportBody"></div>
+      <p class="footer-row noprint">
+        <button id="reportPrint" class="linkish">Print or save as PDF</button>
+      </p>
+      <button id="reportHome" class="ghost noprint">Back home</button>
     </section>
 
     <!-- ============ QUIZ ============ -->
@@ -1359,6 +1378,13 @@ var GROWERS = {forest:gConifer, meadow:gFlower, beach:gPalm, fjord:gCabin};
 
 /* Which piece is currently being adjusted — {op, i}, or null. */
 var sel = null;
+/* A scene's fullness bar doubles as a scrubber: drag it back and the scene
+   rewinds through its own growth. It is capped at the points actually earned,
+   so it can only ever look backwards — nothing ahead is ever revealed. */
+var scrub = null;                       // {op, pts} while dragging, else null
+function shownPts(op){
+  return (scrub && scrub.op===op) ? scrub.pts : (state.pts[op]||0);
+}
 
 function drawGrower(kind, f, pts, op, interactive){
   var age=pts-f.t, stage = age>=BLOOM_AT?2 : age>=BUD_AT?1 : 0;
@@ -1486,7 +1512,11 @@ function sceneSVG(op, pts, interactive, done, asWorld){
   /* the painting; a completed section warms it to golden hour via CSS */
   s+='<image class="bg'+(done?" gold":"")+'" href="'+BG[kind]+'" x="0" y="0" width="300" height="150" preserveAspectRatio="xMidYMid slice"/>';
   s += bigPieces(kind,pts,sc.ground);
-  var list=(asWorld ? scenePlan(op,world).slice(0,slotCount(pts)) : placedList(op).slice())
+  /* A piece only exists once its slot's points have been earned. At full
+     points this changes nothing — she can't place what she hasn't earned — but
+     it is what lets the bar be dragged back through the scene's own history. */
+  var list=(asWorld ? scenePlan(op,world).slice(0,slotCount(pts))
+                    : placedList(op).filter(function(f){ return slotThreshold(f.i)<=pts; }))
     .sort(function(p,q){ return p.y-q.y; });          // back to front
   for(var i=0;i<list.length;i++){
     var f=list[i];
@@ -1607,13 +1637,19 @@ function clearSel(){
 }
 function sceneBlock(op, pts, label, interactive, withBar, withNote){
   var done=sectionComplete(op), m=masteryOf(op);
-  var everDone=!!state.finishedOn[op], slipped=everDone && !done;
+  var scrubbing=!!(scrub && scrub.op===op);
+  /* The landmark and the golden light were earned by mastery, not by points,
+     but showing a finished stag over an empty forest while the bar is dragged
+     back to nothing makes no sense. They come back on release. */
+  var everDone=!!state.finishedOn[op] && !scrubbing, slipped=everDone && !done;
   var short=m.total-m.done;
   var pct=Math.min(100, pts/GOAL*100), mpct=m.total? (m.done/m.total*100) : 0;
   var mtxt = done ? "All "+m.total+" facts mastered ✓"
     : slipped ? short+" fact"+(short===1?"":"s")+" slipped"
     : m.done+" of "+m.total+" facts mastered";
-  var note = slipped
+  var note = scrubbing
+    ? "Back at "+pts+" points. Let go to return to now."
+    : slipped
     ? "Badge at risk — practise "+short+" fact"+(short===1?"":"s")+" to win your gold back."
     : done ? "Finished — every fact mastered! ✨" : sceneNote(op,pts);
   /* the scene keeps its golden light and landmark once earned */
@@ -1626,11 +1662,14 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote){
       (interactive?'<button class="scene-expand" data-op="'+op+'" aria-label="Show '+
         OP_NAME[op]+' bigger">⤢</button>':'')+
       (interactive?pieceBar(op):'')+
-      (withBar?'<div class="scene-bar" role="img" aria-label="Scene '+Math.round(pct)+
-        '% filled in"><i style="width:'+n1(pct)+'%"></i></div>':'')+'</div>'+
+      (withBar?'<div class="scene-bar'+(scrubbing?' scrubbing':'')+'" data-op="'+op+
+        '" role="slider" tabindex="0" aria-label="How full the '+OP_NAME[op]+
+        ' scene is — drag back to watch it grow" aria-valuemin="0" aria-valuemax="'+
+        (state.pts[op]||0)+'" aria-valuenow="'+pts+'"><i style="width:'+n1(pct)+'%"></i></div>':'')+
+      (scrubbing?'<div class="scrub-tag">'+pts+' pts</div>':'')+'</div>'+
     (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
       '<span class="mastery-txt">'+mtxt+'</span></div>':'')+
-    (withBar && waitingCount(op)>0
+    (withBar && !scrubbing && waitingCount(op)>0
       ? '<div class="tray"><span class="tray-txt">'+waitingCount(op)+
         (waitingCount(op)===1?' new thing':' new things')+
         ' to place — tap the picture</span>'+
@@ -1763,16 +1802,17 @@ function streak(){
 /* ---------------- rendering ---------------- */
 var el = {};
 ["screen-home","screen-quiz","screen-summary","screen-setup","screen-learn","startBtn","learnBtn","modeRow","pickNote","gardens","totalLine",
- "learnTabs","learnArt","learnSum","learnSay","learnA","learnB","learnLabA","learnLabB","learnHome",
+ "learnHome",
  "factGrid","cellInfo","gridTabs","dayStrip","streakLine","resetBtn","renameBtn","quitBtn","quitNote","qbar","qcount",
  "opChip","factLine","answerSlot","feedback","sessionPoints","soundBtn","sumTitle","sumPoints","sumStopped","sumDone",
  "sumGardens","sumGardensTitle","sumGardenArt","sumMastered","sumMasteredChips","sumWork","sumWorkChips","sumNote",
  "againBtn","homeBtn","welcome","heroTag","worldTitle","stepName","stepWorld","nameInput","nameNext","worldPick",
  "bigScene","bigBody","bigTitle","bigClose","bigHint",
  "saveBtn","loadBtn","loadFile","backupNote",
- "learnTopics","learnMode","learnNumbers","learnDrag","learnSlide","dragSum","dragArt","dragSay",
+ "learnTopics","learnNumbers","dragSum","dragArt","dragSay",
  "gridArt","gridSay","learnMoney","moneySum","moneyArt","moneySay","coinRow","moneyBack","moneyClear",
- "learnClock","clockSum","clockArt","clockSay"
+ "learnClock","clockSum","clockArt","clockSay",
+ "screen-report","reportBtn","reportBody","reportPrint","reportHome"
 ].forEach(function(id){
   el[id.replace("screen-","")] = document.getElementById(id);
 });
@@ -1838,8 +1878,8 @@ function renderScenes(){
   reconcileFinished();
   var html="", total=0, finished=0;
   for(var i=0;i<OPS.length;i++){
-    var op=OPS[i], p=state.pts[op]||0;
-    total+=p;
+    var op=OPS[i], real=state.pts[op]||0, p=shownPts(op);
+    total+=real;
     if(sectionComplete(op)) finished++;
     html+=sceneBlock(op,p,p+" pts",true,true,true);
   }
@@ -2045,7 +2085,7 @@ var bigOp = null;
 function refreshScenes(){ if(bigOp) renderBig(); else renderScenes(); }
 function renderBig(){
   if(!bigOp) return;
-  var op=bigOp, p=state.pts[op]||0;
+  var op=bigOp, p=shownPts(op);
   el.bigTitle.textContent = OP_NAME[op]+" · "+WORLDS[worldOf()].name;
   el.bigBody.innerHTML = sceneBlock(op, p, p+" pts", true, true, true);
 }
@@ -2081,6 +2121,16 @@ function clampTo(op, x, y){
   return { x:Math.max(10,Math.min(290,x)), y:Math.max(g-4,Math.min(134,y)) };
 }
 document.addEventListener("pointerdown", function(e){
+  var bar = e.target.closest ? e.target.closest(".scene-bar") : null;
+  if(bar){
+    var bop = bar.getAttribute("data-op");
+    if(!(state.pts[bop]>0)) return;      // nothing to rewind through yet
+    sel = null;
+    scrubFrom(bar, bop, e);
+    try{ bar.setPointerCapture(e.pointerId); }catch(err){}
+    e.preventDefault();
+    return;
+  }
   var svg = e.target.closest ? e.target.closest("svg.garden-art") : null;
   if(!svg) return;
   var card = svg.closest(".garden"); if(!card) return;
@@ -2103,7 +2153,28 @@ document.addEventListener("pointerdown", function(e){
   }
   clearSel();          // tapping bare ground puts the current piece down
 });
+function scrubFrom(bar, op, e){
+  var r = bar.getBoundingClientRect();
+  var frac = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+  var cap = state.pts[op] || 0;
+  /* the bar's full width is GOAL points, but it stops at what she has earned */
+  var want = Math.min(cap, Math.round(frac * GOAL));
+  if(!scrub || scrub.op!==op || scrub.pts!==want){
+    scrub = {op:op, pts:want};
+    refreshScenes();
+  }
+}
+function endScrub(){
+  if(!scrub) return;
+  scrub = null;
+  refreshScenes();
+}
 document.addEventListener("pointermove", function(e){
+  if(scrub){
+    var bar=(bigOp?el.bigBody:el.gardens).querySelector('.scene-bar[data-op="'+scrub.op+'"]');
+    if(bar) scrubFrom(bar, scrub.op, e);
+    return;
+  }
   if(!drag) return;
   var p = svgPoint(drag.el.ownerSVGElement || drag.el.closest("svg"), e);
   var dx = p.x-drag.sx, dy = p.y-drag.sy;
@@ -2111,6 +2182,7 @@ document.addEventListener("pointermove", function(e){
   drag.el.setAttribute("transform", "translate("+n1(dx)+","+n1(dy)+")");
 });
 document.addEventListener("pointerup", function(e){
+  if(scrub){ endScrub(); return; }
   if(!drag) return;
   var d = drag; drag = null;
   var svg = d.el.ownerSVGElement || d.el.closest("svg");
@@ -2163,6 +2235,24 @@ document.addEventListener("click", function(e){
   if(!(e.target.closest && e.target.closest("svg.garden-art"))) clearSel();
 });
 document.addEventListener("keydown", function(e){
+  /* the fullness bar is a slider, so the arrow keys have to move it */
+  var sb = e.target.closest ? e.target.closest(".scene-bar") : null;
+  if(sb && (e.key==="ArrowLeft" || e.key==="ArrowRight" || e.key==="Home" || e.key==="End")){
+    e.preventDefault();
+    var sop=sb.getAttribute("data-op"), cap=state.pts[sop]||0;
+    if(!cap) return;
+    var at = (scrub && scrub.op===sop) ? scrub.pts : cap;
+    var step = Math.max(1, Math.round(GOAL/40));
+    if(e.key==="Home") at = 0;
+    else if(e.key==="End") at = cap;
+    else at += (e.key==="ArrowRight" ? step : -step);
+    at = Math.max(0, Math.min(cap, at));
+    scrub = (at>=cap) ? null : {op:sop, pts:at};
+    refreshScenes();
+    var again=(bigOp?el.bigBody:el.gardens).querySelector('.scene-bar[data-op="'+sop+'"]');
+    if(again) again.focus();
+    return;
+  }
   /* the held piece can be sized from the keyboard too */
   if(sel && (e.key==="+" || e.key==="=" || e.key==="-" || e.key==="_")){
     e.preventDefault();
@@ -2219,6 +2309,307 @@ el.resetBtn.addEventListener("click", function(){
     },3000);
   }
 });
+
+/* ---------------- parent report ----------------
+   Everything here is derived from the daily log and the per-fact history that
+   already exist — nothing extra is stored, and nothing leaves the device. It
+   answers the question a parent actually has, which is not "how many points"
+   but "is she getting better, and at what". */
+var REP_WINDOW = 30;
+
+function repDays(n){
+  /* the last n calendar days, whether or not she practised on them, so a gap
+     reads as a gap rather than being quietly closed up */
+  var out=[], d=new Date();
+  for(var i=n-1;i>=0;i--){
+    var k=new Date(d); k.setDate(k.getDate()-i);
+    var key=dayKey(k);
+    out.push({ key:key, e:state.log[key]||null });
+  }
+  return out;
+}
+function repTotals(){
+  var q=0, c=0, t=0, days=0, keys=logDays();
+  for(var i=0;i<keys.length;i++){
+    var e=state.log[keys[i]];
+    if(!e) continue;
+    q+=e.q||0; c+=e.c||0; t+=e.t||0;
+    if(e.q) days++;
+  }
+  return {q:q, c:c, t:t, days:days,
+          acc: q? c/q*100 : 0,
+          ms: c? t/c : 0};
+}
+/* Early days against recent days, so "improving" is a comparison and not a vibe */
+function repTrend(){
+  var d=repDays(REP_WINDOW).filter(function(x){ return x.e && x.e.q; });
+  if(d.length<4) return null;
+  var half=Math.floor(d.length/2);
+  function roll(arr){
+    var q=0,c=0,t=0;
+    for(var i=0;i<arr.length;i++){ q+=arr[i].e.q; c+=arr[i].e.c; t+=arr[i].e.t; }
+    return { acc:q?c/q*100:0, ms:c?t/c:0, q:q };
+  }
+  var a=roll(d.slice(0,half)), b=roll(d.slice(half));
+  return { early:a, late:b, dAcc:b.acc-a.acc, dMs:b.ms-a.ms, sessions:d.length };
+}
+function repFacts(op){
+  var tricky=[], learning=[], b0=minB(op);
+  for(var a=0;a<=MAX;a++) for(var b=b0;b<=MAX;b++){
+    var st=factStatus(op,a,b);
+    if(st==="tricky") tricky.push({a:a,b:b,r:rec(op,a,b)});
+    else if(st==="learning") learning.push({a:a,b:b});
+  }
+  /* worst first: most misses in the last five tries */
+  tricky.sort(function(x,y){
+    function miss(f){ var m=0,i; if(!f.r) return 0; for(i=0;i<f.r.r.length;i++) if(!f.r.r[i]) m++; return m; }
+    return miss(y)-miss(x);
+  });
+  return {tricky:tricky, learning:learning};
+}
+/* Which numbers a child's misses cluster around — more useful than a list of
+   facts. Counting raw appearances doesn't work: if 7 is genuinely hard then
+   7+0, 7+1, 7+2 are all tricky, and 0, 1 and 2 come out looking just as bad as
+   7 does. What matters is the *share* of a number's own facts that are tricky,
+   so a number only shows up when it is hard wherever it appears. */
+function repHotNumbers(op){
+  var seen={}, bad={}, b0=minB(op), lim=state.unlocked[op], a, b, n;
+  function bump(o,k){ o[k]=(o[k]||0)+1; }
+  for(a=0;a<=MAX;a++) for(b=b0;b<=MAX;b++){
+    if(band(a,b)>lim) continue;
+    var st=factStatus(op,a,b);
+    if(st==="locked" || st==="na" || st==="new") continue;
+    bump(seen,a); if(b!==a) bump(seen,b);
+    if(st==="tricky"){ bump(bad,a); if(b!==a) bump(bad,b); }
+  }
+  var arr=[];
+  for(n=0;n<=MAX;n++){
+    if(!seen[n] || seen[n]<4) continue;             // too few tries to say anything
+    var rate=(bad[n]||0)/seen[n];
+    if((bad[n]||0)>=3 && rate>=0.4) arr.push({n:n, c:bad[n], rate:rate});
+  }
+  arr.sort(function(x,y){ return y.rate-x.rate || y.c-x.c; });
+  return arr.slice(0,3);
+}
+function factLabel(op,a,b){
+  if(op==="add") return a+" + "+b;
+  if(op==="sub") return (a+b)+" − "+b;
+  if(op==="mul") return a+" × "+b;
+  return (a*b)+" ÷ "+b;
+}
+
+/* ---- the two charts ---- */
+function repMasteryChart(){
+  var d=repDays(REP_WINDOW), W=300, H=110, x0=8, x1=W-8, y0=10, y1=H-18;
+  var cols={add:"#0FA3A8", sub:"#EF5B3F", mul:"#8455E0", div:"#2E7DD1"};
+  var top=0, i, o;
+  for(i=0;i<d.length;i++) if(d[i].e && d[i].e.m)
+    for(o=0;o<OPS.length;o++) top=Math.max(top, d[i].e.m[OPS[o]]||0);
+  top=Math.max(10, Math.ceil(top/10)*10);
+  var s='<svg class="rep-chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Facts mastered over the last '+
+        REP_WINDOW+' days">';
+  s+='<path d="M'+x0+' '+y1+' H'+x1+'" stroke="'+INK+'" stroke-width="1.6"/>';
+  s+='<text x="'+x0+'" y="'+(y0+4)+'" font-family="Nunito,sans-serif" font-size="9" font-weight="800" fill="#68738F">'+top+'</text>';
+  s+='<text x="'+x0+'" y="'+(H-5)+'" font-family="Nunito,sans-serif" font-size="9" font-weight="800" fill="#68738F">'+
+     REP_WINDOW+' days ago</text>';
+  s+='<text x="'+x1+'" y="'+(H-5)+'" text-anchor="end" font-family="Nunito,sans-serif" font-size="9" font-weight="800" fill="#68738F">today</text>';
+  for(o=0;o<OPS.length;o++){
+    var op=OPS[o], path="", seen=0, last=0;
+    for(i=0;i<d.length;i++){
+      var v = (d[i].e && d[i].e.m) ? (d[i].e.m[op]||0) : last;
+      if(d[i].e && d[i].e.m){ last=v; seen++; }
+      var px=x0+(x1-x0)*(d.length<2?0:i/(d.length-1)), py=y1-(y1-y0)*(v/top);
+      path += (path?" L":"M")+n1(px)+" "+n1(py);
+    }
+    if(seen) s+='<path d="'+path+'" fill="none" stroke="'+cols[op]+'" stroke-width="2.4" '+
+                'stroke-linecap="round" stroke-linejoin="round"/>';
+  }
+  return s+'</svg>';
+}
+function repDailyChart(){
+  var d=repDays(REP_WINDOW), W=300, H=104, x0=8, x1=W-8, y0=10, y1=H-18;
+  var s='<svg class="rep-chart" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Accuracy and answer speed per day">';
+  s+='<path d="M'+x0+' '+y1+' H'+x1+'" stroke="'+INK+'" stroke-width="1.6"/>';
+  var bw=Math.max(3, (x1-x0)/d.length-2), i;
+  /* bars: how much of each day was right */
+  for(i=0;i<d.length;i++){
+    var e=d[i].e, px=x0+((x1-x0)/d.length)*i+1;
+    if(!e || !e.q) continue;
+    var acc=e.c/e.q, h=(y1-y0)*acc;
+    s+='<rect x="'+n1(px)+'" y="'+n1(y1-h)+'" width="'+n1(bw)+'" height="'+n1(h)+'" rx="1.6" fill="#2F9E44" opacity=".55"/>';
+  }
+  /* Line: how long a right answer took. Seconds go up the axis the way seconds
+     should, so the line falling is the line getting faster — the opposite way
+     round and a parent has to be told which direction is the good one. */
+  var maxMs=0;
+  for(i=0;i<d.length;i++) if(d[i].e && d[i].e.c) maxMs=Math.max(maxMs, d[i].e.t/d[i].e.c);
+  if(maxMs>0){
+    var path="", any=0;
+    for(i=0;i<d.length;i++){
+      var e2=d[i].e;
+      if(!e2 || !e2.c) continue;
+      var ms=e2.t/e2.c;
+      var cx=x0+((x1-x0)/d.length)*i+1+bw/2, cy=y1-(y1-y0)*(ms/maxMs);
+      path += (path?" L":"M")+n1(cx)+" "+n1(cy);
+      any++;
+    }
+    if(any>1) s+='<path d="'+path+'" fill="none" stroke="#8455E0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>';
+    s+='<text x="'+x1+'" y="'+(y0+4)+'" text-anchor="end" font-family="Nunito,sans-serif" font-size="9" '+
+       'font-weight="800" fill="#8455E0">'+(maxMs/1000).toFixed(1)+'s</text>';
+    s+='<text x="'+x1+'" y="'+(y1-2)+'" text-anchor="end" font-family="Nunito,sans-serif" font-size="9" '+
+       'font-weight="800" fill="#8455E0">0s</text>';
+  }
+  s+='<text x="'+x0+'" y="'+(H-5)+'" font-family="Nunito,sans-serif" font-size="9" font-weight="800" fill="#68738F">'+
+     REP_WINDOW+' days ago</text>';
+  s+='<text x="'+x1+'" y="'+(H-5)+'" text-anchor="end" font-family="Nunito,sans-serif" font-size="9" font-weight="800" fill="#68738F">today</text>';
+  return s+'</svg>';
+}
+
+/* ---- what to actually do about it ---- */
+function repAdvice(){
+  var out=[], tr=repTrend(), tot=repTotals(), i;
+  if(tot.days<3){
+    out.push("There isn't much history yet. Three or four short sessions a week will "+
+             "give this report something to say — a week of practice is enough to see a direction.");
+    return out;
+  }
+  if(tr){
+    if(tr.dAcc >= 4)
+      out.push("Accuracy is up "+Math.round(tr.dAcc)+" points over the last couple of weeks. "+
+               "Whatever the current routine is, it is working — keep it.");
+    else if(tr.dAcc <= -4)
+      out.push("Accuracy has slipped "+Math.round(-tr.dAcc)+" points. That usually means the pool of "+
+               "facts widened faster than the old ones stuck. Shorter, more frequent sessions help more "+
+               "than longer ones.");
+    else
+      out.push("Accuracy is holding steady at about "+Math.round(tr.late.acc)+"%. That is what learning "+
+               "looks like while the pool keeps widening — new facts arrive at the same rate old ones settle.");
+    if(tr.dMs <= -400)
+      out.push("Answers are coming "+ (Math.abs(tr.dMs)/1000).toFixed(1) +"s faster than they were. "+
+               "Speed is the half of mastery that shows real recall rather than working it out.");
+    else if(tr.dMs >= 400)
+      out.push("Answers are taking "+(tr.dMs/1000).toFixed(1)+"s longer than they were. If she is still "+
+               "getting them right, she is probably counting rather than recalling — the facts below are "+
+               "where to look.");
+  }
+  /* the specific, actionable part */
+  for(i=0;i<OPS.length;i++){
+    var op=OPS[i], tb=repHotNumbers(op);
+    if(tb.length){
+      var names=[];
+      for(var k=0;k<tb.length;k++) names.push(tb[k].n);
+      out.push(OP_NAME[op]+" misses cluster around "+listOf(names, op)+
+               ". Ten minutes on "+(names.length>1?"those":"that")+" away from the app — cards, "+
+               "or counting real objects — is worth more than another session in here.");
+    }
+  }
+  var idle=0, dd=repDays(7);
+  for(i=0;i<dd.length;i++) if(!dd[i].e || !dd[i].e.q) idle++;
+  if(idle>=5)
+    out.push("Only "+(7-idle)+" day"+((7-idle)===1?"":"s")+" of practice in the last week. Mastery here "+
+             "needs five separate days per fact, so the gap between sessions matters more than their length.");
+  if(out.length===1 && tr) out.push("Nothing is stuck. Keep going.");
+  return out;
+}
+/* "the 7 times table" is meaningful for x and ÷ and nonsense for + and − */
+function listOf(a, op){
+  var times = (op==="mul" || op==="div");
+  var join = a.length===1 ? String(a[0])
+           : a.slice(0,-1).join(", ")+" and "+a[a.length-1];
+  if(times) return "the "+join+" times table"+(a.length===1?"":"s");
+  return "facts with "+join+" in them";
+}
+
+function renderReport(){
+  var tot=repTotals(), tr=repTrend(), who=state.name||"your child", i;
+  var mastered=0, total=0;
+  for(i=0;i<OPS.length;i++){ var m=masteryOf(OPS[i]); mastered+=m.done; total+=m.total; }
+
+  var h='<div class="card">'+
+    '<h2 class="card-title rep-head">Progress report</h2>'+
+    '<p class="rep-sub">'+who+' · '+todayKey()+
+      (tot.days? ' · '+tot.days+' day'+(tot.days===1?'':'s')+' of practice recorded' : '')+'</p>';
+
+  if(!tot.days){
+    h+='<p class="rep-empty">No practice recorded yet. This fills in from the first finished set.</p></div>';
+    el.reportBody.innerHTML=h;
+    return;
+  }
+
+  h+='<div class="tiles">'+
+    '<div class="tile"><b>'+mastered+'<span style="font-size:14px;color:var(--muted)"> / '+total+'</span></b><span>facts mastered</span></div>'+
+    '<div class="tile"><b>'+Math.round(tot.acc)+'%</b><span>answered correctly</span></div>'+
+    '<div class="tile"><b>'+(tot.ms/1000).toFixed(1)+'s</b><span>average when correct</span></div>'+
+    '<div class="tile"><b>'+streak()+'</b><span>day streak</span></div>'+
+    '</div>'+
+    '<div class="rep-row"><span>Questions answered</span><span class="val">'+tot.q+'</span></div>'+
+    '<div class="rep-row"><span>Time spent answering</span><span class="val">'+
+      Math.round(tot.t/60000)+' min</span></div>'+
+    '</div>';
+
+  /* is she improving? */
+  h+='<div class="card"><h2 class="card-title">Is she improving?</h2>';
+  if(tr){
+    h+='<div class="rep-row"><span>Accuracy, first half vs second</span><span class="val">'+
+        Math.round(tr.early.acc)+'% → '+Math.round(tr.late.acc)+'%'+
+        (tr.dAcc>=1?' ▲':tr.dAcc<=-1?' ▼':'')+'</span></div>'+
+       '<div class="rep-row"><span>Seconds per correct answer</span><span class="val">'+
+        (tr.early.ms/1000).toFixed(1)+'s → '+(tr.late.ms/1000).toFixed(1)+'s'+
+        (tr.dMs<=-100?' ▲':tr.dMs>=100?' ▼':'')+'</span></div>';
+  }else{
+    h+='<p class="rep-sub">A few more sessions and this will compare recent work with earlier work.</p>';
+  }
+  h+='<h2 class="card-title mt">Facts mastered over time</h2>'+repMasteryChart()+
+     '<div class="rep-legend">'+
+       '<span><i style="background:#0FA3A8"></i>Addition</span>'+
+       '<span><i style="background:#EF5B3F"></i>Subtraction</span>'+
+       '<span><i style="background:#8455E0"></i>Multiplication</span>'+
+       '<span><i style="background:#2E7DD1"></i>Division</span></div>'+
+     '<h2 class="card-title mt">Each day</h2>'+repDailyChart()+
+     '<div class="rep-legend">'+
+       '<span><i style="background:#2F9E44;opacity:.55"></i>Share right that day</span>'+
+       '<span><i style="background:#8455E0"></i>Seconds per correct answer — falling is faster</span></div>'+
+     '</div>';
+
+  /* section by section */
+  h+='<div class="card"><h2 class="card-title">Section by section</h2>';
+  for(i=0;i<OPS.length;i++){
+    var op=OPS[i], mm=masteryOf(op), fx=repFacts(op);
+    h+='<div class="rep-row"><span>'+OP_SYM[op]+' '+OP_NAME[op]+'</span><span class="val">'+
+       mm.done+' / '+mm.total+' mastered · '+fx.tricky.length+' tricky</span></div>';
+  }
+  h+='</div>';
+
+  /* what she is getting wrong */
+  h+='<div class="card"><h2 class="card-title">Where she is stuck</h2>';
+  var anyStuck=false;
+  for(i=0;i<OPS.length;i++){
+    var op2=OPS[i], t=repFacts(op2).tricky.slice(0,8);
+    if(!t.length) continue;
+    anyStuck=true;
+    var chips='';
+    for(var k=0;k<t.length;k++) chips+='<span class="chip">'+factLabel(op2,t[k].a,t[k].b)+'</span>';
+    h+='<div class="rep-row"><span>'+OP_NAME[op2]+'</span></div><div class="chips">'+chips+'</div>';
+  }
+  if(!anyStuck) h+='<p class="rep-sub">Nothing is being missed repeatedly at the moment.</p>';
+  h+='</div>';
+
+  /* suggestions */
+  var adv=repAdvice();
+  h+='<div class="card"><h2 class="card-title">What would help</h2><ul class="advice">';
+  for(i=0;i<adv.length;i++) h+='<li>'+adv[i]+'</li>';
+  h+='</ul></div>';
+
+  el.reportBody.innerHTML=h;
+}
+el.reportBtn.addEventListener("click", function(){
+  el.home.hidden=true; el.report.hidden=false;
+  renderReport(); window.scrollTo(0,0);
+});
+el.reportHome.addEventListener("click", function(){
+  el.report.hidden=true; el.home.hidden=false; renderHome(); window.scrollTo(0,0);
+});
+el.reportPrint.addEventListener("click", function(){ window.print(); });
 
 /* ---------------- keeping a copy ----------------
    Everything lives in this browser's storage and nowhere else, which is the
@@ -2374,104 +2765,6 @@ function boot(){
 }
 
 
-/* ---------------- learn ----------------
-   What the operation actually does, for a child who has no number sense yet.
-   Two sliders, a number line showing the jump, and the same quantity again as
-   counters underneath — the line explains the movement, the counters explain
-   the amount, and different children need different ones. */
-var learnOp = "add", learnA = 3, learnB = 4;
-
-function lnRange(op, a, b){
-  if(op==="add")  return {max:Math.max(10, a+b), from:a, to:a+b, ans:a+b};
-  if(op==="sub")  return {max:Math.max(10, a+b), from:a+b, to:a, ans:a};
-  if(op==="mul")  return {max:Math.max(10, a*b), from:0, to:a*b, ans:a*b};
-  return {max:Math.max(10, a*b), from:a*b, to:0, ans:a};   // div
-}
-function numberLine(op, a, b){
-  var W=300, H=76, r=lnRange(op,a,b);
-  var max=Math.max(1, r.max), x0=14, x1=W-14;
-  var X=function(v){ return x0 + (x1-x0)*(v/max); };
-  var y=52;
-  var step = max<=12 ? 1 : max<=24 ? 2 : max<=60 ? 5 : max<=100 ? 10 : 12;
-  var s='<svg class="learn-art" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Number line from 0 to '+max+'">';
-  s+='<path d="M'+x0+' '+y+' H'+x1+'" stroke="'+INK+'" stroke-width="2.5" stroke-linecap="round"/>';
-  for(var v=0; v<=max; v+=step){
-    var tx=X(v);
-    s+='<path d="M'+n1(tx)+' '+(y-4)+' V'+(y+4)+'" stroke="'+INK+'" stroke-width="1.6"/>';
-    s+='<text x="'+n1(tx)+'" y="'+(y+17)+'" text-anchor="middle" font-family="Nunito,sans-serif" '+
-       'font-size="9" font-weight="800" fill="#68738F">'+v+'</text>';
-  }
-  /* the jumps: multiplication and division are drawn as equal hops, so the
-     grouping is visible rather than just a single leap */
-  var hops=[], i;
-  if(op==="add"){ hops.push([a, a+b]); }
-  else if(op==="sub"){ hops.push([a+b, a]); }
-  else if(op==="mul"){ for(i=0;i<a;i++) hops.push([i*b, (i+1)*b]); }
-  else { for(i=0;i<a;i++) hops.push([a*b-i*b, a*b-(i+1)*b]); }
-  var col = op==="add" ? "#0FA3A8" : op==="sub" ? "#EF5B3F" : op==="mul" ? "#8455E0" : "#2E7DD1";
-  for(i=0;i<hops.length && i<24;i++){
-    var f=X(hops[i][0]), t=X(hops[i][1]), mid=(f+t)/2, up=(i%2?1:1);
-    var h=Math.min(26, 10+Math.abs(t-f)*0.22)*up;
-    s+='<path d="M'+n1(f)+' '+(y-3)+' Q'+n1(mid)+' '+n1(y-3-h*2)+' '+n1(t)+' '+(y-3)+
-       '" fill="none" stroke="'+col+'" stroke-width="2.4" opacity=".9"/>';
-    s+='<circle cx="'+n1(t)+'" cy="'+(y-3)+'" r="2.6" fill="'+col+'"/>';
-  }
-  s+='<circle cx="'+n1(X(r.from))+'" cy="'+y+'" r="5" fill="#FFFEFB" stroke="'+INK+'" stroke-width="2"/>';
-  s+='<circle cx="'+n1(X(r.to))+'" cy="'+y+'" r="6.5" fill="'+col+'" stroke="'+INK+'" stroke-width="2"/>';
-  return s+'</svg>';
-}
-function counters(op, a, b){
-  var W=300, per=12, R=8.5, gap=21, s='';
-  var rows=[], col = op==="add" ? "#0FA3A8" : op==="sub" ? "#EF5B3F" : op==="mul" ? "#8455E0" : "#2E7DD1";
-  if(op==="add"){ rows=[{n:a,c:"#0FA3A8",l:String(a)},{n:b,c:"#FFC93C",l:"+ "+b}]; }
-  else if(op==="sub"){ rows=[{n:a+b,c:"#EF5B3F",l:String(a+b),cross:b}]; }
-  else if(op==="mul"){ for(var g=0;g<Math.min(a,8);g++) rows.push({n:b,c:"#8455E0",l:g===0?a+" groups of "+b:""}); }
-  else { for(var g2=0;g2<Math.min(a,8);g2++) rows.push({n:b,c:"#2E7DD1",l:g2===0?"shared into "+a+" groups":""}); }
-  var H = Math.max(30, rows.length*gap+12);
-  s='<svg class="learn-art" style="margin-top:8px" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="Counters">';
-  for(var i=0;i<rows.length;i++){
-    var row=rows[i], y=14+i*gap;
-    if(row.l) s+='<text x="8" y="'+(y+4)+'" font-family="Nunito,sans-serif" font-size="10" font-weight="800" fill="#68738F">'+row.l+'</text>';
-    var startX=96;
-    for(var k=0;k<Math.min(row.n, per*2);k++){
-      var cx=startX+(k%per)*17, cy=y+Math.floor(k/per)*15;
-      var gone = row.cross!==undefined && k >= row.n-row.cross;
-      s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="'+(gone?"#FFFEFB":row.c)+'" stroke="'+INK+
-         '" stroke-width="1.6"'+(gone?' stroke-dasharray="3 2"':'')+'/>';
-      if(gone) s+='<path d="M'+(cx-4)+' '+(cy-4)+' l8 8 M'+(cx+4)+' '+(cy-4)+' l-8 8" stroke="'+INK+'" stroke-width="1.6"/>';
-    }
-    if(row.n > per*2)
-      s+='<text x="'+(startX+per*17+4)+'" y="'+(y+4)+'" font-family="Nunito,sans-serif" font-size="10" font-weight="800" fill="#68738F">…</text>';
-  }
-  return s+'</svg>';
-}
-function learnWords(op,a,b){
-  if(op==="add") return "Start at "+a+", then count on "+b+" more. You land on "+(a+b)+".";
-  if(op==="sub") return "Start at "+(a+b)+", then count back "+b+". You land on "+a+".";
-  if(op==="mul") return a+" groups with "+b+" in each group makes "+(a*b)+" altogether.";
-  return (a*b)+" shared out into groups of "+b+" makes "+a+" groups.";
-}
-function renderLearn(){
-  var op=learnOp, a=learnA, b=learnB;
-  var tabs=el.learnTabs.querySelectorAll("button"), i;
-  for(i=0;i<tabs.length;i++) tabs[i].setAttribute("aria-selected", String(tabs[i].dataset.op===op));
-  /* division needs a divisor, and its slider means "how many in each group" */
-  if(op==="div" && b<1){ b=learnB=1; el.learnB.value=1; }
-  el.learnA.min = 0; el.learnB.min = (op==="div") ? 1 : 0;
-  var text;
-  if(op==="add") text = a+" + "+b+" = "+(a+b);
-  else if(op==="sub") text = (a+b)+" − "+b+" = "+a;
-  else if(op==="mul") text = a+" × "+b+" = "+(a*b);
-  else text = (a*b)+" ÷ "+b+" = "+a;
-  el.learnSum.textContent = text;
-  el.learnLabA.textContent = op==="add" ? "Start at" : op==="sub" ? "Left with"
-                           : op==="mul" ? "How many groups" : "How many groups";
-  el.learnLabB.textContent = op==="add" ? "Count on" : op==="sub" ? "Take away"
-                           : "How many in each";
-  el.learnArt.innerHTML = numberLine(op,a,b) + counters(op,a,b);
-  el.learnSay.textContent = learnWords(op,a,b);
-}
-
 /* ---------------- learn, version two ----------------
    The sliders version above works, but a child moves a control and the picture
    reacts somewhere else — one step of indirection too many for someone who has
@@ -2568,7 +2861,12 @@ var COINS = {
   10: {r:9.5,fill:"#D8DEE6", ring:"#7C8794", label:"10"},
   25: {r:15, fill:"#C9CFD8", ring:"#7C8794", label:"25"}
 };
-var money = { jar: [], dollars: 0, justMade: false };
+/* phase: "idle" while she is dropping coins in, "full" for the beat where a
+   hundred cents is sitting there visible, "going" while they sweep across into
+   the dollar. The pause matters — the whole lesson is that those four quarters
+   ARE the dollar, and swapping them instantly hides exactly that. */
+var money = { jar: [], dollars: 0, justMade: false, phase: "idle" };
+var FULL_HOLD = 900, SWAP_RUN = 700;
 function moneyCents(){
   var t=0; for(var i=0;i<money.jar.length;i++) t+=money.jar[i];
   return t;
@@ -2598,6 +2896,7 @@ function moneyArt(){
   /* laid out in rows rather than scattered: a child counts them, and coins
      that jump around between taps are hard to count */
   var PER=6, CAP=30, n=Math.min(money.jar.length, CAP);
+  s+='<g class="coins'+(money.phase==="full"?" coins-full":money.phase==="going"?" coins-going":"")+'">';
   for(var i=0;i<n;i++){
     var c=COINS[money.jar[i]] || COINS[1];
     var cx=132+(i%PER)*27, cy=42+Math.floor(i/PER)*20;
@@ -2607,38 +2906,63 @@ function moneyArt(){
   }
   if(money.jar.length>CAP)
     s+='<text x="286" y="144" text-anchor="end" font-family="Nunito,sans-serif" font-size="11" font-weight="800" fill="#68738F">+'+(money.jar.length-CAP)+' more</text>';
+  s+='</g>';
   return s+'</svg>';
 }
 function moneyText(){
-  var c=moneyCents(), d=money.dollars;
-  return "$"+d+"."+(c<10?"0":"")+c;
+  /* counted as one number, so the beat where the jar holds 100 cents and no
+     dollar yet still reads $1.00 rather than $0.100 */
+  var t=money.dollars*100 + moneyCents();
+  return "$"+Math.floor(t/100)+"."+String(t%100).padStart(2,"0");
+}
+function moneyCount(){
+  /* what she just made a hundred out of, said back to her: "4 twenty-fives" */
+  var by={}, i, order=[25,10,5,1], out=[];
+  for(i=0;i<money.jar.length;i++) by[money.jar[i]]=(by[money.jar[i]]||0)+1;
+  for(i=0;i<order.length;i++){
+    var v=order[i];
+    if(by[v]) out.push(by[v]+" × "+v+"¢");
+  }
+  return out.join(" + ");
 }
 function renderMoney(){
   var c=moneyCents();
   el.moneySum.textContent = moneyText();
   el.moneyArt.innerHTML = moneyArt();
-  el.moneySay.textContent = money.justMade
-    ? "100 cents filled up! They swapped for one whole dollar."
+  el.moneySay.textContent =
+      money.phase==="full"  ? moneyCount()+" — that is 100 cents. Watch."
+    : money.phase==="going" ? "A hundred cents, becoming one dollar…"
+    : money.justMade ? "There it is. A hundred cents IS one dollar."
     : c===99 ? "99 cents. One more penny and it turns into a dollar."
     : c===0  ? (money.dollars ? "Nothing left over — just whole dollars." : "Tap a coin to drop it in.")
     : (100-c)+" more cents to make a dollar.";
   money.justMade = false;
 }
 function addCoin(v){
+  if(money.phase!=="idle") return;           // no taps while the swap is running
   money.jar.push(v);
-  if(moneyCents() >= 100){
-    /* a hundred cents leave the jar together and come back as one dollar */
-    var over = moneyCents() - 100;
-    money.jar = [];
-    while(over > 0){                      // keep the change, in the fewest coins
-      var pick = over>=25?25 : over>=10?10 : over>=5?5 : 1;
-      money.jar.push(pick); over -= pick;
-    }
-    money.dollars++;
-    money.justMade = true;
-    sfx.star();
-  }else sfx.tap();
+  if(moneyCents() < 100){ sfx.tap(); renderMoney(); return; }
+  /* Hold on the full jar first, so she can see and count what a hundred cents
+     is made of, then send those coins across into the dollar. */
+  money.phase = "full";
+  sfx.star();
   renderMoney();
+  setTimeout(function(){
+    money.phase = "going";
+    renderMoney();
+    setTimeout(function(){
+      var over = moneyCents() - 100;
+      money.jar = [];
+      while(over > 0){                       // keep the change, in the fewest coins
+        var pick = over>=25?25 : over>=10?10 : over>=5?5 : 1;
+        money.jar.push(pick); over -= pick;
+      }
+      money.dollars++;
+      money.justMade = true;
+      money.phase = "idle";
+      renderMoney();
+    }, SWAP_RUN);
+  }, FULL_HOLD);
 }
 
 /* ---------------- learn: the clock ----------------
@@ -2723,26 +3047,19 @@ function setClockFromAngle(deg){
 }
 
 /* ---------------- learn: screen plumbing ---------------- */
-var learnTopic = "numbers", learnMode = "drag";
+var learnTopic = "numbers";
 function renderLearnScreen(){
   var t=el.learnTopics.querySelectorAll("button"), i;
   for(i=0;i<t.length;i++) t[i].setAttribute("aria-selected", String(t[i].dataset.topic===learnTopic));
-  var m=el.learnMode.querySelectorAll("button");
-  for(i=0;i<m.length;i++) m[i].setAttribute("aria-selected", String(m[i].dataset.mode===learnMode));
   el.learnNumbers.hidden = learnTopic!=="numbers";
   el.learnMoney.hidden   = learnTopic!=="money";
   el.learnClock.hidden   = learnTopic!=="clock";
-  if(learnTopic==="numbers"){
-    el.learnDrag.hidden  = learnMode!=="drag";
-    el.learnSlide.hidden = learnMode!=="slide";
-    if(learnMode==="drag"){ renderDragLine(); renderRows(); } else renderLearn();
-  }
+  if(learnTopic==="numbers"){ renderDragLine(); renderRows(); }
   else if(learnTopic==="money") renderMoney();
   else renderClock();
 }
 function showLearn(){
   el.home.hidden=true; el.learn.hidden=false;
-  el.learnA.value=learnA; el.learnB.value=learnB;
   renderLearnScreen(); window.scrollTo(0,0);
 }
 el.learnBtn.addEventListener("click", showLearn);
@@ -2753,16 +3070,6 @@ el.learnTopics.addEventListener("click", function(e){
   var b2=e.target.closest("button"); if(!b2) return;
   learnTopic=b2.dataset.topic; sfx.tap(); renderLearnScreen(); window.scrollTo(0,0);
 });
-el.learnMode.addEventListener("click", function(e){
-  var b2=e.target.closest("button"); if(!b2) return;
-  learnMode=b2.dataset.mode; sfx.tap(); renderLearnScreen();
-});
-el.learnTabs.addEventListener("click", function(e){
-  var b2=e.target.closest("button"); if(!b2) return;
-  learnOp=b2.dataset.op; sfx.tap(); renderLearn();
-});
-el.learnA.addEventListener("input", function(){ learnA=+this.value; renderLearn(); });
-el.learnB.addEventListener("input", function(){ learnB=+this.value; renderLearn(); });
 el.coinRow.addEventListener("click", function(e){
   var b2=e.target.closest("button"); if(!b2) return;
   addCoin(+b2.getAttribute("data-cents"));
@@ -2826,7 +3133,7 @@ document.addEventListener("pointermove", function(e){
   }
 });
 document.addEventListener("pointerup", function(){ lnDrag=null; });
-document.addEventListener("pointercancel", function(){ lnDrag=null; });
+document.addEventListener("pointercancel", function(){ lnDrag=null; endScrub(); });
 
 renderSoundBtn();
 boot();
