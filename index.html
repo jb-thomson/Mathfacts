@@ -203,12 +203,18 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 .garden-art .fl[tabindex]{cursor:pointer}
 /* a finished section warms its painting to golden hour */
 .garden-art image.gold{filter:sepia(.32) saturate(1.35) hue-rotate(-12deg) brightness(1.05)}
-/* recolouring a painted grower shifts its hue rather than swapping a fill */
-.garden-art image.c1{filter:hue-rotate(40deg)}
-.garden-art image.c2{filter:hue-rotate(315deg)}
-.garden-art image.c3{filter:hue-rotate(265deg)}
-.garden-art image.c4{filter:hue-rotate(205deg)}
-.garden-art image.c5{filter:saturate(.18) brightness(1.22)}
+/* Recolouring drains the paint of its own colour and tints the shading that is
+   left. Rotating the hue instead — which is what this did — moves a red rover
+   and does nothing whatever to a white dome, which is why domes had no colour
+   option at all. The filters themselves are defined once, near the top of the
+   body, so every scene can point at the same ones. */
+.garden-art image.c1{filter:url(#tint1)}
+.garden-art image.c2{filter:url(#tint2)}
+.garden-art image.c3{filter:url(#tint3)}
+.garden-art image.c4{filter:url(#tint4)}
+.garden-art image.c5{filter:url(#tint5)}
+.garden-art image.c6{filter:url(#tint6)}
+.tint-defs{position:absolute;width:0;height:0;overflow:hidden}
 /* fullness bar, sitting inside the scene along its bottom edge */
 .scene-bar{
   position:absolute;left:10px;right:10px;bottom:9px;height:9px;
@@ -320,6 +326,7 @@ body.bigopen{overflow:hidden}
   background:var(--paper);border:1.5px solid var(--ink);white-space:nowrap}
 .garden-art{touch-action:none}
 .garden-art .fl{cursor:grab}
+.garden.tap-big svg.garden-art{cursor:zoom-in}
 /* the strip that appears when a piece is picked up, for sizing and colour */
 .piece-bar{position:absolute;left:50%;transform:translateX(-50%);bottom:24px;z-index:3;
   display:flex;gap:6px;align-items:center;padding:4px 6px;border-radius:999px;
@@ -328,6 +335,8 @@ body.bigopen{overflow:hidden}
   color:var(--ink);font:800 18px/1 'Fredoka',system-ui;display:grid;place-items:center;padding:0}
 .piece-bar button[disabled]{opacity:.32}
 .piece-bar .pb-col{border:2px solid var(--ink)}
+.piece-bar .pb-col.natural{background:var(--paper);
+  background-image:linear-gradient(135deg,transparent 44%,var(--ink) 44%,var(--ink) 56%,transparent 56%)}
 .piece-bar .pb-done{background:var(--good-tint);color:var(--good-deep)}
 .mastery{display:flex;align-items:center;gap:8px;margin-top:9px}
 .mastery-meter{
@@ -491,6 +500,59 @@ body.bigopen{overflow:hidden}
 </style>
 </head>
 <body>
+<!-- One set of tint filters for every scene on the page. Each drains the
+     colour out of a sprite and re-tints the shading that is left, so it works
+     the same on a red rover and on a white dome. -->
+<svg class="tint-defs" aria-hidden="true" focusable="false"><defs>
+    <filter id="tint1" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.872" intercept="0.07"/>
+        <feFuncG type="linear" slope="0.332" intercept="0.07"/>
+        <feFuncB type="linear" slope="0.230" intercept="0.07"/>
+      </feComponentTransfer>
+    </filter>
+    <filter id="tint2" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.930" intercept="0.07"/>
+        <feFuncG type="linear" slope="0.733" intercept="0.07"/>
+        <feFuncB type="linear" slope="0.219" intercept="0.07"/>
+      </feComponentTransfer>
+    </filter>
+    <filter id="tint3" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.875" intercept="0.07"/>
+        <feFuncG type="linear" slope="0.390" intercept="0.07"/>
+        <feFuncB type="linear" slope="0.613" intercept="0.07"/>
+      </feComponentTransfer>
+    </filter>
+    <filter id="tint4" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.481" intercept="0.07"/>
+        <feFuncG type="linear" slope="0.310" intercept="0.07"/>
+        <feFuncB type="linear" slope="0.817" intercept="0.07"/>
+      </feComponentTransfer>
+    </filter>
+    <filter id="tint5" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.226" intercept="0.07"/>
+        <feFuncG type="linear" slope="0.522" intercept="0.07"/>
+        <feFuncB type="linear" slope="0.788" intercept="0.07"/>
+      </feComponentTransfer>
+    </filter>
+    <filter id="tint6" color-interpolation-filters="sRGB">
+      <feColorMatrix type="saturate" values="0"/>
+      <feComponentTransfer>
+        <feFuncR type="linear" slope="0.930" intercept="0.07"/>
+        <feFuncG type="linear" slope="0.926" intercept="0.07"/>
+        <feFuncB type="linear" slope="0.915" intercept="0.07"/>
+      </feComponentTransfer>
+    </filter>
+</defs></svg>
 <div id="app">
   <header class="hero">
     <svg class="mark" viewBox="0 0 100 100" aria-hidden="true">
@@ -586,7 +648,7 @@ body.bigopen{overflow:hidden}
       </p>
       <input id="loadFile" type="file" accept="application/json,.json" hidden>
       <p id="backupNote" class="backup-note" hidden></p>
-      <p class="version-line">v16 · every answer is money now</p>
+      <p class="version-line">v17 · softer keys, truer colours</p>
     </section>
 
     <!-- ============ LEARN ============ -->
@@ -676,7 +738,7 @@ body.bigopen{overflow:hidden}
     <section id="screen-summary" hidden>
       <div class="card summary-card">
         <h2 id="sumTitle">Nice work! 🎉</h2>
-        <div class="big-points"><span id="sumPoints">0</span> <small>points this session</small></div>
+        <div class="big-points"><span id="sumPoints">0</span> <small>this session</small></div>
         <p id="sumStopped" class="sum-stopped" hidden></p>
         <div id="sumDone" class="sum-done" hidden></div>
         <div id="sumGardens" class="sum-block" hidden>
@@ -914,16 +976,19 @@ function unlockAudio(){
 document.addEventListener("touchend",unlockAudio,true);
 document.addEventListener("pointerdown",unlockAudio,true);
 window.__pmAudio=function(){ return AC?AC.state:"none"; };
-function tone(freq,start,dur,type,vol,slide){
+/* `attack` is how long the note takes to reach full volume. The default is
+   short enough to read as a click, which is right for a button and wrong for
+   something that happens three times a second. */
+function tone(freq,start,dur,type,vol,slide,attack){
   var ctx=audioCtx(); if(!ctx) return;
   try{
-    var t=ctx.currentTime+start;
+    var t=ctx.currentTime+start, a=attack||0.008;
     var o=ctx.createOscillator(), g=ctx.createGain();
     o.type=type||"sine";
     o.frequency.setValueAtTime(freq,t);
     if(slide) o.frequency.exponentialRampToValueAtTime(slide,t+dur);
     g.gain.setValueAtTime(0.0001,t);
-    g.gain.linearRampToValueAtTime(vol,t+0.008);
+    g.gain.linearRampToValueAtTime(vol,t+a);
     g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
     o.connect(g); g.connect(ctx.destination);
     o.start(t); o.stop(t+dur+0.02);
@@ -932,9 +997,24 @@ function tone(freq,start,dur,type,vol,slide){
 function buzz(pat){
   if(state.sound && navigator.vibrate){ try{ navigator.vibrate(pat); }catch(e){} }
 }
+/* Typing a digit happens several times a second, so it gets its own voice
+   rather than the general-purpose button click: a sine with a slow attack and
+   a long tail, quiet, so it breathes instead of ticking. Successive digits in
+   one answer step up C–D–E, which makes typing 144 feel like it is going
+   somewhere. It stays clearly apart from the answer chime, which is an event
+   rather than a texture. */
+/* Kept clear of the answer chime's own notes (E5 and B5). C–D–E ended a
+   three-digit answer on the very pitch the chime then opens with, so the two
+   ran together as one sound instead of the chime arriving as a lift. */
+var KEY_NOTES = [440, 493.88, 554.37];         // A4, B4, C#5
 var sfx={
   tap:  function(){ tone(660,0,0.05,"triangle",0.12,520); buzz(8); },
-  back: function(){ tone(420,0,0.05,"triangle",0.10,330); buzz(8); },
+  key:  function(n){
+          var f=KEY_NOTES[Math.max(0, Math.min(KEY_NOTES.length-1, n||0))];
+          tone(f, 0, 0.15, "sine", 0.075, f*0.945, 0.024);
+          buzz(5);
+        },
+  back: function(){ tone(392,0,0.13,"sine",0.07,349.23,0.02); buzz(5); },
   yes:  function(){ tone(659.25,0,0.09,"sine",0.22); tone(987.77,0.07,0.22,"sine",0.20); buzz(20); },
   star: function(){ tone(659.25,0,0.09,"sine",0.22); tone(830.61,0.08,0.09,"sine",0.20);
                     tone(1244.51,0.16,0.35,"sine",0.18); buzz([25,60,25]); },
@@ -1079,43 +1159,43 @@ var ITEMS = {
             {s:"fox",       h:[7,10,13],          w:1},
             {s:"logs",      h:[5,7,9],            w:1},
             {s:"campfire",  h:[6,9,12],           w:1} ],
-  meadow: [ {s:"flower",    h:[10,15,21], hue:1,  w:4},
+  meadow: [ {s:"flower",    h:[10,15,21],  w:4},
             {s:"bush",      h:[10,15,20],         w:2},
             {s:"boulder",   h:[7,10,13],          w:1},
             {s:"sheep",     h:[6,9,12],           w:2},
             {s:"fawn",      h:[8,12,16],          w:1},
             {s:"songbird",  h:[4,6,8],            w:1},
-            {s:"bench",     h:[5,7,10],   hue:1,  w:1} ],
+            {s:"bench",     h:[5,7,10],  w:1} ],
   beach:  [ {s:"palm",      h:[20,32,46], back:1, w:4},
-            {s:"hut",       h:[12,18,25], hue:1,  w:2},
+            {s:"hut",       h:[12,18,25],  w:2},
             {s:"shells",    h:[5,7,10],           w:2},
             {s:"campfire",  h:[6,9,12],           w:1},
-            {s:"bench",     h:[5,7,10],   hue:1,  w:1},
+            {s:"bench",     h:[5,7,10],  w:1},
             {s:"logs",      h:[5,7,9],            w:1} ],
-  fjord:  [ {s:"cabin",     h:[10,15,21], hue:1,  w:3},
+  fjord:  [ {s:"cabin",     h:[10,15,21],  w:3},
             {s:"boathouse", h:[11,16,22],         w:2},
             {s:"jetty",     h:[6,9,12],           w:2},
             {s:"rowboat",   h:[5,8,11],           w:2},
             {s:"sheep",     h:[6,9,12],           w:2},
-            {s:"bench",     h:[5,7,10],   hue:1,  w:1} ],
+            {s:"bench",     h:[5,7,10],  w:1} ],
   /* the space sections build a colony rather than a garden */
   rocky:  [ {s:"dome",      h:[10,15,21], back:1, w:4},
-            {s:"rover",     h:[6,9,12],   hue:1,  w:2},
-            {s:"crates",    h:[5,8,11],   hue:1,  w:2},
-            {s:"solar",     h:[8,12,16],  hue:1,  w:2} ],
+            {s:"rover",     h:[6,9,12],  w:2},
+            {s:"crates",    h:[5,8,11],  w:2},
+            {s:"solar",     h:[8,12,16],  w:2} ],
   ice:    [ {s:"mast",      h:[16,26,38], back:1, w:3},
             {s:"dish",      h:[9,13,18],          w:2},
             {s:"hab",       h:[9,14,19],          w:2},
-            {s:"crates",    h:[5,8,11],   hue:1,  w:2},
-            {s:"rover",     h:[6,9,12],   hue:1,  w:2} ],
+            {s:"crates",    h:[5,8,11],  w:2},
+            {s:"rover",     h:[6,9,12],  w:2} ],
   gas:    [ {s:"dish",      h:[12,18,25], back:1, w:3},
-            {s:"lander",    h:[9,14,19],  hue:1,  w:2},
+            {s:"lander",    h:[9,14,19],  w:2},
             {s:"hab",       h:[9,14,19],          w:2},
-            {s:"solar",     h:[8,12,16],  hue:1,  w:2} ],
+            {s:"solar",     h:[8,12,16],  w:2} ],
   station:[ {s:"hab",       h:[12,18,25], back:1, w:3},
             {s:"dome",      h:[10,15,21],         w:2},
-            {s:"solar",     h:[8,12,16],  hue:1,  w:2},
-            {s:"crates",    h:[5,8,11],   hue:1,  w:2} ]
+            {s:"solar",     h:[8,12,16],  w:2},
+            {s:"crates",    h:[5,8,11],  w:2} ]
 };
 function backIndex(kind){
   var list=ITEMS[kind];
@@ -1176,6 +1256,11 @@ function resizePiece(op, i, dir){
   saveState();
   return true;
 }
+/* Every painted piece can be recoloured now. It used to be a per-item flag,
+   set only where a hue rotation happened to show — which is a fact about the
+   old filter, not about the thing, and left a child tapping a dome and finding
+   no option there. */
+function canHue(it){ return !!(it && SPRITES[it.s]); }
 function itemOf(kind, f){
   var list=ITEMS[kind];
   return list ? list[(f.v||0) % list.length] : null;
@@ -1191,9 +1276,13 @@ var BG = {"forest": "data:image/webp;base64,UklGRtRjAABXRUJQVlA4WAoAAAAgAAAAVwIA
    in stages, and because tapping one recolours it. */
 var SLOTS = 12;               // earned pieces per scene
 var INK = "#2B3A57";
+/* Index 0 is the paint as it came. It used to be red while the piece was
+   actually left unfiltered, so the swatch showed a colour the piece did not
+   have and tapping appeared to do nothing at all. */
 var BLOOMS = [
-  {c:"#EF5B3F",n:"red"},    {c:"#FFC93C",n:"yellow"}, {c:"#F06BA8",n:"pink"},
-  {c:"#8455E0",n:"purple"}, {c:"#3E8FD8",n:"blue"},   {c:"#FFFEFB",n:"white"}
+  {c:null,      n:"as it came"},
+  {c:"#EF5B3F", n:"red"},    {c:"#FFC93C", n:"yellow"}, {c:"#F06BA8", n:"pink"},
+  {c:"#8455E0", n:"purple"}, {c:"#3E8FD8", n:"blue"},   {c:"#FFFEFB", n:"white"}
 ];
 /* Milestones, in points. Tune pacing here — the drawing code reads these. */
 var MILE = {small:120, big:250, water:400, fly1:500, fly2:650, high:900};
@@ -1293,14 +1382,22 @@ function scenePlan(op, world){
   planCache[ck]=list;
   return list;
 }
+/* Only a deliberate tap tints a piece. Scenes used to seed every piece with a
+   random colour, which made sense when they were flat vector flowers and makes
+   none now that they are painted — the paint is the point until she decides
+   otherwise. */
 function bloomIndex(op,f){
   var pick = state.blooms[op] ? state.blooms[op][f.i] : undefined;
-  if(typeof pick === "number") return pick;
-  return (typeof f.c === "number") ? f.c : 0;   // records saved before colours were stored
+  return (typeof pick === "number") ? pick : 0;
 }
 function bloomColor(op,f){
   var idx=bloomIndex(op,f);
   return BLOOMS[((idx % BLOOMS.length)+BLOOMS.length)%BLOOMS.length];
+}
+/* the drawn fallbacks need an actual fill, and "as it came" has no colour */
+function bloomFill(op,f){
+  var b=bloomColor(op,f);
+  return b.c || "#6BC46B";
 }
 /* Pieces unlock with points but are positioned by the child, so the number
    earned and the number actually placed are different things. */
@@ -1460,17 +1557,18 @@ function drawGrower(kind, f, pts, op, interactive){
         '" data-item="'+name+'"';
   a += tappable
     ? ' tabindex="0" role="button" aria-label="'+name+' '+f.i+
-      (it&&it.hue?', '+col.n:'')+'. Tap to resize'+(it&&it.hue?' or recolour':'')+'."'
+      (canHue(it)?', '+col.n:'')+'. Tap to resize'+(canHue(it)?' or recolour':'')+'."'
     : ' role="img" aria-label="'+name+'"';
   if(sp){
     var h=it.h[stage]*depthScale(kind,f.y)*sizeOf(f), w=h*sp.ratio;
-    var cls = it.hue ? (" c"+(((bloomIndex(op,f)%BLOOMS.length)+BLOOMS.length)%BLOOMS.length)) : "";
+      var ci=((bloomIndex(op,f)%BLOOMS.length)+BLOOMS.length)%BLOOMS.length;
+    var cls = ci ? (" c"+ci) : "";
     return '<g '+a+'>'+shadow(f.x, f.y, w*0.38)+
       (picked?pickRing(f.x, f.y, w):"")+
       '<image class="gw'+cls+'" href="'+sp.uri+'" x="'+n1(f.x-w/2)+'" y="'+n1(f.y-h)+
       '" width="'+n1(w)+'" height="'+n1(h)+'"/></g>';
   }
-  return '<g '+a+'>'+(GROWERS[kind] ? GROWERS[kind](f,stage,col) : "")+'</g>';
+  return '<g '+a+'>'+(GROWERS[kind] ? GROWERS[kind](f,stage,{c:bloomFill(op,f),n:col.n}) : "")+'</g>';
 }
 /* a dashed ring on the ground under whichever piece is being adjusted */
 function pickRing(x, y, w){
@@ -1669,15 +1767,16 @@ function pieceBar(op){
   if(!rec) return "";
   var kind=kindFor(op), it=itemOf(kind, rec), z=sizeOf(rec);
   var name=it?it.s:"piece";
-  var canHue = !!(it && it.hue);
+  var hue = canHue(it);
   var col = bloomColor(op, rec);
   return '<div class="piece-bar" data-op="'+op+'">'+
     '<button class="pb-small" data-act="small"'+(z<=SIZE_MIN+0.001?' disabled':'')+
       ' aria-label="Make this '+name+' smaller">−</button>'+
     '<button class="pb-big" data-act="big"'+(z>=SIZE_MAX-0.001?' disabled':'')+
       ' aria-label="Make this '+name+' bigger">+</button>'+
-    (canHue?'<button class="pb-col" data-act="colour" style="background:'+col.c+
-      '" aria-label="Change this '+name+' from '+col.n+'"></button>':'')+
+    (hue?'<button class="pb-col'+(col.c?'':' natural')+'" data-act="colour"'+
+      (col.c?' style="background:'+col.c+'"':'')+
+      ' aria-label="This '+name+' is '+col.n+'. Tap to change it."></button>':'')+
     '<button class="pb-done" data-act="done" aria-label="Done with this '+name+'">✓</button>'+
     '</div>';
 }
@@ -1763,7 +1862,7 @@ function comingStrip(op, pts){
   }
   return h+'</div>';
 }
-function sceneBlock(op, pts, label, interactive, withBar, withNote){
+function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
   var done=sectionComplete(op), m=masteryOf(op);
   var scrubbing=!!(scrub && scrub.op===op);
   /* The landmark and the golden light were earned by mastery, not by points,
@@ -1781,7 +1880,8 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote){
     ? "Badge at risk — practise "+short+" fact"+(short===1?"":"s")+" to win your gold back."
     : done ? "Finished — every fact mastered! ✨" : sceneNote(op,pts);
   /* the scene keeps its golden light and landmark once earned */
-  return '<div class="garden'+(everDone?" done":"")+(slipped?" slipped":"")+'" data-op="'+op+'">'+
+  return '<div class="garden'+(everDone?" done":"")+(slipped?" slipped":"")+
+    (interactive?" live":"")+(expandable&&!interactive?" tap-big":"")+'" data-op="'+op+'">'+
     '<div class="garden-head">'+
       '<span class="garden-name"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</span>'+
       (everDone?completeBadge(slipped):"")+
@@ -1791,8 +1891,9 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote){
           moneyMain(pts)+'. Tap to show it as '+(moneyView()==="dollars"?"cents":"dollars and cents")+
           '.">'+moneyMain(pts)+'<small>'+moneyAlt(pts)+'</small></button>')+'</div>'+
     '<div class="scene-wrap">'+sceneSVG(op,pts,interactive,everDone)+
-      (interactive?'<button class="scene-expand" data-op="'+op+'" aria-label="Show '+
-        OP_NAME[op]+' bigger">⤢</button>':'')+
+      (interactive||expandable
+        ? '<button class="scene-expand" data-op="'+op+'" aria-label="Show '+
+          OP_NAME[op]+' bigger">⤢</button>' : '')+
       (interactive?pieceBar(op):'')+
       (withBar?'<div class="scene-bar'+(scrubbing?' scrubbing':'')+'" data-op="'+op+
         '" role="slider" tabindex="0" aria-label="How full the '+OP_NAME[op]+
@@ -2142,9 +2243,8 @@ function renderSummary(){
   el.sumGardensTitle.textContent = sprouted
     ? (grew.length>1 ? "🌱 New "+thing+"s appeared!" : "🌱 A new "+thing+" appeared!")
     : "🌱 Your world";
-  el.sumGardenArt.innerHTML = grew.map(function(o){
-    return sceneBlock(o, state.pts[o], "+"+centsTxt(S.gained[o]), false, false, true);
-  }).join("");
+  sumGrew = grew;
+  renderSummaryScenes();
 
   el.sumMastered.hidden = S.newlyMastered.length===0;
   el.sumMasteredChips.innerHTML = S.newlyMastered.map(function(t){
@@ -2161,12 +2261,23 @@ function renderSummary(){
     : "Tricky facts come back more often until they turn green.";
 }
 
+/* Kept separate from the rest of the summary so the cards can be redrawn on
+   their own — coming back from the full-screen view has to put back whatever
+   was changed in there. */
+var sumGrew = [];
+function renderSummaryScenes(){
+  if(!S) return;
+  el.sumGardenArt.innerHTML = sumGrew.map(function(o){
+    return sceneBlock(o, state.pts[o], "+"+centsTxt(S.gained[o]), false, false, true, true);
+  }).join("");
+}
+
 /* ---------------- input ---------------- */
 function padPress(k2){
   if(!S || S.busy) return;
   if(k2==="back"){ S.entry=S.entry.slice(0,-1); sfx.back(); }
   else if(k2==="ok") return submitAnswer();
-  else if(S.entry.length<3){ S.entry+=k2; sfx.tap(); }   // products reach 144
+  else if(S.entry.length<3){ sfx.key(S.entry.length); S.entry+=k2; }   // products reach 144
   el.answerSlot.textContent = S.entry===""?" ":S.entry;
   el.answerSlot.className = "answer-slot"+(S.entry?" filled":"");
 }
@@ -2216,7 +2327,11 @@ function cycleBloom(op,i){
 /* Pieces are earned by practising but positioned by the child: tap the picture
    to drop the next one, drag one that is already there to move it. */
 var bigOp = null;
-function refreshScenes(){ if(bigOp) renderBig(); else renderScenes(); }
+function refreshScenes(){
+  if(bigOp) renderBig();
+  else if(!el.summary.hidden) renderSummaryScenes();
+  else renderScenes();
+}
 function renderBig(){
   if(!bigOp) return;
   var op=bigOp, p=shownPts(op);
@@ -2239,7 +2354,7 @@ function closeBig(){
   el.bigBody.innerHTML = "";        // or the scene exists twice in the document
   document.body.classList.remove("bigopen");
   try{ if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen(); }catch(e){}
-  renderScenes();
+  if(!el.summary.hidden) renderSummaryScenes(); else renderScenes();
 }
 el.bigClose.addEventListener("click", closeBig);
 document.addEventListener("keydown", function(e){
@@ -2267,7 +2382,10 @@ document.addEventListener("pointerdown", function(e){
   }
   var svg = e.target.closest ? e.target.closest("svg.garden-art") : null;
   if(!svg) return;
-  var card = svg.closest(".garden"); if(!card) return;
+  /* Only a live scene can be placed into or dragged. The summary shows the same
+     picture and must not: it was keyed off "is this a scene" rather than "is
+     this scene interactive", so tapping the summary card quietly placed things. */
+  var card = svg.closest(".garden.live"); if(!card) return;
   var op = card.getAttribute("data-op");
   var piece = e.target.closest(".fl");
   didDrag = false;
@@ -2346,6 +2464,12 @@ function pieceAction(bar, act){
   if(resizePiece(op, sel.i, act==="big" ? 1 : -1)){ sfx.tap(); refreshScenes(); }
 }
 document.addEventListener("click", function(e){
+  /* On the summary card there is nothing to place or drag, so the whole picture
+     is the button — turning the phone then fills the screen with it. */
+  var tb = e.target.closest ? e.target.closest(".garden.tap-big") : null;
+  if(tb && e.target.closest("svg.garden-art")){
+    openBig(tb.getAttribute("data-op")); return;
+  }
   var amt = e.target.closest ? e.target.closest(".garden-pts") : null;
   if(amt){
     state.moneyView = (moneyView()==="dollars") ? "cents" : "dollars";

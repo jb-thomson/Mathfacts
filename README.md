@@ -72,6 +72,14 @@ Input works by tapping the pad, or with the keyboard: digits to enter,
 `Backspace` to delete, `Enter` to submit. Answers can be up to three digits,
 since products reach 144.
 
+Typing has its own voice: a quiet sine with a slow attack and a long tail,
+rather than the short triangle click every other button uses. It happens
+several times a second, so it needs to breathe instead of tick. Successive
+digits in one answer step up A–B–C♯, which makes typing `144` feel like it is
+going somewhere, and backspace falls instead of rising. All of it stays clear
+of the answer chime's own notes — C–D–E ended a three-digit answer on the very
+pitch the chime opens with, and the two ran together as one sound.
+
 ### Finishing counts
 
 A practice day is earned by **working through the whole set**. Stopping partway
@@ -248,9 +256,16 @@ under the scene:
   is hers to set. The steps multiply rather than add, so each tap changes a
   piece by the same proportion whatever size it started at, between 0.55× and
   1.9×.
-- **A colour dot**, on the pieces that have real colour in the paint — flowers,
-  huts, cabins, benches, rovers, solar arrays, crates, landers. A hue shift on a
-  white dome would do nothing, so those don't offer it.
+- **A colour dot**, on every painted piece. It drains the paint of its own
+  colour and re-tints the shading that is left, so it works the same on a red
+  rover and on a white dome. Rotating the hue instead — which is what this did
+  first — moves a rover and does nothing whatever to a dome, which is why domes
+  used to have no colour option at all.
+
+  The first swatch is **as it came**, drawn as a crossed-out circle: a piece
+  keeps its own paint until she deliberately changes it. That slot used to show
+  red while the piece was in fact unfiltered, so the swatch named a colour the
+  piece did not have and tapping looked like it did nothing.
 - **✓** puts it down. So does tapping anywhere else.
 
 Dragging still moves a piece, and it stays held afterwards so it can be resized
@@ -265,7 +280,13 @@ inside the ground. **Place for me** scatters the rest for a child who would
 rather not fiddle.
 
 Tap **⤢** on any scene to open it full screen. Turning the phone to landscape
-fills the display; placing and dragging work there too.
+fills the display; placing and dragging work there too. The scene on the
+end-of-session summary opens the same way — there is nothing to place there, so
+the whole picture is the button.
+
+Only a *live* scene accepts placing and dragging. The pointer handling used to
+key off "is this a scene" rather than "is this scene interactive", so tapping
+the summary card quietly placed pieces into the world behind it.
 
 Positions, colours and which thing each piece is are all saved. The starting
 scatter for a save that predates placement comes from a seed derived from the
