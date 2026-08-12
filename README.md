@@ -82,27 +82,62 @@ Stopping takes two taps of the × button — the first arms it and warns what wi
 happen, and it disarms itself after 3 seconds. A stray tap can't end a set the
 child was most of the way through.
 
-## Learning what the operation means
+## Learn
 
 Practice assumes a child already knows what `7 × 3` *is*. Not every child does,
 and drilling a fact you don't understand is just memorising noise. **Learn**, on
-the home screen, is the part that explains it.
+the home screen, is the part that explains it. Nothing here is scored and
+nothing is recorded — it is a place to look, not a test.
 
-Pick an operation, drag the two sliders, and the same sum is shown three ways at
-once:
+Three topics: **Numbers**, **Money** and **Clock**.
 
-- **A number line** with the jump drawn on it. Addition counts on, subtraction
-  counts back, and multiplication and division are drawn as **equal hops** — six
-  hops of three, rather than one leap to eighteen — so grouping is visible
-  rather than asserted.
-- **Counters** underneath: two rows to add, a row with some crossed out to
-  subtract, equal rows for the times tables.
-- **A sentence**: "3 groups with 4 in each group makes 12 altogether."
+### Numbers, in two versions
 
-The line explains the movement and the counters explain the amount, and
-different children need different ones, which is why both are on screen.
-Nothing here is scored and nothing is recorded — it is a place to look, not a
-test.
+Numbers exists twice, behind a **Drag the line / Sliders** toggle, because the
+two are being compared with a real child before one is thrown away.
+
+**Drag the line** is the newer one, and the default. Two ideas shape it:
+
+- **Direct manipulation.** In the sliders version the child moves a control and
+  the picture reacts somewhere else. That is one step of indirection too many
+  for someone with no number sense yet. Here she drags the dot along the line
+  itself, and the hop stretches under her finger.
+- **No operation tabs.** A child who doesn't know what division means cannot
+  pick it from a menu. So the *direction of the drag* names the operation
+  instead — drag right and it says you added, drag left and it says you took
+  away. Addition and subtraction stop being two topics and become two
+  directions.
+
+Underneath, **Make rows** handles × and ÷ with an array rather than hops on a
+line. Drag across the dots and a rectangle of them fills in, captioned both
+ways at once: *5 rows of 6 is 30*, and *30 dots put into 5 rows is 6 in each
+row*. That pair is exactly what a child has to learn is the same fact, and
+equal hops on a number line are the abstraction that should come after
+grouping, not before it.
+
+**Sliders** is the original, unchanged: four operation tabs, two sliders, and
+the same sum shown as a number line, as counters, and as a sentence, with ×
+and ÷ drawn as equal hops.
+
+### Money
+
+A jar you tap coins into — 1¢, 5¢, 10¢, 25¢ — with a running total above it.
+The lesson is that a hundred small things become one big thing, so at 99¢ it
+says what is about to happen, and on the hundredth cent the coins visibly
+*leave the jar* and come back as a single dollar. Overshooting keeps the
+change, in the fewest coins. Coins are laid out in rows rather than scattered,
+because coins that move between taps can't be counted.
+
+### Clock
+
+A clock face with a **draggable minute hand**. The hour hand is never set — it
+is derived from the total minutes, so it creeps round the whole time the long
+hand is moving, and "the hour changed" is just the moment it finishes a lap. A
+shaded wedge shows how far into the current hour you are, and the caption
+counts down the minutes left in it.
+
+Dragging tracks which way the hand crossed the top, so going forward past 12
+adds an hour and going back over it takes one away.
 
 ## Which facts get asked
 
@@ -310,6 +345,21 @@ Nothing is uploaded or shared. If storage is unavailable — Safari private
 browsing, for instance — the app falls back to keeping state in memory for the
 session rather than failing.
 
+### Keeping a copy
+
+`localStorage` is per-origin, so **updating the app does not touch a save** —
+new code ships, the data stays, and older shapes upgrade on load. But a wiped
+browser or a lost phone is a lost world, and iOS Safari evicts storage for
+sites unused for about a week unless they have been added to the Home Screen.
+So: **Save a copy** writes the whole save out as a `.json` file, and **Load a
+copy** reads one back. No server is involved.
+
+A file being loaded is checked before it is trusted — it must be an object with
+a numeric version and the expected fields, and it must not come from a newer
+version of Numo than the one reading it. Anything else is refused with a
+message rather than being allowed to overwrite a real world. An older save is
+run up the same migration ladder `loadState()` uses.
+
 ```js
 {
   v: 7,
@@ -352,6 +402,9 @@ so they can never fall out of step with the real history.
 
 Older saves migrate automatically on load, and the upgraded save is written
 immediately so the migration survives even if the app is closed straight away:
+
+Loading a copy from a file uses the same ladder, so a backup taken months ago
+still opens.
 
 - **v6** (before the space scenes had things of their own) re-rolls which thing
   each already-placed space piece is — until v7 they were all the same shape, so

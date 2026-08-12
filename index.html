@@ -208,6 +208,26 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 .slider::-moz-range-thumb{width:30px;height:30px;border-radius:50%;background:var(--teal);
   border:2.5px solid var(--ink)}
 .learn-say{margin-top:14px;font-size:15px;font-weight:700;color:var(--muted);text-align:center;min-height:42px}
+.backup-note{margin:8px 0 0;text-align:center;font-size:12.5px;font-weight:800;color:var(--good-deep)}
+.backup-note.bad{color:var(--coral-deep)}
+.card-title.mt{margin-top:26px}
+/* the two ways into Numbers, and the three topics */
+.tabs.topic button{flex:1;font-size:14px}
+.tabs.mode{margin-bottom:10px}
+.tabs.mode button{flex:1;font-size:13px}
+/* the draggable handles on the number line and the clock */
+.learn-art .grab{cursor:grab;touch-action:none}
+.learn-art{touch-action:none}
+/* money */
+.coin-row{display:flex;gap:8px;margin-top:12px}
+.coin-row button{flex:1;font-family:'Fredoka';font-weight:600;font-size:16px;padding:11px 0;
+  border-radius:12px;background:var(--sun-tint);border:2px solid var(--ink);
+  box-shadow:0 3px 0 var(--ink-soft);color:var(--ink)}
+.coin-row.alt{margin-top:8px}
+.coin-row .ghost.sm{flex:1;font-size:13px;padding:8px 0;background:var(--paper);box-shadow:none}
+.money-pop{animation:moneyPop .55s ease}
+@keyframes moneyPop{0%{opacity:0;transform:translateY(-8px)}100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.money-pop{animation:none}}
 .big[hidden]{display:none}
 .big{position:fixed;inset:0;z-index:40;background:var(--ink);display:flex;flex-direction:column;
   padding:calc(8px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom))}
@@ -493,33 +513,88 @@ body.bigopen{overflow:hidden}
 
       <p class="footer-row">
         <button id="renameBtn" class="linkish">Change name</button>
+        <button id="saveBtn" class="linkish">Save a copy</button>
+        <button id="loadBtn" class="linkish">Load a copy</button>
         <button id="resetBtn" class="linkish">Erase all progress</button>
       </p>
-      <p class="version-line">v12 · your world, your size</p>
+      <input id="loadFile" type="file" accept="application/json,.json" hidden>
+      <p id="backupNote" class="backup-note" hidden></p>
+      <p class="version-line">v13 · learn it your way</p>
     </section>
 
     <!-- ============ LEARN ============ -->
     <section id="screen-learn" hidden>
-      <div class="card">
-        <h2 class="card-title">What does it mean? <span class="note">drag the dots</span></h2>
-        <div class="tabs" id="learnTabs" role="tablist" aria-label="Operation">
-          <button data-op="add" role="tab" aria-selected="true" aria-label="Addition">+</button>
-          <button data-op="sub" role="tab" aria-selected="false" aria-label="Subtraction">−</button>
-          <button data-op="mul" role="tab" aria-selected="false" aria-label="Multiplication">×</button>
-          <button data-op="div" role="tab" aria-selected="false" aria-label="Division">÷</button>
-        </div>
-        <p id="learnSum" class="learn-sum"></p>
-        <div id="learnArt"></div>
-        <div class="learn-ctl">
-          <label id="learnLabA" for="learnA"></label>
-          <input id="learnA" class="slider" type="range" min="0" max="12" value="3">
-        </div>
-        <div class="learn-ctl">
-          <label id="learnLabB" for="learnB"></label>
-          <input id="learnB" class="slider" type="range" min="0" max="12" value="4">
-        </div>
-        <p id="learnSay" class="learn-say"></p>
+      <div class="tabs topic" id="learnTopics" role="tablist" aria-label="What to explore">
+        <button data-topic="numbers" role="tab" aria-selected="true">Numbers</button>
+        <button data-topic="money" role="tab" aria-selected="false">Money</button>
+        <button data-topic="clock" role="tab" aria-selected="false">Clock</button>
       </div>
+
+      <!-- ---- numbers, in two versions while we work out which is clearer ---- -->
+      <div class="card" id="learnNumbers">
+        <div class="tabs mode" id="learnMode" role="tablist" aria-label="How to explore">
+          <button data-mode="drag" role="tab" aria-selected="true">Drag the line</button>
+          <button data-mode="slide" role="tab" aria-selected="false">Sliders</button>
+        </div>
+
+        <div id="learnDrag">
+          <h2 class="card-title">Move along the line <span class="note">drag either dot</span></h2>
+          <p id="dragSum" class="learn-sum"></p>
+          <div id="dragArt"></div>
+          <p id="dragSay" class="learn-say"></p>
+          <h2 class="card-title mt">Make rows <span class="note">drag across the dots</span></h2>
+          <div id="gridArt"></div>
+          <p id="gridSay" class="learn-say"></p>
+        </div>
+
+        <div id="learnSlide" hidden>
+          <h2 class="card-title">What does it mean? <span class="note">move the sliders</span></h2>
+          <div class="tabs" id="learnTabs" role="tablist" aria-label="Operation">
+            <button data-op="add" role="tab" aria-selected="true" aria-label="Addition">+</button>
+            <button data-op="sub" role="tab" aria-selected="false" aria-label="Subtraction">−</button>
+            <button data-op="mul" role="tab" aria-selected="false" aria-label="Multiplication">×</button>
+            <button data-op="div" role="tab" aria-selected="false" aria-label="Division">÷</button>
+          </div>
+          <p id="learnSum" class="learn-sum"></p>
+          <div id="learnArt"></div>
+          <div class="learn-ctl">
+            <label id="learnLabA" for="learnA"></label>
+            <input id="learnA" class="slider" type="range" min="0" max="12" value="3">
+          </div>
+          <div class="learn-ctl">
+            <label id="learnLabB" for="learnB"></label>
+            <input id="learnB" class="slider" type="range" min="0" max="12" value="4">
+          </div>
+          <p id="learnSay" class="learn-say"></p>
+        </div>
+      </div>
+
+      <!-- ---- money: 100 pennies becoming one dollar ---- -->
+      <div class="card" id="learnMoney" hidden>
+        <h2 class="card-title">Filling up a dollar <span class="note">tap the coins</span></h2>
+        <p id="moneySum" class="learn-sum"></p>
+        <div id="moneyArt"></div>
+        <div class="coin-row" id="coinRow">
+          <button data-cents="1">1¢</button>
+          <button data-cents="5">5¢</button>
+          <button data-cents="10">10¢</button>
+          <button data-cents="25">25¢</button>
+        </div>
+        <div class="coin-row alt">
+          <button id="moneyBack" class="ghost sm">Take one back</button>
+          <button id="moneyClear" class="ghost sm">Empty the jar</button>
+        </div>
+        <p id="moneySay" class="learn-say"></p>
+      </div>
+
+      <!-- ---- clock: the hour creeping round with the minutes ---- -->
+      <div class="card" id="learnClock" hidden>
+        <h2 class="card-title">Where the hour goes <span class="note">drag the long hand</span></h2>
+        <p id="clockSum" class="learn-sum"></p>
+        <div id="clockArt"></div>
+        <p id="clockSay" class="learn-say"></p>
+      </div>
+
       <button id="learnHome" class="ghost">Back home</button>
     </section>
 
@@ -1693,7 +1768,11 @@ var el = {};
  "opChip","factLine","answerSlot","feedback","sessionPoints","soundBtn","sumTitle","sumPoints","sumStopped","sumDone",
  "sumGardens","sumGardensTitle","sumGardenArt","sumMastered","sumMasteredChips","sumWork","sumWorkChips","sumNote",
  "againBtn","homeBtn","welcome","heroTag","worldTitle","stepName","stepWorld","nameInput","nameNext","worldPick",
- "bigScene","bigBody","bigTitle","bigClose","bigHint"
+ "bigScene","bigBody","bigTitle","bigClose","bigHint",
+ "saveBtn","loadBtn","loadFile","backupNote",
+ "learnTopics","learnMode","learnNumbers","learnDrag","learnSlide","dragSum","dragArt","dragSay",
+ "gridArt","gridSay","learnMoney","moneySum","moneyArt","moneySay","coinRow","moneyBack","moneyClear",
+ "learnClock","clockSum","clockArt","clockSay"
 ].forEach(function(id){
   el[id.replace("screen-","")] = document.getElementById(id);
 });
@@ -2141,6 +2220,66 @@ el.resetBtn.addEventListener("click", function(){
   }
 });
 
+/* ---------------- keeping a copy ----------------
+   Everything lives in this browser's storage and nowhere else, which is the
+   point — but it also means a wiped browser or a lost phone is a lost world.
+   These write the save out as a plain file and read one back, so there is
+   something to restore from. No server is involved. */
+function backupSay(msg, bad){
+  el.backupNote.hidden = false;
+  el.backupNote.textContent = msg;
+  el.backupNote.classList.toggle("bad", !!bad);
+}
+el.saveBtn.addEventListener("click", function(){
+  try{
+    var blob = new Blob([JSON.stringify(state)], {type:"application/json"});
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "numo-" + (state.name || "save").replace(/[^A-Za-z0-9_-]/g,"") +
+                 "-" + todayKey() + ".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function(){ URL.revokeObjectURL(url); }, 4000);
+    sfx.tap();
+    backupSay("Saved. Keep that file somewhere safe.");
+  }catch(e){ backupSay("This browser wouldn't let me save a file.", true); }
+});
+el.loadBtn.addEventListener("click", function(){ el.loadFile.click(); });
+el.loadFile.addEventListener("change", function(){
+  var f = this.files && this.files[0];
+  this.value = "";                       // so the same file can be picked twice
+  if(!f) return;
+  var fr = new FileReader();
+  fr.onload = function(){
+    var loaded;
+    try{ loaded = JSON.parse(fr.result); }
+    catch(e){ backupSay("That file isn't a Numo save.", true); return; }
+    /* Check it before trusting it: a wrong file here would wipe a real world. */
+    if(!loaded || typeof loaded !== "object" || typeof loaded.v !== "number" ||
+       !loaded.facts || !loaded.pts){
+      backupSay("That file isn't a Numo save.", true); return;
+    }
+    if(loaded.v > 7){ backupSay("That save comes from a newer Numo than this one.", true); return; }
+    state = fill(loaded.v === 7 ? loaded : migrateForward(loaded));
+    saveState();
+    sfx.star();
+    boot();
+    backupSay("Loaded " + (state.name || "that save") + "’s world.");
+  };
+  fr.onerror = function(){ backupSay("Couldn't read that file.", true); };
+  fr.readAsText(f);
+});
+/* the same upgrade ladder loadState() walks, for a save arriving from a file */
+function migrateForward(o){
+  if(o.v===6) return migrateV7(o);
+  if(o.v===5) return migrateV7(migrateV6(o));
+  if(o.v===4) return migrateV7(migrateV6(migrateV5(o)));
+  if(o.v===3) return migrateV7(migrateV6(migrateV5(migrateV4(o))));
+  if(o.v===2) return migrateV7(migrateV6(migrateV5(migrateV4(migrateV2(o)))));
+  if(o.v===1) return migrateV7(migrateV6(migrateV5(migrateV4(migrate(o)))));
+  return o;
+}
+
 /* ---------------- first run: name, then world ----------------
    The world is asked once and then fixed, so the picker states that plainly
    and nothing in the app reassigns it afterwards. */
@@ -2332,14 +2471,291 @@ function renderLearn(){
   el.learnArt.innerHTML = numberLine(op,a,b) + counters(op,a,b);
   el.learnSay.textContent = learnWords(op,a,b);
 }
+
+/* ---------------- learn, version two ----------------
+   The sliders version above works, but a child moves a control and the picture
+   reacts somewhere else — one step of indirection too many for someone who has
+   no number sense yet. Here she drags the thing she is reasoning about.
+
+   There are also no operation tabs. A child who doesn't know what division
+   means can't choose it from a menu, so the direction of the drag names the
+   operation instead: right is adding, left is taking away. */
+var LN_MAX = 20;                       // as far as the line goes
+var lnFrom = 3, lnTo = 7;
+
+function lnX(v){ return 18 + (264 * v / LN_MAX); }
+function lnV(x){ return Math.max(0, Math.min(LN_MAX, Math.round((x-18)/264*LN_MAX))); }
+
+function dragLine(){
+  var W=300, H=104, y=64;
+  var fwd = lnTo >= lnFrom, col = fwd ? "#0FA3A8" : "#EF5B3F";
+  var s='<svg class="learn-art" id="lnSvg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+
+        'A number line from 0 to '+LN_MAX+', with a dot on '+lnFrom+' and a dot on '+lnTo+'">';
+  s+='<path d="M18 '+y+' H282" stroke="'+INK+'" stroke-width="2.5" stroke-linecap="round"/>';
+  for(var v=0; v<=LN_MAX; v++){
+    var tx=n1(lnX(v)), big=(v%5===0);
+    s+='<path d="M'+tx+' '+(y-(big?6:3))+' V'+(y+(big?6:3))+'" stroke="'+INK+
+       '" stroke-width="'+(big?2:1.3)+'"/>';
+    if(big) s+='<text x="'+tx+'" y="'+(y+20)+'" text-anchor="middle" font-family="Nunito,sans-serif" '+
+              'font-size="10" font-weight="800" fill="#68738F">'+v+'</text>';
+  }
+  /* the hop, drawn as an arc that follows the finger */
+  if(lnTo!==lnFrom){
+    var f=lnX(lnFrom), t=lnX(lnTo), mid=(f+t)/2, h=Math.min(34, 12+Math.abs(t-f)*0.3);
+    s+='<path d="M'+n1(f)+' '+(y-8)+' Q'+n1(mid)+' '+n1(y-8-h*1.6)+' '+n1(t)+' '+(y-8)+
+       '" fill="none" stroke="'+col+'" stroke-width="3" stroke-linecap="round"/>';
+    var dir = fwd ? -1 : 1;
+    s+='<path d="M'+n1(t)+' '+(y-8)+' l'+n1(7*dir)+' -7 M'+n1(t)+' '+(y-8)+' l'+n1(7*dir)+' 7"'+
+       ' stroke="'+col+'" stroke-width="3" stroke-linecap="round" fill="none"/>';
+    s+='<text x="'+n1(mid)+'" y="'+n1(y-16-h*1.05)+'" text-anchor="middle" font-family="Fredoka,sans-serif" '+
+       'font-size="15" font-weight="700" fill="'+col+'">'+(fwd?"+":"−")+Math.abs(lnTo-lnFrom)+'</text>';
+  }
+  /* the two handles — deliberately fat, because they are dragged by a finger */
+  s+='<g class="grab" data-h="from"><circle cx="'+n1(lnX(lnFrom))+'" cy="'+y+'" r="15" fill="transparent"/>'+
+     '<circle cx="'+n1(lnX(lnFrom))+'" cy="'+y+'" r="8" fill="#FFFEFB" stroke="'+INK+'" stroke-width="2.6"/></g>';
+  s+='<g class="grab" data-h="to"><circle cx="'+n1(lnX(lnTo))+'" cy="'+y+'" r="15" fill="transparent"/>'+
+     '<circle cx="'+n1(lnX(lnTo))+'" cy="'+y+'" r="9.5" fill="'+col+'" stroke="'+INK+'" stroke-width="2.6"/></g>';
+  return s+'</svg>';
+}
+function renderDragLine(){
+  var d = lnTo - lnFrom;
+  el.dragSum.textContent = d===0 ? lnFrom+" + 0 = "+lnFrom
+    : d>0 ? lnFrom+" + "+d+" = "+lnTo
+          : lnFrom+" − "+(-d)+" = "+lnTo;
+  el.dragArt.innerHTML = dragLine();
+  el.dragSay.textContent = d===0
+    ? "Both dots are on "+lnFrom+". Drag the coloured one to move."
+    : d>0 ? "You started at "+lnFrom+" and went "+d+" forward. That is adding."
+          : "You started at "+lnFrom+" and went "+(-d)+" back. That is taking away.";
+}
+
+/* ---- rows of dots: multiplication and division as one picture ----
+   An array says both things at once — 3 rows of 4 is 12, and 12 in 3 rows is 4
+   each — which is exactly the pair a child has to learn are the same fact. */
+var GR_MAX = 10, grRows = 3, grCols = 4;
+var GR_X0 = 26, GR_Y0 = 18, GR_STEP = 25;
+
+function rowsArt(){
+  var W=300, H=GR_Y0 + GR_MAX*GR_STEP - 8;
+  var s='<svg class="learn-art" id="grSvg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+
+        grRows+' rows of '+grCols+' dots, '+(grRows*grCols)+' altogether">';
+  for(var r=0;r<GR_MAX;r++) for(var c=0;c<GR_MAX;c++){
+    var cx=GR_X0+c*GR_STEP, cy=GR_Y0+r*GR_STEP, on=(r<grRows && c<grCols);
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+(on?9:3)+'" fill="'+(on?"#8455E0":"#E7DFCB")+
+       '"'+(on?' stroke="'+INK+'" stroke-width="2"':'')+'/>';
+  }
+  /* a band round each row, so "rows of" is something you can see */
+  for(var r2=0;r2<grRows;r2++){
+    var y=GR_Y0+r2*GR_STEP;
+    s+='<rect x="'+(GR_X0-13)+'" y="'+(y-13)+'" width="'+(grCols*GR_STEP+2)+'" height="26" rx="13" '+
+       'fill="none" stroke="#8455E0" stroke-width="1.6" opacity=".45"/>';
+  }
+  return s+'</svg>';
+}
+function renderRows(){
+  el.gridArt.innerHTML = rowsArt();
+  el.gridSay.innerHTML = grRows+" rows of "+grCols+" is <b>"+(grRows*grCols)+"</b>."+
+    "<br>And "+(grRows*grCols)+" dots put into "+grRows+" rows is "+grCols+" in each row.";
+}
+
+/* ---------------- learn: money ----------------
+   The lesson is that a hundred small things become one big thing. So the jar
+   holds real coins, the count climbs one coin at a time, and at 100 the pennies
+   are visibly swapped for a dollar rather than the number just ticking over. */
+var COINS = {
+  1:  {r:11, fill:"#C98A5A", ring:"#8A5A33", label:"1"},
+  5:  {r:13, fill:"#C9CFD8", ring:"#7C8794", label:"5"},
+  10: {r:9.5,fill:"#D8DEE6", ring:"#7C8794", label:"10"},
+  25: {r:15, fill:"#C9CFD8", ring:"#7C8794", label:"25"}
+};
+var money = { jar: [], dollars: 0, justMade: false };
+function moneyCents(){
+  var t=0; for(var i=0;i<money.jar.length;i++) t+=money.jar[i];
+  return t;
+}
+function moneyArt(){
+  var W=300, H=150;
+  var s='<svg class="learn-art" viewBox="0 0 '+W+' '+H+
+        '" role="img" aria-label="'+money.dollars+' dollars and '+moneyCents()+' cents">';
+  /* the dollars already made, stacked on the left */
+  s+='<text x="14" y="20" font-family="Nunito,sans-serif" font-size="11" font-weight="800" fill="#68738F">Dollars</text>';
+  for(var d=0; d<Math.min(money.dollars, 6); d++){
+    var by=118-d*13, newest=(d===money.dollars-1 && money.justMade);
+    s+='<g'+(newest?' class="money-pop"':'')+'>'+
+       '<rect x="14" y="'+by+'" width="72" height="30" rx="4" fill="#BFD9B4" stroke="'+
+       (newest?"#FFC93C":"#3F6B39")+'" stroke-width="'+(newest?3:2)+'"/>'+
+       '<circle cx="50" cy="'+(by+15)+'" r="9" fill="#D8E9CE" stroke="#3F6B39" stroke-width="1.4"/>'+
+       '<text x="50" y="'+(by+19)+'" text-anchor="middle" font-family="Fredoka,sans-serif" font-size="12" '+
+       'font-weight="700" fill="#3F6B39">$1</text></g>';
+  }
+  if(money.dollars>6)
+    s+='<text x="92" y="140" font-family="Nunito,sans-serif" font-size="11" font-weight="800" fill="#68738F">+'+(money.dollars-6)+'</text>';
+  if(!money.dollars)
+    s+='<rect x="14" y="118" width="72" height="30" rx="4" fill="none" stroke="#C7CEDA" stroke-width="2" stroke-dasharray="5 4"/>';
+
+  /* the coins in the jar, on the right */
+  s+='<text x="110" y="20" font-family="Nunito,sans-serif" font-size="11" font-weight="800" fill="#68738F">Cents</text>';
+  /* laid out in rows rather than scattered: a child counts them, and coins
+     that jump around between taps are hard to count */
+  var PER=6, CAP=30, n=Math.min(money.jar.length, CAP);
+  for(var i=0;i<n;i++){
+    var c=COINS[money.jar[i]] || COINS[1];
+    var cx=132+(i%PER)*27, cy=42+Math.floor(i/PER)*20;
+    s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+c.r+'" fill="'+c.fill+'" stroke="'+c.ring+'" stroke-width="2"/>'+
+       '<text x="'+cx+'" y="'+(cy+3.5)+'" text-anchor="middle" font-family="Fredoka,sans-serif" '+
+       'font-size="'+(c.r>12?11:9)+'" font-weight="700" fill="'+c.ring+'">'+c.label+'</text>';
+  }
+  if(money.jar.length>CAP)
+    s+='<text x="286" y="144" text-anchor="end" font-family="Nunito,sans-serif" font-size="11" font-weight="800" fill="#68738F">+'+(money.jar.length-CAP)+' more</text>';
+  return s+'</svg>';
+}
+function moneyText(){
+  var c=moneyCents(), d=money.dollars;
+  return "$"+d+"."+(c<10?"0":"")+c;
+}
+function renderMoney(){
+  var c=moneyCents();
+  el.moneySum.textContent = moneyText();
+  el.moneyArt.innerHTML = moneyArt();
+  el.moneySay.textContent = money.justMade
+    ? "100 cents filled up! They swapped for one whole dollar."
+    : c===99 ? "99 cents. One more penny and it turns into a dollar."
+    : c===0  ? (money.dollars ? "Nothing left over — just whole dollars." : "Tap a coin to drop it in.")
+    : (100-c)+" more cents to make a dollar.";
+  money.justMade = false;
+}
+function addCoin(v){
+  money.jar.push(v);
+  if(moneyCents() >= 100){
+    /* a hundred cents leave the jar together and come back as one dollar */
+    var over = moneyCents() - 100;
+    money.jar = [];
+    while(over > 0){                      // keep the change, in the fewest coins
+      var pick = over>=25?25 : over>=10?10 : over>=5?5 : 1;
+      money.jar.push(pick); over -= pick;
+    }
+    money.dollars++;
+    money.justMade = true;
+    sfx.star();
+  }else sfx.tap();
+  renderMoney();
+}
+
+/* ---------------- learn: the clock ----------------
+   The thing to see is that the hour hand never jumps. It creeps the whole time
+   the minute hand is going round, and "the hour changed" is just the moment it
+   finishes a lap. So the hour hand is driven by the total minutes, never set. */
+var clockMins = 3*60 + 0;              // minutes past 12, 0..719
+var clockFlash = 0;
+function clockAngle(mins){ return (mins%60)/60*360; }
+function hand(cx, cy, len, deg, w, col){
+  var a=(deg-90)*Math.PI/180;
+  return '<path d="M'+cx+' '+cy+' L'+n1(cx+Math.cos(a)*len)+' '+n1(cy+Math.sin(a)*len)+
+         '" stroke="'+col+'" stroke-width="'+w+'" stroke-linecap="round"/>';
+}
+function clockArt(){
+  var W=300, H=228, cx=150, cy=104, R=92;
+  var m=((clockMins%720)+720)%720, hourF=m/60;
+  var s='<svg class="learn-art" id="ckSvg" viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+
+        clockText()+'">';
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="'+R+'" fill="#FFFEFB" stroke="'+INK+'" stroke-width="3"/>';
+  /* the minute ring, with the hour marks picked out */
+  for(var i=0;i<60;i++){
+    var a=(i*6-90)*Math.PI/180, big=(i%5===0);
+    var r1=R-(big?11:5), r2=R-2;
+    s+='<path d="M'+n1(cx+Math.cos(a)*r1)+' '+n1(cy+Math.sin(a)*r1)+' L'+
+       n1(cx+Math.cos(a)*r2)+' '+n1(cy+Math.sin(a)*r2)+'" stroke="'+(big?INK:"#B9C0CF")+
+       '" stroke-width="'+(big?2.6:1.2)+'" stroke-linecap="round"/>';
+    if(big){
+      var n=(i/5)||12, ra=R-24;
+      s+='<text x="'+n1(cx+Math.cos(a)*ra)+'" y="'+n1(cy+Math.sin(a)*ra+5)+'" text-anchor="middle" '+
+         'font-family="Fredoka,sans-serif" font-size="15" font-weight="700" fill="'+INK+'">'+n+'</text>';
+    }
+  }
+  /* how far round this hour we are — the hour hand's progress, made visible */
+  var sweep=(m%60)/60*360;
+  if(sweep>0.5){
+    var a0=-90*Math.PI/180, a1=(sweep-90)*Math.PI/180, rr=R-34;
+    s+='<path d="M'+cx+' '+cy+' L'+n1(cx+Math.cos(a0)*rr)+' '+n1(cy+Math.sin(a0)*rr)+
+       ' A'+rr+' '+rr+' 0 '+(sweep>180?1:0)+' 1 '+n1(cx+Math.cos(a1)*rr)+' '+n1(cy+Math.sin(a1)*rr)+
+       ' Z" fill="#0FA3A8" opacity=".13"/>';
+  }
+  s+=hand(cx, cy, R-40, (hourF%12)*30, 8.5, INK);          // hour, driven by the minutes
+  s+=hand(cx, cy, R-16, clockAngle(m), 5, "#EF5B3F");       // minute
+  s+='<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="'+INK+'"/>';
+  /* the fat invisible handle on the end of the minute hand */
+  var ma=(clockAngle(m)-90)*Math.PI/180;
+  s+='<g class="grab" data-h="min"><circle cx="'+n1(cx+Math.cos(ma)*(R-16))+'" cy="'+
+     n1(cy+Math.sin(ma)*(R-16))+'" r="20" fill="transparent"/>'+
+     '<circle cx="'+n1(cx+Math.cos(ma)*(R-16))+'" cy="'+n1(cy+Math.sin(ma)*(R-16))+
+     '" r="8" fill="#EF5B3F" stroke="'+INK+'" stroke-width="2.4"/></g>';
+  s+='<text x="150" y="218" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11.5" '+
+     'font-weight="800" fill="#68738F">'+(60-(m%60))+' minutes until the hour changes</text>';
+  return s+'</svg>';
+}
+function clockText(){
+  var m=((clockMins%720)+720)%720, h=Math.floor(m/60)||12, mm=m%60;
+  return h+":"+(mm<10?"0":"")+mm;
+}
+function renderClock(){
+  el.clockSum.textContent = clockText();
+  el.clockArt.innerHTML = clockArt();
+  var mm=((clockMins%720)+720)%720 % 60;
+  el.clockSay.textContent = clockFlash
+    ? "A whole lap of the long hand — so the hour changed."
+    : mm===0 ? "Right on the hour. Drag the long hand all the way round."
+    : "The short hand has crept "+mm+" minutes into this hour. It never jumps.";
+  clockFlash = 0;
+}
+/* Dragging the minute hand has to know which way it crossed the top, or the
+   hour would flip the wrong way whenever the hand passed 12. */
+function setClockFromAngle(deg){
+  var m=((clockMins%720)+720)%720, was=m%60;
+  var now=Math.round(((deg%360)+360)%360/6)%60;
+  var d=now-was;
+  if(d>30) d-=60;                 // dragged backwards over the top
+  else if(d<-30) d+=60;           // dragged forwards over the top
+  var before=Math.floor(m/60);
+  clockMins += d;
+  var after=Math.floor((((clockMins%720)+720)%720)/60);
+  if(after!==before){ clockFlash=1; sfx.star(); }
+  renderClock();
+}
+
+/* ---------------- learn: screen plumbing ---------------- */
+var learnTopic = "numbers", learnMode = "drag";
+function renderLearnScreen(){
+  var t=el.learnTopics.querySelectorAll("button"), i;
+  for(i=0;i<t.length;i++) t[i].setAttribute("aria-selected", String(t[i].dataset.topic===learnTopic));
+  var m=el.learnMode.querySelectorAll("button");
+  for(i=0;i<m.length;i++) m[i].setAttribute("aria-selected", String(m[i].dataset.mode===learnMode));
+  el.learnNumbers.hidden = learnTopic!=="numbers";
+  el.learnMoney.hidden   = learnTopic!=="money";
+  el.learnClock.hidden   = learnTopic!=="clock";
+  if(learnTopic==="numbers"){
+    el.learnDrag.hidden  = learnMode!=="drag";
+    el.learnSlide.hidden = learnMode!=="slide";
+    if(learnMode==="drag"){ renderDragLine(); renderRows(); } else renderLearn();
+  }
+  else if(learnTopic==="money") renderMoney();
+  else renderClock();
+}
 function showLearn(){
   el.home.hidden=true; el.learn.hidden=false;
   el.learnA.value=learnA; el.learnB.value=learnB;
-  renderLearn(); window.scrollTo(0,0);
+  renderLearnScreen(); window.scrollTo(0,0);
 }
 el.learnBtn.addEventListener("click", showLearn);
 el.learnHome.addEventListener("click", function(){
   el.learn.hidden=true; el.home.hidden=false; renderHome(); window.scrollTo(0,0);
+});
+el.learnTopics.addEventListener("click", function(e){
+  var b2=e.target.closest("button"); if(!b2) return;
+  learnTopic=b2.dataset.topic; sfx.tap(); renderLearnScreen(); window.scrollTo(0,0);
+});
+el.learnMode.addEventListener("click", function(e){
+  var b2=e.target.closest("button"); if(!b2) return;
+  learnMode=b2.dataset.mode; sfx.tap(); renderLearnScreen();
 });
 el.learnTabs.addEventListener("click", function(e){
   var b2=e.target.closest("button"); if(!b2) return;
@@ -2347,6 +2763,70 @@ el.learnTabs.addEventListener("click", function(e){
 });
 el.learnA.addEventListener("input", function(){ learnA=+this.value; renderLearn(); });
 el.learnB.addEventListener("input", function(){ learnB=+this.value; renderLearn(); });
+el.coinRow.addEventListener("click", function(e){
+  var b2=e.target.closest("button"); if(!b2) return;
+  addCoin(+b2.getAttribute("data-cents"));
+});
+el.moneyBack.addEventListener("click", function(){
+  if(money.jar.length) money.jar.pop();
+  else if(money.dollars){ money.dollars--; }
+  sfx.tap(); renderMoney();
+});
+el.moneyClear.addEventListener("click", function(){
+  money.jar=[]; money.dollars=0; sfx.tap(); renderMoney();
+});
+
+/* ---- dragging inside the learn pictures ---- */
+var lnDrag=null;
+function artPoint(svg, ev, vbW, vbH){
+  var r=svg.getBoundingClientRect();
+  return { x:(ev.clientX-r.left)/r.width*vbW, y:(ev.clientY-r.top)/r.height*vbH };
+}
+el.learn.addEventListener("pointerdown", function(e){
+  var svg=e.target.closest ? e.target.closest("svg.learn-art") : null;
+  if(!svg) return;
+  var grab=e.target.closest(".grab");
+  if(svg.id==="lnSvg"){
+    /* tapping the line anywhere moves the coloured dot there, which is how a
+       child finds out the dots move at all */
+    var h = grab ? grab.getAttribute("data-h") : "to";
+    lnDrag={kind:"line", h:h, svg:svg};
+    var p=artPoint(svg,e,300,104);
+    if(h==="from") lnFrom=lnV(p.x); else lnTo=lnV(p.x);
+    renderDragLine();
+  }else if(svg.id==="grSvg"){
+    lnDrag={kind:"grid", svg:svg};
+    gridFromPoint(svg,e);
+  }else if(svg.id==="ckSvg"){
+    if(!grab) return;
+    lnDrag={kind:"clock", svg:svg};
+  }else return;
+  e.preventDefault();
+  try{ svg.setPointerCapture(e.pointerId); }catch(err){}
+});
+function gridFromPoint(svg, e){
+  var H=GR_Y0 + GR_MAX*GR_STEP - 8, p=artPoint(svg,e,300,H);
+  grCols=Math.max(1, Math.min(GR_MAX, Math.round((p.x-GR_X0)/GR_STEP)+1));
+  grRows=Math.max(1, Math.min(GR_MAX, Math.round((p.y-GR_Y0)/GR_STEP)+1));
+  renderRows();
+}
+document.addEventListener("pointermove", function(e){
+  if(!lnDrag) return;
+  /* the picture is redrawn under the finger, so find the live one each time */
+  var svg=document.getElementById(lnDrag.svg.id) || lnDrag.svg;
+  if(lnDrag.kind==="line"){
+    var p=artPoint(svg,e,300,104), v=lnV(p.x);
+    if(lnDrag.h==="from"){ if(v!==lnFrom){ lnFrom=v; renderDragLine(); } }
+    else if(v!==lnTo){ lnTo=v; renderDragLine(); }
+  }else if(lnDrag.kind==="grid"){
+    gridFromPoint(svg,e);
+  }else{
+    var q=artPoint(svg,e,300,228);
+    setClockFromAngle(Math.atan2(q.y-104, q.x-150)*180/Math.PI + 90);
+  }
+});
+document.addEventListener("pointerup", function(){ lnDrag=null; });
+document.addEventListener("pointercancel", function(){ lnDrag=null; });
 
 renderSoundBtn();
 boot();
