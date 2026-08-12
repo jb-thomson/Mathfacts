@@ -24,9 +24,7 @@ at runtime. That is why `index.html` is around 700 KB despite being a single
 page — it is a whole illustrated app, not a page that fetches one. It works
 offline from the moment it loads, including from `file://`.
 
-The one part of that worth watching is recolouring: every grower carries both
-its painting and a mask of where its body is, which is what makes recolouring
-repaint a part of a thing rather than all of it.
+Most of that weight is the artwork: 75 painted sprites and 8 painted backdrops.
 
 `robots.txt` disallows everything and the page sends `noindex, nofollow,
 noarchive`, so it stays out of search results.
@@ -233,10 +231,10 @@ never blur together:
 
 | | Wild Places | Space |
 | --- | --- | --- |
-| **+** | Forest — conifers, ferns, mushrooms, rabbits, foxes, hedgehogs, a campfire | Rocky planet — habitat domes, rovers, solar arrays, supply crates |
-| **−** | Mountain meadow — wildflowers, bushes, sheep, a fawn, songbirds, a bench | Ice moon — comms masts, dishes, habitats, a rover |
-| **×** | Beach — palms, huts, shells, driftwood, a campfire | Ring giant — dishes, landers, habitats, solar arrays |
-| **÷** | Fjord — cabins, boathouses, jetties, rowboats, sheep | Station deck — modules, domes, arrays, crates |
+| **+** | Forest — conifers, saplings, ferns, four kinds of fungus, bluebells, brambles, acorns, mossy rocks, a hollow log, rabbits, a fox, a hedgehog, a campfire | Rocky planet — geodesic domes, habitat pods, tunnels, rovers, solar arrays, crates |
+| **−** | Mountain meadow — poppies, cornflowers, daisies, lupines, buttercups, foxgloves, marigolds, lavender, chamomile, sheep, a fawn, songbirds | Ice moon — comms masts, an observatory, a command hut, airlocks, dishes, habitats, a rover |
+| **×** | Beach — palms, huts, stilt cabins, shells, driftwood, a campfire | Ring giant — dishes, a greenhouse, landers, a two-storey habitat, solar arrays |
+| **÷** | Fjord — nine different Norwegian houses, boathouses, jetties, rowboats, sheep | Station deck — modules, greenhouses, tunnels, airlocks, domes, crates |
 
 Each scene is a **painted backdrop** with everything earned drawn over it.
 Pieces appear one at a time and grow through three stages as more points come
@@ -246,7 +244,9 @@ front, so a full scene has depth rather than being a row of stickers.
 Every third piece is the tall one — a conifer, a palm, a comms mast — so a
 forest always has a canopy and a colony always has its big structure. The rest
 are picked by weight, and no single thing may appear more than twice, because
-weighting alone will cheerfully line up four identical foxes.
+weighting alone will cheerfully line up four identical foxes. With this many
+kinds available that cap is what makes a full fjord read as a *village* rather
+than as one house repeated.
 
 Two larger copies of that tall piece arrive at milestones to anchor the left and
 right edges, birds or comets cross the sky, and once the meadow is really full a
@@ -260,44 +260,11 @@ under the scene:
   is hers to set. The steps multiply rather than add, so each tap changes a
   piece by the same proportion whatever size it started at, between 0.55× and
   1.9×.
-- **A colour dot**, on every painted piece. The first swatch is **as it came**,
-  drawn as a crossed-out circle: a piece keeps its own paint until she
-  deliberately changes it.
+- That is all it does. **There is no colour button.** Variety comes from there
+  being many kinds of a thing instead of one kind a child can repaint — nine
+  wildflowers rather than one flower in nine colours. A purple version of the
+  same flower is still the same flower.
 
-  Recolouring **repaints the body and leaves everything else exactly as
-  painted**. A dome's shell turns pink and its amber window and wooden seat are
-  untouched; a tree's needles change and its trunk stays brown; the rover keeps
-  its yellow seats and black tyres; the campfire keeps its flames.
-
-  This takes two halves, because **a filter can only ever act on a whole
-  sprite** — any filter alone drags every pixel with it. So the *area* is
-  chosen first. Each sprite carries a small mask marking where its body is,
-  worked out ahead of time by finding the largest run of one material in it.
-  The app draws the sprite untouched, then draws it again through that mask
-  with a filter that replaces the colour and keeps the shading.
-
-  Three earlier attempts are worth recording, because each looked reasonable
-  and each was wrong:
-
-  1. **Rotating the hue.** Moves a red rover; does *nothing whatever* to a
-     white dome. That is why domes had no colour option at all — the flag
-     saying what could be recoloured was describing the filter's limits, not
-     the objects.
-  2. **Flattening the sprite to one colour.** Fixed the dome by ruining
-     everything it touched. A painted thing became a sticker.
-  3. **Tinting in proportion to how plain each pixel is.** Better, and still a
-     global operation: it shifts the whole object's shade rather than
-     repainting a part of it.
-
-  Materials are found by dividing each pixel by its own brightness, so the lit
-  top of a dome and its shaded underside count as the same paint — which is
-  also why a repainted piece keeps its modelling instead of going flat. The
-  largest such run is the body nearly everywhere; a flower is the exception,
-  where the leaves outweigh the bloom and the bloom is the point, so that one
-  names the colour to aim at instead.
-
-  The masks are soft coverage rather than artwork, so they are stored much
-  smaller than the sprites and cost about 86 KB for all thirty.
 - **✓** puts it down. So does tapping anywhere else.
 
 Dragging still moves a piece, and it stays held afterwards so it can be resized
