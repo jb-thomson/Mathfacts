@@ -48,7 +48,7 @@ The four buttons at the top — `+ − × ÷` — are toggles, and any combinati
 works. Pick one for a single-section session, or several to interleave them.
 At least one always stays selected.
 
-Points from each answer go to that operation's own scene, so a mixed session
+Money from each answer goes to that operation's own scene, so a mixed session
 grows several of them at once.
 
 ## How a session works
@@ -60,8 +60,8 @@ set to fit them in, which meant the counter climbed away from the child as she
 worked (`20/20`, then `21/21`, then `22/23`) and the set could never be
 finished. It doesn't do that any more.
 
-- **Correct** — 5 points, plus 3 more if you answered within 4 seconds.
-- **Newly mastered** — a 20 point bonus and a star.
+- **Correct** — 5¢, plus 3¢ more if you answered within 4 seconds.
+- **Newly mastered** — a 20¢ bonus and a star.
 - **Wrong** — the correct answer is shown, and the fact is queued to come back
   about 3 questions later, within the same session.
 
@@ -272,6 +272,51 @@ scatter for a save that predates placement comes from a seed derived from the
 world and section, so an existing world is laid out exactly as it used to look
 rather than rearranged.
 
+## She earns money, not points
+
+A point is a cent. None of the scoring changed — the numbers are the ones they
+always were — but calling them cents makes every total a real amount, and turns
+the running score into something worth reading rather than an abstraction. A
+full scene is **$10**; all four is **$40**.
+
+Each section shows both readings at once: the cents big, the dollars-and-cents
+beside them. **Tap the amount to swap which one leads**, and the choice sticks.
+Both are always on screen, so the conversion is in front of her constantly
+rather than being a thing she has to be taught separately — and the money
+section in **Learn** is where the *why* lives.
+
+The total at the bottom of the home screen adds all four sections up, which is
+the number she will actually quote at you: *"I've got $41.40."*
+
+### The prices are round on purpose
+
+The `i`th thing used to cost `round(25 × i^1.5)`. That is a fine difficulty
+curve and terrible money — "$4.63 to the next one" is not a number a child can
+hold on to. The ladder is now:
+
+| | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Costs** | 25¢ | 50¢ | $1 | $1.75 | $2.50 | $3.50 | $4.50 | $5.50 | $6.75 | $7.75 | $9 | $10 |
+
+Every one of those is **at or below** what the old curve charged, which is the
+property that mattered: changing the prices could only ever hand things out
+earlier, never take back something already standing in a scene.
+
+### Coming up
+
+Under each scene, the next three unlocks with their prices. The first one or
+two are the **actual things**, drawn as darkened silhouettes; the last is a
+question mark. Knowing exactly what is coming is not a reason to keep going, so
+the preview shows enough to pull and not enough to spoil.
+
+The silhouettes are the real items, not decoration. Which thing a slot turns
+into is decided by a seeded roll that also avoids repeating anything more than
+twice, so the preview has to walk every unplaced slot in order carrying the
+same running tally the placement carries — otherwise it promises something the
+placement then declines to give. A slot's *number* is only an identity, handed
+out back-to-front by the seeded layout; what a piece costs depends on how many
+have been earned before it.
+
 ## Rewinding a scene
 
 The fullness bar under each scene is also a scrubber. **Drag it backwards and
@@ -318,12 +363,12 @@ in them" instead.
 
 Each section shows two, and the split is deliberate:
 
-- **The bar inside the scene** tracks **points**. It moves every session and
+- **The bar inside the scene** tracks **money**. It moves every session and
   shows how full the scene is.
 - **The meter below it** tracks **facts mastered** — "84 of 169 facts mastered".
   It moves slowly, and it is the one that decides when a section is *finished*.
 
-Early on the mastery meter reads close to empty. That's honest: the points bar
+Early on the mastery meter reads close to empty. That's honest: the money bar
 is what carries short-term motivation, which is exactly why both are there.
 
 ## Finishing a section
@@ -513,7 +558,7 @@ The constants that shape the difficulty curve are at the top of the script in
 | Constant | Default | Controls |
 | --- | --- | --- |
 | `MAX` | 12 | Largest operand |
-| `GOAL` | 1000 | Points for a comfortably full scene |
+| `GOAL` | 1000 | Cents for a comfortably full scene — $10 |
 | `SESSION_LEN` | 20 | Questions per session — fixed; the target never moves |
 | `FAST_MS` | 4000 | Speed-bonus threshold |
 | `MASTER_MS` | 5000 | Base recall time for mastery (longer answers get more) |
@@ -522,8 +567,7 @@ The constants that shape the difficulty curve are at the top of the script in
 | `UNLOCK_MS` / `UNLOCK_STREAK` | 7000 / 3 | The gentler bar that opens new bands |
 | `RECENT_N` | 5 | How many recent results and times are kept per fact |
 
-Scene pacing lives beside them: `slotThreshold(i)` sets when the `i`th thing
-appears, `BUD_AT` and `BLOOM_AT` how quickly each grows up, and the `MILE` table
+Scene pacing lives beside them: `SLOT_AT` prices each thing in cents, `BUD_AT` and `BLOOM_AT` how quickly each grows up, and the `MILE` table
 when the bigger pieces and sky flourishes arrive. `ITEMS` lists what grows in
 each scene with its sizes and weights, `SCENE[kind].ground` says where each
 painting's usable foreground begins, `LAND` places the completion landmarks, and

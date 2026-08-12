@@ -173,7 +173,27 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 .garden-head{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .garden-name{font-family:'Fredoka';font-weight:600;font-size:16px}
 .garden-name .sym{font-size:18px}
-.garden-pts{margin-left:auto;font-size:13px;font-weight:800;color:var(--muted)}
+/* the amount, which swaps between cents and dollars when it is tapped */
+.garden-pts{margin-left:auto;display:flex;align-items:baseline;gap:6px;padding:2px 8px;
+  border:0;background:none;border-radius:9px;font-family:'Fredoka';font-weight:700;
+  font-size:17px;color:var(--ink);cursor:pointer}
+.garden-pts:hover,.garden-pts:focus-visible{background:var(--bg-dot)}
+.garden-pts small{font-family:'Nunito';font-size:11.5px;font-weight:800;color:var(--muted)}
+.garden-pts.plain{cursor:default;font-size:14px;color:var(--good-deep)}
+/* a glimpse of the next few things, and what they cost */
+.coming{display:flex;align-items:center;gap:7px;margin-top:9px;flex-wrap:wrap}
+.coming-lab{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;
+  letter-spacing:.04em}
+.coming-chip{display:flex;align-items:center;gap:5px;padding:3px 8px 3px 5px;border-radius:99px;
+  background:var(--paper);border:1.5px solid var(--line)}
+.coming-chip img{width:20px;height:20px;object-fit:contain;
+  filter:brightness(0) saturate(0) opacity(.34)}
+.coming-chip b{font-family:'Fredoka';font-weight:600;font-size:12.5px;color:var(--muted)}
+.coming-chip .coming-q{width:20px;text-align:center;font-family:'Fredoka';font-weight:700;
+  font-size:14px;color:var(--muted);opacity:.55}
+.coming-chip.mystery{border-style:dashed}
+.total-line b{font-family:'Fredoka';font-weight:700;color:var(--ink)}
+.total-line small{font-size:12px;color:var(--muted)}
 .badge{width:22px;height:22px;flex:0 0 auto}
 .scene-wrap{position:relative;line-height:0}
 .garden-art{
@@ -566,7 +586,7 @@ body.bigopen{overflow:hidden}
       </p>
       <input id="loadFile" type="file" accept="application/json,.json" hidden>
       <p id="backupNote" class="backup-note" hidden></p>
-      <p class="version-line">v15 · a proper icon on the Home Screen</p>
+      <p class="version-line">v16 · every answer is money now</p>
     </section>
 
     <!-- ============ LEARN ============ -->
@@ -714,6 +734,7 @@ var OP_NAME = {add:"Addition", sub:"Subtraction", mul:"Multiplication", div:"Div
 /* ---------------- state ---------------- */
 var defaultState = function(){ return {
   v:7, sound:true,
+  moneyView:"cents",                  // "cents" | "dollars" — which way the totals read
   finishedOn:{},                      // section -> date first completed; never cleared
   log:{},                             // "YYYY-MM-DD" -> a day's totals, for the report
   placed:{add:[], sub:[], mul:[], div:[]},  // where each earned piece has been put
@@ -739,6 +760,7 @@ function fill(s){
   s.placed = s.placed || {};
   if(s.seedPlaced) s.seedPlaced = true;
   if(s.reroll) s.reroll = true;
+  if(s.moneyView !== "dollars") s.moneyView = "cents";
   if(s.sound === undefined) s.sound = true;
   if(typeof s.name !== "string") s.name = "";
   if(s.world !== "wild" && s.world !== "space") s.world = null;
@@ -1215,7 +1237,34 @@ function seedFor(s){
   return h>>>0;
 }
 function n1(v){ return (Math.round(v*10)/10); }
-function slotThreshold(i){ return Math.round(25*Math.pow(i,1.5)); }
+/* ---------------- money ----------------
+   A point is a cent. Nothing about the scoring changed — the numbers are the
+   ones they always were — but calling them cents makes every total a real
+   amount she can read, and the conversion is a thing worth practising rather
+   than a chore. A full scene is $10, all four is $40. */
+function centsTxt(c){ return Math.round(c)+"¢"; }
+function dollarsTxt(c){
+  c=Math.max(0, Math.round(c));
+  return "$"+Math.floor(c/100)+"."+String(c%100).padStart(2,"0");
+}
+/* for running totals in a sentence: pennies while it is pennies */
+function moneyShort(c){
+  c=Math.max(0, Math.round(c));
+  return c<100 ? centsTxt(c) : dollarsTxt(c);
+}
+function moneyView(){ return state.moneyView==="dollars" ? "dollars" : "cents"; }
+function moneyMain(c){ return moneyView()==="dollars" ? dollarsTxt(c) : centsTxt(c); }
+function moneyAlt(c){ return moneyView()==="dollars" ? centsTxt(c) : dollarsTxt(c); }
+
+/* What each thing costs, in cents. These were 25·i^1.5, which is a fine curve
+   and terrible money — "$4.63 to the next one" is not a number a child can hold
+   on to. Every price is now round, and every one of them is at or below what
+   the old curve charged, so switching to money could only ever hand pieces out
+   early and never take one back. */
+var SLOT_AT = [0, 25, 50, 100, 175, 250, 350, 450, 550, 675, 775, 900, 1000];
+function slotThreshold(i){
+  return i<SLOT_AT.length ? SLOT_AT[i] : SLOT_AT[SLOT_AT.length-1] + (i-SLOTS)*200;
+}
 /* a soft contact shadow, so pieces sit on the painting instead of floating */
 function shadow(x,y,w){
   return '<ellipse cx="'+n1(x)+'" cy="'+n1(y+1)+'" rx="'+n1(w)+'" ry="'+n1(w*0.32)+'" fill="#1B2233" opacity=".18"/>';
@@ -1545,13 +1594,13 @@ function sceneAlt(op,pts,done){
   return OP_NAME[op]+" "+SCENE[kind].label+" with "+n+" "+what+(n===1?"":"s")+".";
 }
 function sceneNote(op,p){
-  if(p<=0) return "Empty — practise "+OP_NAME[op].toLowerCase()+" to start it off.";
+  if(p<=0) return "Empty — practise "+OP_NAME[op].toLowerCase()+" to start it off. First thing costs 25¢.";
   if(p>=GOAL) return "Every corner filled in! ✨";
   for(var i=1;i<=SLOTS;i++){
     var t=slotThreshold(i);
-    if(p<t) return (t-p)+" points to the next one.";
+    if(p<t) return moneyShort(t-p)+" more and something new arrives.";
   }
-  return (GOAL-p)+" points to fill it up.";
+  return moneyShort(GOAL-p)+" more to fill it right up.";
 }
 
 /* ---------------- mastery & completion ----------------
@@ -1646,6 +1695,74 @@ function clearSel(){
   refreshScenes();
   return true;
 }
+/* Which thing each unplaced slot will turn out to be. It has to walk every
+   slot in order, carrying the same running tally placePiece carries, or the
+   preview would promise something the placement then declines to give. */
+function freeSlots(op){
+  var used={}, arr=placedList(op), out=[], i;
+  for(i=0;i<arr.length;i++) used[arr[i].i]=1;
+  for(i=1;i<=SLOTS;i++) if(!used[i]) out.push(i);
+  return out;
+}
+function slotItems(op, want){
+  var kind=kindFor(op), arr=placedList(op), seen={}, used={}, out={}, i;
+  for(i=0;i<arr.length;i++){
+    seen[arr[i].v]=(seen[arr[i].v]||0)+1;
+    used[arr[i].i]=1;
+  }
+  for(i=1;i<=SLOTS;i++){
+    if(used[i]) continue;
+    var v=pickFor(kind, i, mulberry32(seedFor("place"+op+i)), seen);
+    if(want[i]) out[i]=ITEMS[kind] ? ITEMS[kind][v] : null;
+  }
+  return out;
+}
+/* The next few unlocks, priced. Deliberately only a few: knowing everything
+   that is coming is not a reason to keep going, and the last one is left as a
+   question mark on purpose. */
+function upcoming(op, pts){
+  var kind=kindFor(op), out=[], i;
+  /* A slot's number is only an identity — the seeded layout hands them out in
+     back-to-front order, not in the order things are earned. What a piece costs
+     depends on how many have been earned before it, and which slot it lands in
+     depends on which are still free. Pricing by slot number quietly promised
+     the wrong things at the wrong prices. */
+  var have=placedList(op).length, free=freeSlots(op);
+  for(i=0;i<free.length;i++){
+    var n=have+i+1;
+    if(n>SLOTS) break;
+    var t=slotThreshold(n);
+    if(t>pts) out.push({at:t, slot:free[i]});
+  }
+  var extras=[{at:MILE.small, what:"a big one at the edge"},
+              {at:MILE.big,   what:"another big one"},
+              {at:MILE.fly1,  what:"something in the sky"},
+              {at:MILE.fly2,  what:"more in the sky"}];
+  if(kind==="meadow") extras.push({at:MILE.high, what:"a hot air balloon"});
+  for(i=0;i<extras.length;i++)
+    if(extras[i].at>pts) out.push({at:extras[i].at, what:extras[i].what});
+  out.sort(function(a,b){ return a.at-b.at; });
+  return out.slice(0,3);
+}
+function comingStrip(op, pts){
+  var next=upcoming(op, pts);
+  if(!next.length)
+    return '<div class="coming"><span class="coming-lab">Everything here is unlocked ✨</span></div>';
+  var want={}, i;
+  for(i=0;i<next.length;i++) if(next[i].slot) want[next[i].slot]=1;
+  var items=slotItems(op, want);
+  var h='<div class="coming"><span class="coming-lab">Coming up</span>';
+  for(i=0;i<next.length;i++){
+    var n=next[i], last=(i===next.length-1 && next.length>1);
+    var it=n.slot ? items[n.slot] : null, sp=it && SPRITES[it.s];
+    var name = last ? "a surprise" : (it ? it.s : (n.what||"something new"));
+    h+='<span class="coming-chip'+(last?" mystery":"")+'" title="'+name+'">'+
+       (last||!sp ? '<span class="coming-q">'+(last?"?":"✦")+'</span>'
+                  : '<img src="'+sp.uri+'" alt="">')+
+       '<b>'+dollarsTxt(n.at)+'</b></span>';
+  }
+  return h+'</div>';
+}
 function sceneBlock(op, pts, label, interactive, withBar, withNote){
   var done=sectionComplete(op), m=masteryOf(op);
   var scrubbing=!!(scrub && scrub.op===op);
@@ -1659,7 +1776,7 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote){
     : slipped ? short+" fact"+(short===1?"":"s")+" slipped"
     : m.done+" of "+m.total+" facts mastered";
   var note = scrubbing
-    ? "Back at "+pts+" points. Let go to return to now."
+    ? "Back at "+dollarsTxt(pts)+". Let go to return to now."
     : slipped
     ? "Badge at risk — practise "+short+" fact"+(short===1?"":"s")+" to win your gold back."
     : done ? "Finished — every fact mastered! ✨" : sceneNote(op,pts);
@@ -1668,7 +1785,11 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote){
     '<div class="garden-head">'+
       '<span class="garden-name"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</span>'+
       (everDone?completeBadge(slipped):"")+
-      '<span class="garden-pts">'+label+'</span></div>'+
+      (label
+        ? '<span class="garden-pts plain">'+label+'</span>'
+        : '<button class="garden-pts" data-op="'+op+'" aria-label="'+OP_NAME[op]+': '+
+          moneyMain(pts)+'. Tap to show it as '+(moneyView()==="dollars"?"cents":"dollars and cents")+
+          '.">'+moneyMain(pts)+'<small>'+moneyAlt(pts)+'</small></button>')+'</div>'+
     '<div class="scene-wrap">'+sceneSVG(op,pts,interactive,everDone)+
       (interactive?'<button class="scene-expand" data-op="'+op+'" aria-label="Show '+
         OP_NAME[op]+' bigger">⤢</button>':'')+
@@ -1677,7 +1798,7 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote){
         '" role="slider" tabindex="0" aria-label="How full the '+OP_NAME[op]+
         ' scene is — drag back to watch it grow" aria-valuemin="0" aria-valuemax="'+
         (state.pts[op]||0)+'" aria-valuenow="'+pts+'"><i style="width:'+n1(pct)+'%"></i></div>':'')+
-      (scrubbing?'<div class="scrub-tag">'+pts+' pts</div>':'')+'</div>'+
+      (scrubbing?'<div class="scrub-tag">'+dollarsTxt(pts)+'</div>':'')+'</div>'+
     (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
       '<span class="mastery-txt">'+mtxt+'</span></div>':'')+
     (withBar && !scrubbing && waitingCount(op)>0
@@ -1687,6 +1808,7 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote){
         '<button class="tray-auto" data-op="'+op+'">Place for me</button></div>'
       : '')+
     (withNote?'<p class="garden-note">'+note+'</p>':'')+
+    (withBar && !scrubbing ? comingStrip(op, pts) : '')+
     '</div>';
 }
 
@@ -1892,10 +2014,11 @@ function renderScenes(){
     var op=OPS[i], real=state.pts[op]||0, p=shownPts(op);
     total+=real;
     if(sectionComplete(op)) finished++;
-    html+=sceneBlock(op,p,p+" pts",true,true,true);
+    html+=sceneBlock(op,p,"",true,true,true);
   }
   el.gardens.innerHTML=html;
-  el.totalLine.textContent = total+" points in all"+
+  el.totalLine.innerHTML = "You have <b>"+dollarsTxt(total)+"</b> in all <small>"+
+    centsTxt(total)+"</small>"+
     (finished ? " · "+finished+" of "+OPS.length+" finished 🏅" : "");
 }
 function renderGrid(){
@@ -1972,7 +2095,7 @@ function renderQuestion(){
   el.feedback.innerHTML="";
   el.qcount.textContent=S.asked+"/"+S.len;
   el.qbar.style.width=((S.asked-1)/S.len*100)+"%";
-  el.sessionPoints.textContent = S.points>0 ? "+"+S.points+" points this session" : "";
+  el.sessionPoints.textContent = S.points>0 ? "+"+centsTxt(S.points)+" this session" : "";
   var card=document.querySelector(".quiz-card");
   card.classList.remove("pop"); void card.offsetWidth; card.classList.add("pop");
 }
@@ -1988,7 +2111,7 @@ function showFeedback(correct, pts, star){
   }
 }
 function renderSummary(){
-  el.sumPoints.textContent="+"+S.points;
+  el.sumPoints.textContent="+"+centsTxt(S.points);
   el.sumTitle.textContent = !S.completed ? "Stopped early"
     : (S.newlyMastered.length ? "Nice work! 🎉" : "Good practice! 👍");
 
@@ -1996,7 +2119,7 @@ function renderSummary(){
   if(!S.completed){
     var left=Math.max(0, S.len-S.asked+1);
     el.sumStopped.textContent = "You stopped with "+left+" question"+(left===1?"":"s")+
-      " still to go, so this one doesn’t count as a practice day. Your points are safe — finish a whole set to fill in today.";
+      " still to go, so this one doesn’t count as a practice day. Your money is safe — finish a whole set to fill in today.";
   }
 
   /* finishing a whole section is the biggest thing that can happen here */
@@ -2020,7 +2143,7 @@ function renderSummary(){
     ? (grew.length>1 ? "🌱 New "+thing+"s appeared!" : "🌱 A new "+thing+" appeared!")
     : "🌱 Your world";
   el.sumGardenArt.innerHTML = grew.map(function(o){
-    return sceneBlock(o, state.pts[o], "+"+S.gained[o]+" pts", false, false, true);
+    return sceneBlock(o, state.pts[o], "+"+centsTxt(S.gained[o]), false, false, true);
   }).join("");
 
   el.sumMastered.hidden = S.newlyMastered.length===0;
@@ -2098,7 +2221,7 @@ function renderBig(){
   if(!bigOp) return;
   var op=bigOp, p=shownPts(op);
   el.bigTitle.textContent = OP_NAME[op]+" · "+WORLDS[worldOf()].name;
-  el.bigBody.innerHTML = sceneBlock(op, p, p+" pts", true, true, true);
+  el.bigBody.innerHTML = sceneBlock(op, p, "", true, true, true);
 }
 function openBig(op){
   bigOp = op;
@@ -2223,6 +2346,16 @@ function pieceAction(bar, act){
   if(resizePiece(op, sel.i, act==="big" ? 1 : -1)){ sfx.tap(); refreshScenes(); }
 }
 document.addEventListener("click", function(e){
+  var amt = e.target.closest ? e.target.closest(".garden-pts") : null;
+  if(amt){
+    state.moneyView = (moneyView()==="dollars") ? "cents" : "dollars";
+    saveState(); sfx.tap();
+    refreshScenes();
+    var again=(bigOp?el.bigBody:el.gardens).querySelector('.garden-pts[data-op="'+
+      amt.getAttribute("data-op")+'"]');
+    if(again) again.focus();
+    return;
+  }
   var pb = e.target.closest ? e.target.closest(".piece-bar button") : null;
   if(pb){ pieceAction(pb.closest(".piece-bar"), pb.getAttribute("data-act")); return; }
   var ex = e.target.closest ? e.target.closest(".scene-expand") : null;
