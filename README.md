@@ -234,19 +234,12 @@ never blur together:
 | **+** | Forest — conifers, saplings, ferns, four kinds of fungus, bluebells, brambles, acorns, mossy rocks, a hollow log, rabbits, a fox, a hedgehog, a campfire | Rocky planet — geodesic domes, habitat pods, tunnels, rovers, solar arrays, crates |
 | **−** | Mountain meadow — poppies, cornflowers, daisies, lupines, buttercups, foxgloves, marigolds, lavender, chamomile, sheep, a fawn, songbirds | Ice moon — comms masts, an observatory, a command hut, airlocks, dishes, habitats, a rover |
 | **×** | Beach — palms, huts, stilt cabins, shells, driftwood, a campfire | Ring giant — dishes, a greenhouse, landers, a two-storey habitat, solar arrays |
-| **÷** | Fjord — nine different Norwegian houses, boathouses, jetties, rowboats, sheep | Station deck — modules, greenhouses, tunnels, airlocks, domes, crates |
+| **÷** | Fjord — ten different Norwegian houses, boathouses, jetties, rowboats, sheep | Station deck — modules, greenhouses, tunnels, airlocks, domes, crates |
 
 Each scene is a **painted backdrop** with everything earned drawn over it.
 Pieces appear one at a time and grow through three stages as more points come
 in, and they are drawn smaller toward the back of the ground and larger at the
 front, so a full scene has depth rather than being a row of stickers.
-
-Every third piece is the tall one — a conifer, a palm, a comms mast — so a
-forest always has a canopy and a colony always has its big structure. The rest
-are picked by weight, and no single thing may appear more than twice, because
-weighting alone will cheerfully line up four identical foxes. With this many
-kinds available that cap is what makes a full fjord read as a *village* rather
-than as one house repeated.
 
 Two larger copies of that tall piece arrive at milestones to anchor the left and
 right edges, birds or comets cross the sky, and once the meadow is really full a
@@ -261,8 +254,8 @@ under the scene:
   piece by the same proportion whatever size it started at, between 0.55× and
   1.9×.
 - That is all it does. **There is no colour button.** Variety comes from there
-  being many kinds of a thing instead of one kind a child can repaint — nine
-  wildflowers rather than one flower in nine colours. A purple version of the
+  being many kinds of a thing instead of one kind a child can repaint — ten
+  wildflowers rather than one flower in ten colours. A purple version of the
   same flower is still the same flower.
 
 - **✓** puts it down. So does tapping anywhere else.
@@ -270,13 +263,48 @@ under the scene:
 Dragging still moves a piece, and it stays held afterwards so it can be resized
 where it now stands. All of it works the same in the full-screen view.
 
+### What unlocks is a kind of thing
+
+Every scene's things are grouped into named **categories**, and it is the
+category that gets earned. Reach its price and everything inside it is hers to
+plant, as often as she likes: unlocking Mushrooms hands over all three
+mushrooms, not one of them chosen for her.
+
+| Scene | Categories, in the order they open |
+| --- | --- |
+| Forest | Trees · Ferns · Mushrooms · Forest floor · Rocks & logs · Animals · Camp |
+| Meadow | Wildflowers · More flowers · Bushes & rocks · Animals · A bench |
+| Beach | Palms · Huts · Beachcombing · Camp |
+| Fjord | Cabins · Farm buildings · On the water · The village |
+| Rocky planet | Domes · Pods & tunnels · Rovers · Power & supplies |
+| Ice moon | Masts & dishes · Domes · Huts · Machines & supplies |
+| Ring giant | Dishes & panels · Greenhouses · Habitats · Landers |
+| Station deck | Habitats · Tunnels & airlocks · Domes · Machines & supplies |
+
+The first category is free, so the signature thing — trees in a forest, cabins
+in a fjord — is there from the very first piece and the scene reads right
+straight away. The last one always lands at **$7.75**, with the rest spread
+ahead of it on a slightly back-loaded curve, rounded to the nearest quarter like
+every other price. A scene with seven categories therefore opens one every
+$1.25 or so; one with four opens them at $0, $2.00, $4.75 and $7.75.
+
+Unlocking a category is the loudest thing the end-of-session summary can say
+short of finishing a section: *"🎁 You unlocked ferns and mushrooms!"*
+
 ### Placing what you earn
 
-Points **unlock** a piece; the child decides **where it goes**. A tray under the
-scene says how many are waiting, and tapping the picture puts the next one
-there. Anything already down can be dragged to a new spot, and everything stays
-inside the ground. **Place for me** scatters the rest for a child who would
-rather not fiddle.
+Money **unlocks** things; the child decides **which one** and **where it goes**.
+A tray under the scene says how many are waiting, and under it a picker: the
+categories along the top — earned ones in colour, the rest padlocked with their
+price — and the things inside whichever one is open underneath. Tap a thing to
+pick it, tap the picture to put it down. Twelve of the same daisy is a perfectly
+good answer if that is what she wants.
+
+Only the *next* locked category is named, because knowing mushrooms are $2.00
+away is the point; the ones behind it stay a silhouette and a price. Anything
+already down can be dragged to a new spot, and everything stays inside the
+ground. **Surprise me** fills the rest for a child who would rather not fiddle —
+drawn at random from the categories she has earned and never from a locked one.
 
 Tap **⤢** on any scene to open it full screen. Turning the phone to landscape
 fills the display; placing and dragging work there too. The scene on the
@@ -287,10 +315,10 @@ Only a *live* scene accepts placing and dragging. The pointer handling used to
 key off "is this a scene" rather than "is this scene interactive", so tapping
 the summary card quietly placed pieces into the world behind it.
 
-Positions, colours and which thing each piece is are all saved. The starting
-scatter for a save that predates placement comes from a seed derived from the
-world and section, so an existing world is laid out exactly as it used to look
-rather than rearranged.
+Positions, sizes and which thing each piece is are all saved, along with what
+is currently picked in each scene. The starting scatter for a save that predates
+placement comes from a seed derived from the world and section, so an existing
+world is laid out exactly as it used to look rather than rearranged.
 
 ## She earns money, not points
 
@@ -324,18 +352,18 @@ earlier, never take back something already standing in a scene.
 
 ### Coming up
 
-Under each scene, the next three unlocks with their prices. The first one or
-two are the **actual things**, drawn as darkened silhouettes; the last is a
-question mark. Knowing exactly what is coming is not a reason to keep going, so
-the preview shows enough to pull and not enough to spoil.
+Under each scene, the next three unlocks with their prices. A **✦** is another
+thing to put down; a darkened **silhouette** is a whole new category arriving,
+drawn from something that lives inside it; the last is a question mark. Knowing
+exactly what is coming is not a reason to keep going, so the preview shows
+enough to pull and not enough to spoil.
 
-The silhouettes are the real items, not decoration. Which thing a slot turns
-into is decided by a seeded roll that also avoids repeating anything more than
-twice, so the preview has to walk every unplaced slot in order carrying the
-same running tally the placement carries — otherwise it promises something the
-placement then declines to give. A slot's *number* is only an identity, handed
-out back-to-front by the seeded layout; what a piece costs depends on how many
-have been earned before it.
+Which *thing* a piece turns out to be stopped being worth advertising the
+moment she started choosing it herself — but a new kind of thing still is, and
+paying the advertised price opens exactly the category the silhouette came
+from. A slot's *number* is only an identity, handed out back-to-front by the
+seeded layout; what a piece costs depends on how many have been earned before
+it.
 
 ## Rewinding a scene
 
@@ -473,13 +501,15 @@ copy** reads one back. No server is involved.
 
 A file being loaded is checked before it is trusted — it must be an object with
 a numeric version and the expected fields, and it must not come from a newer
-version of Numo than the one reading it. Anything else is refused with a
+version of Numo than the one reading it. One constant, `STATE_V`, is what the
+default, the loader and that guard all read, so bumping the save's shape moves
+them together instead of leaving the file-restore path a version behind. Anything else is refused with a
 message rather than being allowed to overwrite a real world. An older save is
 run up the same migration ladder `loadState()` uses.
 
 ```js
 {
-  v: 7,
+  v: 8,
   name:     "Alex",                             // "" until asked
   world:    "wild",                             // "wild" | "space" — set once, then fixed
   pts:      { add:0, sub:0, mul:0, div:0 },     // points per section, fills the scenes
@@ -490,10 +520,11 @@ run up the same migration ladder `loadState()` uses.
     sub: {}, mul: {}, div: {}
   },
   placed: {                                     // where each earned piece was put
-    add: [ { i:1, v:0, c:2, x:112.4, y:126.1, z:1.15 } ],  // slot, item, colour, position, size
+    add: [ { i:1, v:0, x:112.4, y:126.1, z:1.15 } ],  // slot, item, position, size
     sub: [], mul: [], div: []
   },
-  blooms:     { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // recoloured pieces
+  choice:     { forest: "sapling", meadow: "poppy" },       // what is picked to plant next
+  blooms:     { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // vestigial; colour is gone
   log:        { "2026-08-09": { q:20, c:17, t:41200, m:{add:12,sub:4,mul:0,div:0} } },
   finishedOn: { add: "2026-08-09" },            // first completion; never cleared
   days:       { "2026-08-09": 1 },              // sessions completed per day
@@ -510,6 +541,11 @@ reconstructed after the fact, so it is written as it happens.
 `z` is the size the child set; it is absent until she changes one, and anything
 without it draws at 1×. That is why adding it needed no migration.
 
+`choice` is keyed by *scene kind* rather than by section, because the item
+tables are per scene, and it stores the sprite's **name** rather than its index
+so it survives the tables being added to. Anything picked that is no longer
+reachable quietly falls back to the first thing she can reach.
+
 Per fact: `n` total attempts, `s` current correct streak, `r` last five results
 as 1/0, `t` last five correct response times in milliseconds, and `d` the
 separate days it has been answered correctly on — the thing cramming can't fake.
@@ -523,6 +559,10 @@ immediately so the migration survives even if the app is closed straight away:
 Loading a copy from a file uses the same ladder, so a backup taken months ago
 still opens.
 
+- **v7** (before categories) adds the note of what is picked in each scene, and
+  changes nothing else. Things put down under the old rules stay exactly as they
+  are, wherever they came from — including things from a category she has not
+  reached yet.
 - **v6** (before the space scenes had things of their own) re-rolls which thing
   each already-placed space piece is — until v7 they were all the same shape, so
   every one recorded the same kind. Positions and colours are untouched.
@@ -597,11 +637,17 @@ The constants that shape the difficulty curve are at the top of the script in
 
 Scene pacing lives beside them: `SLOT_AT` prices each thing in cents, `BUD_AT` and `BLOOM_AT` how quickly each grows up, and the `MILE` table
 when the bigger pieces and sky flourishes arrive. `ITEMS` lists what grows in
-each scene with its sizes and weights, `SCENE[kind].ground` says where each
+each scene with its sizes, weights and which category it belongs to;
+`CAT_ORDER` sets the order categories unlock in and `CAT_LABEL` names them, with
+`CAT_TOP` fixing where the last one lands. `SCENE[kind].ground` says where each
 painting's usable foreground begins, `LAND` places the completion landmarks, and
 `WORLDS` maps sections to scenes. Changing any of it restyles every scene
-immediately — the only thing saved per piece is which slot, which item, which
-colour and where, so nothing breaks as long as an item stays in its list.
+immediately — the only thing saved per piece is which slot, which item, where
+and how big, so nothing breaks as long as an item stays in its list.
+
+`CATS` is **built** from `ITEMS` and `CAT_ORDER` rather than written out a
+second time, so an item can never be tagged into a category the picker doesn't
+show, which would leave it earned and unplantable.
 
 Lowering `MASTER_MS` makes mastery stricter; raising `SESSION_LEN` makes
 sessions longer. Changing `LSKEY` starts everyone from scratch.

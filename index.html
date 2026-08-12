@@ -325,6 +325,25 @@ body.bigopen{overflow:hidden}
 .tray-txt{flex:1;font-size:12.5px;font-weight:800;color:var(--ink)}
 .tray-auto{font-family:'Fredoka';font-weight:600;font-size:12px;padding:5px 10px;border-radius:8px;
   background:var(--paper);border:1.5px solid var(--ink);white-space:nowrap}
+/* choosing what to plant: the kinds of thing on top, what's inside underneath */
+.picker{margin-top:7px;border:1.5px solid var(--line);border-radius:10px;
+  padding:7px 8px 8px;background:var(--paper)}
+.pick-cats{display:flex;flex-wrap:wrap;gap:6px}
+.cat-chip{display:flex;align-items:center;gap:5px;padding:2px 9px 2px 3px;border-radius:99px;
+  border:1.5px solid var(--line);background:var(--bg);
+  font:800 12px/1.2 'Nunito',system-ui;color:var(--muted);text-align:left}
+.cat-chip img{width:22px;height:22px;object-fit:contain;flex:none}
+.cat-chip .cat-q{width:22px;text-align:center;color:var(--muted)}
+.cat-chip.on{border-color:var(--ink);border-width:2px;color:var(--ink);background:var(--sun-tint)}
+.cat-chip.locked{border-style:dashed;opacity:.85}
+.cat-chip.locked img{filter:brightness(0) saturate(0) opacity(.3)}
+.pick-types{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.type-chip{width:48px;height:48px;border-radius:10px;padding:3px;
+  border:1.5px solid var(--line);background:var(--bg);display:grid;place-items:center}
+.type-chip img{width:38px;height:38px;object-fit:contain}   /* a percentage
+  height here resolves against an auto grid area, so it has to be a real size */
+.type-chip.on{border-color:var(--ink);border-width:2.5px;background:var(--sun-tint)}
+.pick-hint{margin:8px 2px 0;font-size:12px;font-weight:700;color:var(--muted)}
 .garden-art{touch-action:none}
 .garden-art .fl{cursor:grab}
 .garden.tap-big svg.garden-art{cursor:zoom-in}
@@ -686,7 +705,7 @@ body.bigopen{overflow:hidden}
       </p>
       <input id="loadFile" type="file" accept="application/json,.json" hidden>
       <p id="backupNote" class="backup-note" hidden></p>
-      <p class="version-line">v20 · many kinds of everything</p>
+      <p class="version-line">v21 · you unlock a kind, you pick the thing</p>
     </section>
 
     <!-- ============ LEARN ============ -->
@@ -831,13 +850,17 @@ var OPS = ["add","sub","mul","div"];
 var OP_SYM = {add:"+", sub:"−", mul:"×", div:"÷"};
 var OP_NAME = {add:"Addition", sub:"Subtraction", mul:"Multiplication", div:"Division"};
 
-/* ---------------- state ---------------- */
+/* ---------------- state ----------------
+   One number for the save's shape, so the loader, the file-restore guard and
+   the default all move together when it changes. */
+var STATE_V = 8;
 var defaultState = function(){ return {
-  v:7, sound:true,
+  v:STATE_V, sound:true,
   moneyView:"cents",                  // "cents" | "dollars" — which way the totals read
   finishedOn:{},                      // section -> date first completed; never cleared
   log:{},                             // "YYYY-MM-DD" -> a day's totals, for the report
   placed:{add:[], sub:[], mul:[], div:[]},  // where each earned piece has been put
+  choice:{},                          // scene kind -> which thing she has picked to plant
   name:"",                            // "" until the child tells us
   world:null,                         // "wild" | "space" — chosen once, then fixed
   pts:{add:0, sub:0, mul:0, div:0},   // points per section — decorates the scenes
@@ -858,6 +881,7 @@ function fill(s){
   s.facts = s.facts || {}; s.blooms = s.blooms || {};
   s.days = s.days || {}; s.finishedOn = s.finishedOn || {}; s.log = s.log || {};
   s.placed = s.placed || {};
+  if(!s.choice || typeof s.choice !== "object") s.choice = {};
   if(s.seedPlaced) s.seedPlaced = true;
   if(s.reroll) s.reroll = true;
   if(s.moneyView !== "dollars") s.moneyView = "cents";
@@ -957,22 +981,32 @@ function migrateV7(old){
   if(old.world === "space") old.reroll = true;
   return fill(old);
 }
+/* v7 chose each piece for her. She chooses now, out of the kinds of thing she
+   has earned, so a save gains a note of what is currently picked in each
+   scene. Nothing already placed changes: things put down under the old rules
+   stay exactly as they are, wherever they came from. */
+function migrateV8(old){
+  old.v = 8;
+  old.choice = old.choice || {};
+  return fill(old);
+}
 function loadState(){
   try{
     var raw = localStorage.getItem(LSKEY);
     if(raw){
       var s = JSON.parse(raw);
-      if(s && s.v===7) return fill(s);
-      if(s && s.v===6){ didMigrate = true; return migrateV7(s); }
-      if(s && s.v===5){ didMigrate = true; return migrateV7(migrateV6(s)); }
-      if(s && s.v===4){ didMigrate = true; return migrateV7(migrateV6(migrateV5(s))); }
-      if(s && s.v===3){ didMigrate = true; return migrateV7(migrateV6(migrateV5(migrateV4(s)))); }
-      if(s && s.v===2){ didMigrate = true; return migrateV7(migrateV6(migrateV5(migrateV4(migrateV2(s))))); }
+      if(s && s.v===STATE_V) return fill(s);
+      if(s && s.v===7){ didMigrate = true; return migrateV8(s); }
+      if(s && s.v===6){ didMigrate = true; return migrateV8(migrateV7(s)); }
+      if(s && s.v===5){ didMigrate = true; return migrateV8(migrateV7(migrateV6(s))); }
+      if(s && s.v===4){ didMigrate = true; return migrateV8(migrateV7(migrateV6(migrateV5(s)))); }
+      if(s && s.v===3){ didMigrate = true; return migrateV8(migrateV7(migrateV6(migrateV5(migrateV4(s))))); }
+      if(s && s.v===2){ didMigrate = true; return migrateV8(migrateV7(migrateV6(migrateV5(migrateV4(migrateV2(s)))))); }
     }
     var oldRaw = localStorage.getItem(OLDKEY);
     if(oldRaw){
       var o = JSON.parse(oldRaw);
-      if(o && o.v===1){ didMigrate = true; return migrateV7(migrateV6(migrateV5(migrateV4(migrate(o))))); }
+      if(o && o.v===1){ didMigrate = true; return migrateV8(migrateV7(migrateV6(migrateV5(migrateV4(migrate(o)))))); }
     }
   }catch(e){ if(memFallback) return memFallback; }
   return defaultState();
@@ -1194,111 +1228,232 @@ var SPRITES = {"tree": {"uri": "data:image/webp;base64,UklGRsIbAABXRUJQVlA4WAoAA
    often a slot picks it, and the tall `back` piece is weighted high because
    every third slot takes it anyway. */
 var ITEMS = {
-  forest: [ {s:"tree",      h:[22,38,56], back:1, w:5},
-            {s:"sapling",   h:[10,15,21],         w:2},
-            {s:"fern",      h:[8,12,16],          w:2},
-            {s:"fernb",     h:[8,12,17],          w:2},
-            {s:"mushrooms", h:[6,9,12],           w:2},
-            {s:"flyagaric", h:[7,10,14],          w:2},
-            {s:"toadstools",h:[6,9,12],           w:2},
-            {s:"bluebells", h:[7,10,14],          w:2},
-            {s:"brambles",  h:[6,9,12],           w:1},
-            {s:"acorns",    h:[5,7,10],           w:1},
-            {s:"boulder",   h:[7,10,13],          w:1},
-            {s:"mossyrock", h:[6,9,13],           w:1},
-            {s:"hollowlog", h:[6,9,12],           w:1},
-            {s:"rabbit",    h:[5,7,10],           w:2},
-            {s:"hedgehog",  h:[4,6,8],            w:1},
-            {s:"fox",       h:[7,10,13],          w:1},
-            {s:"logs",      h:[5,7,9],            w:1},
-            {s:"campfire",  h:[6,9,12],           w:1} ],
+  forest: [ {s:"tree",      h:[22,38,56], back:1, w:5, cat:"tree"},
+            {s:"sapling",   h:[10,15,21],         w:2, cat:"tree"},
+            {s:"fern",      h:[8,12,16],          w:2, cat:"fern"},
+            {s:"fernb",     h:[8,12,17],          w:2, cat:"fern"},
+            {s:"mushrooms", h:[6,9,12],           w:2, cat:"mush"},
+            {s:"flyagaric", h:[7,10,14],          w:2, cat:"mush"},
+            {s:"toadstools",h:[6,9,12],           w:2, cat:"mush"},
+            {s:"bluebells", h:[7,10,14],          w:2, cat:"floor"},
+            {s:"brambles",  h:[6,9,12],           w:1, cat:"floor"},
+            {s:"acorns",    h:[5,7,10],           w:1, cat:"floor"},
+            {s:"boulder",   h:[7,10,13],          w:1, cat:"rock"},
+            {s:"mossyrock", h:[6,9,13],           w:1, cat:"rock"},
+            {s:"hollowlog", h:[6,9,12],           w:1, cat:"rock"},
+            {s:"rabbit",    h:[5,7,10],           w:2, cat:"animal"},
+            {s:"hedgehog",  h:[4,6,8],            w:1, cat:"animal"},
+            {s:"fox",       h:[7,10,13],          w:1, cat:"animal"},
+            {s:"logs",      h:[5,7,9],            w:1, cat:"camp"},
+            {s:"campfire",  h:[6,9,12],           w:1, cat:"camp"} ],
   /* The painted wildflowers are mostly stem, so at the old flower's height the
      bloom all but disappeared. They are drawn taller so the flower itself is
      the part you see. */
-  meadow: [ {s:"flower",    h:[11,16,22], w:2},
-            {s:"poppy",     h:[14,21,29],         w:2},
-            {s:"cornflower",h:[15,22,31],         w:2},
-            {s:"daisy",     h:[14,21,29],         w:2},
-            {s:"lupine",    h:[15,22,31],         w:2},
-            {s:"buttercup", h:[13,19,27],         w:2},
-            {s:"foxglove",  h:[15,22,31],         w:2},
-            {s:"marigold",  h:[13,19,27],         w:2},
-            {s:"lavender",  h:[15,22,31],         w:2},
-            {s:"chamomile", h:[14,21,29],         w:2},
-            {s:"bush",      h:[10,15,20],         w:2},
-            {s:"boulder",   h:[7,10,13],          w:1},
-            {s:"sheep",     h:[6,9,12],           w:2},
-            {s:"fawn",      h:[8,12,16],          w:1},
-            {s:"songbird",  h:[4,6,8],            w:1},
-            {s:"bench",     h:[5,7,10], w:1} ],
-  beach:  [ {s:"palm",      h:[20,32,46], back:1, w:5},
-            {s:"hut",       h:[12,18,25], w:2},
-            {s:"stiltcabin",h:[12,18,25],         w:2},
-            {s:"shells",    h:[5,7,10],           w:2},
-            {s:"campfire",  h:[6,9,12],           w:1},
-            {s:"bench",     h:[5,7,10], w:1},
-            {s:"logs",      h:[5,7,9],            w:1},
-            {s:"mossyrock", h:[6,9,13],           w:1} ],
-  fjord:  [ {s:"cabin",     h:[10,15,21], w:2},
-            {s:"logcabin",  h:[11,16,22],         w:2},
-            {s:"turfhouse", h:[10,15,21],         w:2},
-            {s:"farmhouse", h:[11,16,22],         w:2},
-            {s:"stiltcabin",h:[12,18,25],         w:2},
-            {s:"greenshed", h:[10,15,21],         w:2},
-            {s:"redcabin",  h:[11,16,22],         w:2},
-            {s:"stonecottage",h:[10,15,21],       w:2},
-            {s:"timberbarn",h:[11,16,22],         w:2},
-            {s:"chapel",    h:[13,19,27],         w:1},
-            {s:"boathouse", h:[11,16,22],         w:2},
-            {s:"jetty",     h:[6,9,12],           w:2},
-            {s:"rowboat",   h:[5,8,11],           w:2},
-            {s:"sheep",     h:[6,9,12],           w:2},
-            {s:"bench",     h:[5,7,10], w:1} ],
+  meadow: [ {s:"flower",    h:[11,16,22], w:2, cat:"bloom"},
+            {s:"poppy",     h:[14,21,29],         w:2, cat:"bloom"},
+            {s:"cornflower",h:[15,22,31],         w:2, cat:"bloom2"},
+            {s:"daisy",     h:[14,21,29],         w:2, cat:"bloom"},
+            {s:"lupine",    h:[15,22,31],         w:2, cat:"bloom2"},
+            {s:"buttercup", h:[13,19,27],         w:2, cat:"bloom"},
+            {s:"foxglove",  h:[15,22,31],         w:2, cat:"bloom2"},
+            {s:"marigold",  h:[13,19,27],         w:2, cat:"bloom2"},
+            {s:"lavender",  h:[15,22,31],         w:2, cat:"bloom2"},
+            {s:"chamomile", h:[14,21,29],         w:2, cat:"bloom"},
+            {s:"bush",      h:[10,15,20],         w:2, cat:"green"},
+            {s:"boulder",   h:[7,10,13],          w:1, cat:"green"},
+            {s:"sheep",     h:[6,9,12],           w:2, cat:"animal"},
+            {s:"fawn",      h:[8,12,16],          w:1, cat:"animal"},
+            {s:"songbird",  h:[4,6,8],            w:1, cat:"animal"},
+            {s:"bench",     h:[5,7,10], w:1, cat:"rest"} ],
+  beach:  [ {s:"palm",      h:[20,32,46], back:1, w:5, cat:"palm"},
+            {s:"hut",       h:[12,18,25], w:2, cat:"hut"},
+            {s:"stiltcabin",h:[12,18,25],         w:2, cat:"hut"},
+            {s:"shells",    h:[5,7,10],           w:2, cat:"shore"},
+            {s:"campfire",  h:[6,9,12],           w:1, cat:"camp"},
+            {s:"bench",     h:[5,7,10], w:1, cat:"camp"},
+            {s:"logs",      h:[5,7,9],            w:1, cat:"shore"},
+            {s:"mossyrock", h:[6,9,13],           w:1, cat:"shore"} ],
+  fjord:  [ {s:"cabin",     h:[10,15,21], w:2, cat:"cabin"},
+            {s:"logcabin",  h:[11,16,22],         w:2, cat:"cabin"},
+            {s:"turfhouse", h:[10,15,21],         w:2, cat:"farm"},
+            {s:"farmhouse", h:[11,16,22],         w:2, cat:"farm"},
+            {s:"stiltcabin",h:[12,18,25],         w:2, cat:"water"},
+            {s:"greenshed", h:[10,15,21],         w:2, cat:"farm"},
+            {s:"redcabin",  h:[11,16,22],         w:2, cat:"cabin"},
+            {s:"stonecottage",h:[10,15,21],       w:2, cat:"cabin"},
+            {s:"timberbarn",h:[11,16,22],         w:2, cat:"farm"},
+            {s:"chapel",    h:[13,19,27],         w:1, cat:"village"},
+            {s:"boathouse", h:[11,16,22],         w:2, cat:"water"},
+            {s:"jetty",     h:[6,9,12],           w:2, cat:"water"},
+            {s:"rowboat",   h:[5,8,11],           w:2, cat:"water"},
+            {s:"sheep",     h:[6,9,12],           w:2, cat:"village"},
+            {s:"bench",     h:[5,7,10], w:1, cat:"village"} ],
   /* the space sections build a colony rather than a garden */
-  rocky:  [ {s:"dome",      h:[10,15,21], back:1, w:4},
-            {s:"dome2",     h:[11,16,23],         w:2},
-            {s:"pod",       h:[9,13,18],          w:2},
-            {s:"tunnel",    h:[8,12,17],          w:2},
-            {s:"rover",     h:[6,9,12], w:2},
-            {s:"crates",    h:[5,8,11], w:2},
-            {s:"solar",     h:[8,12,16], w:2} ],
-  ice:    [ {s:"mast",      h:[16,26,38], back:1, w:4},
-            {s:"obsdome",   h:[11,16,22],         w:2},
-            {s:"commandhut",h:[10,15,21],         w:2},
-            {s:"airlock",   h:[9,13,18],          w:2},
-            {s:"dish",      h:[9,13,18],          w:2},
-            {s:"hab",       h:[9,14,19],          w:2},
-            {s:"crates",    h:[5,8,11], w:2},
-            {s:"rover",     h:[6,9,12], w:2} ],
-  gas:    [ {s:"dish",      h:[12,18,25], back:1, w:4},
-            {s:"greenhouse",h:[12,18,25],         w:2},
-            {s:"lander2",   h:[9,14,19],          w:2},
-            {s:"twostorey", h:[12,18,25],         w:2},
-            {s:"lander",    h:[9,14,19], w:2},
-            {s:"hab",       h:[9,14,19],          w:2},
-            {s:"solar",     h:[8,12,16], w:2} ],
-  station:[ {s:"hab",       h:[12,18,25], back:1, w:4},
-            {s:"twostorey", h:[12,18,25],         w:2},
-            {s:"tunnel",    h:[8,12,17],          w:2},
-            {s:"airlock",   h:[9,13,18],          w:2},
-            {s:"greenhouse",h:[12,18,25],         w:2},
-            {s:"dome",      h:[10,15,21],         w:2},
-            {s:"solar",     h:[8,12,16], w:2},
-            {s:"crates",    h:[5,8,11], w:2} ]
+  rocky:  [ {s:"dome",      h:[10,15,21], back:1, w:4, cat:"dome"},
+            {s:"dome2",     h:[11,16,23],         w:2, cat:"dome"},
+            {s:"pod",       h:[9,13,18],          w:2, cat:"pod"},
+            {s:"tunnel",    h:[8,12,17],          w:2, cat:"pod"},
+            {s:"rover",     h:[6,9,12], w:2, cat:"rover"},
+            {s:"crates",    h:[5,8,11], w:2, cat:"supply"},
+            {s:"solar",     h:[8,12,16], w:2, cat:"supply"} ],
+  ice:    [ {s:"mast",      h:[16,26,38], back:1, w:4, cat:"mast"},
+            {s:"obsdome",   h:[11,16,22],         w:2, cat:"dome"},
+            {s:"commandhut",h:[10,15,21],         w:2, cat:"hut"},
+            {s:"airlock",   h:[9,13,18],          w:2, cat:"hut"},
+            {s:"dish",      h:[9,13,18],          w:2, cat:"mast"},
+            {s:"hab",       h:[9,14,19],          w:2, cat:"dome"},
+            {s:"crates",    h:[5,8,11], w:2, cat:"gear"},
+            {s:"rover",     h:[6,9,12], w:2, cat:"gear"} ],
+  gas:    [ {s:"dish",      h:[12,18,25], back:1, w:4, cat:"panel"},
+            {s:"greenhouse",h:[12,18,25],         w:2, cat:"glass"},
+            {s:"lander2",   h:[9,14,19],          w:2, cat:"lander"},
+            {s:"twostorey", h:[12,18,25],         w:2, cat:"hab"},
+            {s:"lander",    h:[9,14,19], w:2, cat:"lander"},
+            {s:"hab",       h:[9,14,19],          w:2, cat:"hab"},
+            {s:"solar",     h:[8,12,16], w:2, cat:"panel"} ],
+  station:[ {s:"hab",       h:[12,18,25], back:1, w:4, cat:"hab"},
+            {s:"twostorey", h:[12,18,25],         w:2, cat:"hab"},
+            {s:"tunnel",    h:[8,12,17],          w:2, cat:"dock"},
+            {s:"airlock",   h:[9,13,18],          w:2, cat:"dock"},
+            {s:"greenhouse",h:[12,18,25],         w:2, cat:"dome"},
+            {s:"dome",      h:[10,15,21],         w:2, cat:"dome"},
+            {s:"solar",     h:[8,12,16], w:2, cat:"gear"},
+            {s:"crates",    h:[5,8,11], w:2, cat:"gear"} ]
 };
+/* ---------------- kinds of thing, and choosing between them ----------------
+   A scene's items are grouped into categories, and it is the category that is
+   earned: reach its price and every kind inside it is yours to plant, as often
+   as you like. Twelve pieces used to arrive as twelve surprises; now the
+   surprise is which drawer opens next, and what comes out of it is hers.
+
+   CAT_ORDER is the order they unlock in, so the signature thing — trees in a
+   forest, cabins in a fjord — comes first and the scene reads right from the
+   very first piece. */
+var CAT_LABEL = {
+  tree:"Trees", fern:"Ferns", mush:"Mushrooms", floor:"Forest floor",
+  rock:"Rocks & logs", animal:"Animals", camp:"Camp",
+  bloom:"Wildflowers", bloom2:"More flowers", green:"Bushes & rocks", rest:"A bench",
+  palm:"Palms", hut:"Huts", shore:"Beachcombing",
+  cabin:"Cabins", farm:"Farm buildings", water:"On the water", village:"The village",
+  dome:"Domes", pod:"Pods & tunnels", dock:"Tunnels & airlocks",
+  mast:"Masts & dishes", panel:"Dishes & panels", hab:"Habitats", lander:"Landers",
+  glass:"Greenhouses", rover:"Rovers", supply:"Power & supplies",
+  gear:"Machines & supplies"
+};
+var CAT_ORDER = {
+  forest: ["tree","fern","mush","floor","rock","animal","camp"],
+  meadow: ["bloom","bloom2","green","animal","rest"],
+  beach:  ["palm","hut","shore","camp"],
+  fjord:  ["cabin","farm","water","village"],
+  rocky:  ["dome","pod","rover","supply"],
+  ice:    ["mast","dome","hut","gear"],
+  gas:    ["panel","glass","hab","lander"],
+  station:["hab","dock","dome","gear"]
+};
+/* Built from the tables above rather than written out again, so an item can
+   never be tagged into a category the picker doesn't show — which would leave
+   it earned and unplantable. */
+var CATS = (function(){
+  var out = {};
+  for(var kind in ITEMS){
+    if(!Object.prototype.hasOwnProperty.call(ITEMS,kind)) continue;
+    var order = CAT_ORDER[kind] || [], list = ITEMS[kind], cats = [];
+    for(var i=0;i<order.length;i++){
+      var items = [];
+      for(var j=0;j<list.length;j++) if(list[j].cat===order[i]) items.push(j);
+      if(items.length) cats.push({id:order[i], name:CAT_LABEL[order[i]]||order[i], items:items});
+    }
+    out[kind] = cats;
+  }
+  return out;
+})();
+function catsOf(kind){ return CATS[kind] || []; }
+/* Sprite keys are file names — "fernb", "dome2", "stonecottage". Anything a
+   child reads should be words instead. Only the awkward ones need an entry;
+   the rest already read fine. */
+var ITEM_NAME = {
+  tree:"pine tree", fernb:"fern", flyagaric:"fly agaric", mossyrock:"mossy rock",
+  hollowlog:"hollow log", flower:"wildflower", palm:"palm tree",
+  stiltcabin:"stilt cabin", logcabin:"log cabin", turfhouse:"turf house",
+  greenshed:"green shed", redcabin:"red cabin", stonecottage:"stone cottage",
+  timberbarn:"timber barn", boathouse:"boat house",
+  dome2:"geodesic dome", obsdome:"observatory dome", commandhut:"command hut",
+  lander2:"cargo lander", twostorey:"two-storey hab", hab:"habitat",
+  solar:"solar panels", mast:"comms mast", dish:"dish antenna"
+};
+function itemName(it){ return it ? (ITEM_NAME[it.s] || it.s) : "piece"; }
+/* The last category of any scene lands at $7.75, with the rest spread ahead of
+   it — slightly back-loaded, so the early ones come quickly and there is still
+   something left to earn near the end. Prices are rounded to a quarter, like
+   every other price in the app. */
+var CAT_TOP = 775;
+function catThreshold(kind, i){
+  var n = catsOf(kind).length;
+  if(i<=0 || n<2) return 0;
+  return Math.round(CAT_TOP * Math.pow(Math.min(1,i/(n-1)), 1.25) / 25) * 25;
+}
+function catOpen(kind, i, pts){ return (pts||0) >= catThreshold(kind, i); }
+/* Which categories are unlocked, and everything inside them. */
+function openCats(kind, pts){
+  var out=[], list=catsOf(kind);
+  for(var i=0;i<list.length;i++) if(catOpen(kind,i,pts)) out.push(i);
+  return out;
+}
+function openItems(kind, pts){
+  var out=[], list=catsOf(kind), i, j;
+  for(i=0;i<list.length;i++){
+    if(!catOpen(kind,i,pts)) continue;
+    for(j=0;j<list[i].items.length;j++) out.push(list[i].items[j]);
+  }
+  return out;
+}
+function catOfItem(kind, v){
+  var list=catsOf(kind);
+  for(var i=0;i<list.length;i++) if(list[i].items.indexOf(v)>=0) return i;
+  return -1;
+}
+/* What she has picked to plant next, remembered per scene. Stored by name
+   rather than by index so it survives the item tables being added to. */
+function chosenIndex(kind, pts){
+  var list=ITEMS[kind]||[], open=openItems(kind,pts);
+  var want = state.choice && state.choice[kind];
+  for(var i=0;i<open.length;i++) if(list[open[i]] && list[open[i]].s===want) return open[i];
+  return open.length ? open[0] : 0;
+}
+function chooseItem(kind, v){
+  var it=(ITEMS[kind]||[])[v];
+  if(!it) return false;
+  state.choice = state.choice || {};
+  state.choice[kind] = it.s;
+  saveState();
+  return true;
+}
 function backIndex(kind){
   var list=ITEMS[kind];
   for(var i=0;list && i<list.length;i++) if(list[i].back) return i;
   return -1;
 }
-function pickItem(kind, rnd, skip){
-  var list=ITEMS[kind], tot=0, i;
-  if(!list) return 0;
-  for(i=0;i<list.length;i++) if(i!==skip) tot+=list[i].w;
+/* A weighted pick out of a given set of items. The set matters now: a scene
+   lays itself out from everything it has, but nothing may ever be *placed*
+   from a category that hasn't been earned. */
+function pickWeighted(kind, rnd, pool, skip){
+  var list=ITEMS[kind], cand=[], tot=0, i, v;
+  if(!list || !pool || !pool.length) return 0;
+  for(i=0;i<pool.length;i++){
+    v=pool[i];
+    if(v!==skip && list[v]){ cand.push(v); tot+=list[v].w; }
+  }
+  if(!cand.length) return pool[0];
   var r=rnd()*tot;
-  for(i=0;i<list.length;i++){ if(i===skip) continue; r-=list[i].w; if(r<=0) return i; }
-  return 0;
+  for(i=0;i<cand.length;i++){ r-=list[cand[i]].w; if(r<=0) return cand[i]; }
+  return cand[cand.length-1];
 }
+function allItems(kind){
+  var list=ITEMS[kind]||[], out=[];
+  for(var i=0;i<list.length;i++) out.push(i);
+  return out;
+}
+function pickItem(kind, rnd, skip){ return pickWeighted(kind, rnd, allItems(kind), skip); }
 /* Every third piece is the tall one at the back, so a forest always has a
    canopy and a colony always has its big structure standing over the rest —
    left to weighted chance alone a whole forest can come out as one tree and
@@ -1483,16 +1638,25 @@ function nextSlot(op){
   for(i=1;i<=SLOTS;i++) if(!used[i]) return i;
   return SLOTS;
 }
-function placePiece(op, x, y){
+/* Put down the next earned piece. What it *is* is her choice — whatever is
+   selected in the picker — unless she asked to be surprised, in which case it
+   is drawn at random from the categories she has earned and nothing else. */
+function placePiece(op, x, y, surprise){
   if(waitingCount(op)<=0) return false;
-  var world=worldOf(), kind=kindFor(op,world);
+  var world=worldOf(), kind=kindFor(op,world), pts=state.pts[op]||0;
   var g=SCENE[kind].ground, lo=g-4, hi=134;
-  var slot=nextSlot(op), arr=placedList(op), seen={}, i;
-  for(i=0;i<arr.length;i++) seen[arr[i].v]=(seen[arr[i].v]||0)+1;
-  var rnd=mulberry32(seedFor("place"+op+slot));
-  arr.push({ i:slot, v:pickFor(kind,slot,rnd,seen), c:Math.floor(rnd()*BLOOMS.length),
-                        x:Math.max(10,Math.min(290,x)),
-                        y:Math.max(lo,Math.min(hi,y)) });
+  var slot=nextSlot(op), arr=placedList(op), v, i;
+  if(surprise){
+    var seen={};
+    for(i=0;i<arr.length;i++) seen[arr[i].v]=(seen[arr[i].v]||0)+1;
+    var rnd=mulberry32(seedFor("place"+op+slot)), pool=openItems(kind,pts);
+    v=pickWeighted(kind,rnd,pool,-1);
+    for(var tries=0; seen[v]>=SAME_MAX && tries<4; tries++) v=pickWeighted(kind,rnd,pool,-1);
+  }else{
+    v=chosenIndex(kind, pts);
+  }
+  arr.push({ i:slot, v:v, x:Math.max(10,Math.min(290,x)),
+                          y:Math.max(lo,Math.min(hi,y)) });
   saveState();
   return true;
 }
@@ -1623,10 +1787,11 @@ function drawGrower(kind, f, pts, op, interactive){
   var tappable = stage===2 && interactive;
   /* every piece names itself, whether or not it can be tapped, so a screen
      reader describes the place rather than announcing a dozen anonymous groups */
-  var name = it ? it.s : GROWER_NAME[kind].toLowerCase();
+  var key = it ? it.s : GROWER_NAME[kind].toLowerCase();
+  var name = it ? itemName(it) : key;
   var picked = tappable && sel && sel.op===op && sel.i===f.i;
   var a='class="fl'+(picked?" picked":"")+'" data-op="'+op+'" data-i="'+f.i+
-        '" data-item="'+name+'"';
+        '" data-item="'+key+'"';
   a += tappable
     ? ' tabindex="0" role="button" aria-label="'+name+' '+f.i+'. Tap to resize."'
     : ' role="img" aria-label="'+name+'"';
@@ -1765,10 +1930,19 @@ function sceneAlt(op,pts,done){
 function sceneNote(op,p){
   if(p<=0) return "Empty — practise "+OP_NAME[op].toLowerCase()+" to start it off. First thing costs 25¢.";
   if(p>=GOAL) return "Every corner filled in! ✨";
-  for(var i=1;i<=SLOTS;i++){
-    var t=slotThreshold(i);
-    if(p<t) return moneyShort(t-p)+" more and something new arrives.";
+  /* Whichever comes first: another thing to put down, or a whole new kind of
+     thing to choose from. Naming the kind is what makes it worth saving for. */
+  var kind=kindFor(op), best=null, i, t;
+  for(i=1;i<=SLOTS;i++){
+    t=slotThreshold(i);
+    if(p<t){ best={at:t, what:"something new arrives"}; break; }
   }
+  var cats=catsOf(kind);
+  for(i=0;i<cats.length;i++){
+    t=catThreshold(kind,i);
+    if(p<t){ if(!best || t<best.at) best={at:t, what:"you unlock "+cats[i].name}; break; }
+  }
+  if(best) return moneyShort(best.at-p)+" more and "+best.what+".";
   return moneyShort(GOAL-p)+" more to fill it right up.";
 }
 
@@ -1837,7 +2011,7 @@ function pieceBar(op){
   var rec=pieceAt(op, sel.i);
   if(!rec) return "";
   var kind=kindFor(op), it=itemOf(kind, rec), z=sizeOf(rec);
-  var name=it?it.s:"piece";
+  var name=itemName(it);
   return '<div class="piece-bar" data-op="'+op+'">'+
     '<button class="pb-small" data-act="small"'+(z<=SIZE_MIN+0.001?' disabled':'')+
       ' aria-label="Make this '+name+' smaller">−</button>'+
@@ -1869,19 +2043,6 @@ function freeSlots(op){
   for(i=1;i<=SLOTS;i++) if(!used[i]) out.push(i);
   return out;
 }
-function slotItems(op, want){
-  var kind=kindFor(op), arr=placedList(op), seen={}, used={}, out={}, i;
-  for(i=0;i<arr.length;i++){
-    seen[arr[i].v]=(seen[arr[i].v]||0)+1;
-    used[arr[i].i]=1;
-  }
-  for(i=1;i<=SLOTS;i++){
-    if(used[i]) continue;
-    var v=pickFor(kind, i, mulberry32(seedFor("place"+op+i)), seen);
-    if(want[i]) out[i]=ITEMS[kind] ? ITEMS[kind][v] : null;
-  }
-  return out;
-}
 /* The next few unlocks, priced. Deliberately only a few: knowing everything
    that is coming is not a reason to keep going, and the last one is left as a
    question mark on purpose. */
@@ -1899,6 +2060,14 @@ function upcoming(op, pts){
     var t=slotThreshold(n);
     if(t>pts) out.push({at:t, slot:free[i]});
   }
+  /* The bigger news is the next drawer. Which thing a piece turns out to be is
+     no longer a surprise worth advertising — she picks that herself — but a
+     whole new kind of thing arriving still is. */
+  var cats=catsOf(kind);
+  for(i=0;i<cats.length;i++){
+    var ct=catThreshold(kind,i);
+    if(ct>pts) out.push({at:ct, cat:i});
+  }
   var extras=[{at:MILE.small, what:"a big one at the edge"},
               {at:MILE.big,   what:"another big one"},
               {at:MILE.fly1,  what:"something in the sky"},
@@ -1910,23 +2079,78 @@ function upcoming(op, pts){
   return out.slice(0,3);
 }
 function comingStrip(op, pts){
-  var next=upcoming(op, pts);
+  var kind=kindFor(op), next=upcoming(op, pts);
   if(!next.length)
     return '<div class="coming"><span class="coming-lab">Everything here is unlocked ✨</span></div>';
-  var want={}, i;
-  for(i=0;i<next.length;i++) if(next[i].slot) want[next[i].slot]=1;
-  var items=slotItems(op, want);
-  var h='<div class="coming"><span class="coming-lab">Coming up</span>';
+  var h='<div class="coming"><span class="coming-lab">Coming up</span>', i;
   for(i=0;i<next.length;i++){
     var n=next[i], last=(i===next.length-1 && next.length>1);
-    var it=n.slot ? items[n.slot] : null, sp=it && SPRITES[it.s];
-    var name = last ? "a surprise" : (it ? it.s : (n.what||"something new"));
+    /* A locked category shows the silhouette of one of its things, which says
+       "something new lives here" without saying what. */
+    var cat = (typeof n.cat==="number") ? catsOf(kind)[n.cat] : null;
+    var it = cat ? ITEMS[kind][cat.items[0]] : null, sp = it && SPRITES[it.s];
+    var name = last ? "a surprise" : cat ? cat.name : (n.what || "a new thing to place");
     h+='<span class="coming-chip'+(last?" mystery":"")+'" title="'+name+'">'+
        (last||!sp ? '<span class="coming-q">'+(last?"?":"✦")+'</span>'
                   : '<img src="'+sp.uri+'" alt="">')+
        '<b>'+dollarsTxt(n.at)+'</b></span>';
   }
   return h+'</div>';
+}
+/* ---- choosing what to plant ----
+   Shown only while there is something waiting to go down. The top row is the
+   kinds of thing this scene has, earned ones first and the rest padlocked with
+   their price; the row under it is what is inside whichever kind is open. */
+function pickerStrip(op, pts){
+  var kind=kindFor(op), cats=catsOf(kind), list=ITEMS[kind]||[];
+  if(!cats.length) return "";
+  var v=chosenIndex(kind, pts), openCat=catOfItem(kind, v), i, j;
+  var h='<div class="picker" data-op="'+op+'"><div class="pick-cats">';
+  var firstLocked=true;
+  for(i=0;i<cats.length;i++){
+    var c=cats[i], sp=SPRITES[list[c.items[0]].s];
+    var thumb = sp ? '<img src="'+sp.uri+'" alt="">' : '<span class="cat-q">✦</span>';
+    if(catOpen(kind,i,pts)){
+      h+='<button class="cat-chip'+(i===openCat?" on":"")+'" data-op="'+op+'" data-cat="'+i+
+         '" aria-pressed="'+(i===openCat)+'">'+thumb+'<span>'+c.name+'</span></button>';
+    }else{
+      /* The next one is named, because knowing mushrooms are $2.00 away is the
+         point. The ones after it stay a price and a shadow. */
+      h+='<span class="cat-chip locked" title="'+(firstLocked?c.name:"Something new")+'">'+
+         thumb+'<span>🔒 '+(firstLocked?c.name+" · ":"")+dollarsTxt(catThreshold(kind,i))+'</span></span>';
+      firstLocked=false;
+    }
+  }
+  h+='</div><div class="pick-types">';
+  var open=openCat>=0 ? cats[openCat].items : [];
+  for(j=0;j<open.length;j++){
+    var itm=list[open[j]], isp=SPRITES[itm.s];
+    h+='<button class="type-chip'+(open[j]===v?" on":"")+'" data-op="'+op+'" data-v="'+open[j]+
+       '" aria-pressed="'+(open[j]===v)+'" aria-label="'+itemName(itm)+'" title="'+itemName(itm)+'">'+
+       (isp ? '<img src="'+isp.uri+'" alt="">' : '✦')+'</button>';
+  }
+  return h+'</div><p class="pick-hint">Tap the picture to place your '+
+    itemName(list[v])+'.</p></div>';
+}
+/* Tapping a kind opens it and takes the first thing inside; tapping a thing
+   takes that one. The whole card is redrawn either way, so focus has to be put
+   back on what was tapped or a keyboard lands nowhere. */
+function choosePick(op, how, n){
+  var kind=kindFor(op), pts=state.pts[op]||0, v;
+  if(how==="cat"){
+    var c=catsOf(kind)[n];
+    if(!c || !catOpen(kind,n,pts)) return;
+    v=c.items[0];
+  }else{
+    v=n;
+    if(openItems(kind,pts).indexOf(v)<0) return;    // never a locked thing
+  }
+  if(!chooseItem(kind, v)) return;
+  sfx.tap();
+  refreshScenes();
+  var back=(bigOp?el.bigBody:el.gardens).querySelector('.picker[data-op="'+op+'"] '+
+    (how==="cat" ? '.cat-chip[data-cat="'+n+'"]' : '.type-chip[data-v="'+n+'"]'));
+  if(back) back.focus();
 }
 function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
   var done=sectionComplete(op), m=masteryOf(op);
@@ -1971,8 +2195,9 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
     (withBar && !scrubbing && waitingCount(op)>0
       ? '<div class="tray"><span class="tray-txt">'+waitingCount(op)+
         (waitingCount(op)===1?' new thing':' new things')+
-        ' to place — tap the picture</span>'+
-        '<button class="tray-auto" data-op="'+op+'">Place for me</button></div>'
+        ' to place</span>'+
+        '<button class="tray-auto" data-op="'+op+'">Surprise me</button></div>'+
+        pickerStrip(op, pts)
       : '')+
     (withNote?'<p class="garden-note">'+note+'</p>':'')+
     (withBar && !scrubbing ? comingStrip(op, pts) : '')+
@@ -2301,13 +2526,26 @@ function renderSummary(){
   }
 
   var grew=OPS.filter(function(o){ return S.gained[o]>0; });
-  var thing = worldOf()==="space" ? "dome" : "flower";
   var sprouted=grew.some(function(o){
     return slotCount(state.pts[o]) > slotCount(state.pts[o]-S.gained[o]);
   });
+  /* A whole new kind of thing is bigger news than another piece to put down,
+     so it takes the headline when one has just been earned. */
+  var newCats=[];
+  grew.forEach(function(o){
+    var kind=kindFor(o), before=state.pts[o]-S.gained[o], cats=catsOf(kind);
+    for(var i=0;i<cats.length;i++){
+      var t=catThreshold(kind,i);
+      if(t>before && t<=state.pts[o]) newCats.push(cats[i].name.toLowerCase());
+    }
+  });
   el.sumGardens.hidden = grew.length===0;
-  el.sumGardensTitle.textContent = sprouted
-    ? (grew.length>1 ? "🌱 New "+thing+"s appeared!" : "🌱 A new "+thing+" appeared!")
+  el.sumGardensTitle.textContent = newCats.length
+    ? "🎁 You unlocked "+(newCats.length>1
+        ? newCats.slice(0,-1).join(", ")+" and "+newCats[newCats.length-1]
+        : newCats[0])+"!"
+    : sprouted
+    ? (grew.length>1 ? "🌱 New things to place!" : "🌱 A new thing to place!")
     : "🌱 Your world";
   sumGrew = grew;
   renderSummaryScenes();
@@ -2548,11 +2786,18 @@ document.addEventListener("click", function(e){
     while(waitingCount(op)>0 && guard++ < SLOTS){
       var slot = nextSlot(op), spot = null;
       for(var k=0;k<plan.length;k++) if(plan[k].i===slot) spot = plan[k];
-      placePiece(op, spot?spot.x:150, spot?spot.y:SCENE[kindFor(op)].ground+8);
+      /* "Surprise me" means exactly that — a mix out of everything earned,
+         rather than a dozen copies of whatever happens to be selected. */
+      placePiece(op, spot?spot.x:150, spot?spot.y:SCENE[kindFor(op)].ground+8, true);
     }
     sel=null; sfx.star(); refreshScenes();
     return;
   }
+  /* the picker: a kind on top, one of its things underneath */
+  var cch = e.target.closest ? e.target.closest(".cat-chip[data-cat]") : null;
+  if(cch){ choosePick(cch.getAttribute("data-op"), "cat", +cch.getAttribute("data-cat")); return; }
+  var tch = e.target.closest ? e.target.closest(".type-chip[data-v]") : null;
+  if(tch){ choosePick(tch.getAttribute("data-op"), "v", +tch.getAttribute("data-v")); return; }
   if(didDrag){ didDrag=false; return; }
   var g=e.target.closest ? e.target.closest(".fl[tabindex]") : null;
   if(g){ selectPiece(g.getAttribute("data-op"), +g.getAttribute("data-i")); return; }
@@ -2986,8 +3231,8 @@ el.loadFile.addEventListener("change", function(){
        !loaded.facts || !loaded.pts){
       backupSay("That file isn't a Numo save.", true); return;
     }
-    if(loaded.v > 7){ backupSay("That save comes from a newer Numo than this one.", true); return; }
-    state = fill(loaded.v === 7 ? loaded : migrateForward(loaded));
+    if(loaded.v > STATE_V){ backupSay("That save comes from a newer Numo than this one.", true); return; }
+    state = fill(loaded.v === STATE_V ? loaded : migrateForward(loaded));
     saveState();
     sfx.star();
     boot();
@@ -2998,12 +3243,13 @@ el.loadFile.addEventListener("change", function(){
 });
 /* the same upgrade ladder loadState() walks, for a save arriving from a file */
 function migrateForward(o){
-  if(o.v===6) return migrateV7(o);
-  if(o.v===5) return migrateV7(migrateV6(o));
-  if(o.v===4) return migrateV7(migrateV6(migrateV5(o)));
-  if(o.v===3) return migrateV7(migrateV6(migrateV5(migrateV4(o))));
-  if(o.v===2) return migrateV7(migrateV6(migrateV5(migrateV4(migrateV2(o)))));
-  if(o.v===1) return migrateV7(migrateV6(migrateV5(migrateV4(migrate(o)))));
+  if(o.v===7) return migrateV8(o);
+  if(o.v===6) return migrateV8(migrateV7(o));
+  if(o.v===5) return migrateV8(migrateV7(migrateV6(o)));
+  if(o.v===4) return migrateV8(migrateV7(migrateV6(migrateV5(o))));
+  if(o.v===3) return migrateV8(migrateV7(migrateV6(migrateV5(migrateV4(o)))));
+  if(o.v===2) return migrateV8(migrateV7(migrateV6(migrateV5(migrateV4(migrateV2(o))))));
+  if(o.v===1) return migrateV8(migrateV7(migrateV6(migrateV5(migrateV4(migrate(o))))));
   return o;
 }
 
