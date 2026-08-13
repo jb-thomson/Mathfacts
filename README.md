@@ -256,7 +256,9 @@ under the scene:
 - That is all it does. **There is no colour button.** Variety comes from there
   being many kinds of a thing instead of one kind a child can repaint — ten
   wildflowers rather than one flower in ten colours. A purple version of the
-  same flower is still the same flower.
+  same flower is still the same flower. The tint filters and the per-sprite body
+  masks that recolouring needed are gone from the file too: 184 KB, about a
+  seventh of the app, sitting there for a feature that no longer existed.
 
 - **✓** puts it down. So does tapping anywhere else.
 
@@ -306,7 +308,9 @@ already down can be dragged to a new spot, and everything stays inside the
 ground. **Surprise me** fills the rest for a child who would rather not fiddle —
 drawn at random from the categories she has earned and never from a locked one.
 
-Tap **⤢** on any scene to open it full screen. Turning the phone to landscape
+Tap **⤢** on any scene to open it full screen. The button is not drawn inside
+that view — there is nowhere bigger to go, so offering it again was a control
+that did nothing and read as the app being broken. Turning the phone to landscape
 fills the display; placing and dragging work there too. The scene on the
 end-of-session summary opens the same way — there is nothing to place there, so
 the whole picture is the button.
