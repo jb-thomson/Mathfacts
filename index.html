@@ -308,12 +308,20 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 .big-title{flex:1;font-family:'Fredoka';font-weight:600;font-size:17px;color:#FFFEFB}
 .big-close{width:38px;height:38px;flex:0 0 auto;border-radius:11px;background:var(--paper);
   border:2px solid var(--ink);font-family:'Fredoka';font-weight:600;font-size:20px}
-.big-body{flex:1;display:flex;align-items:center;justify-content:center;min-height:0;overflow:hidden}
-.big-body .garden{margin:0;width:100%;max-height:100%;display:flex;flex-direction:column}
+/* The picture keeps its 2:1 shape, so its height follows from its width and the
+   only way to make it fit a short screen is to cap how wide it may be: at most
+   150vh across is at most 75vh tall, whatever the phone is doing. It used to be
+   told height:100%, which resolves to nothing against a flex track of unknown
+   height — so in landscape the art came out half the window's *width* tall,
+   overflowed the panel, and the controls underneath were painted straight over
+   the middle of it with no way to scroll them back into view. */
+.big-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch}
+.big-body .garden{margin:0 auto;width:100%;max-width:min(100%, 150vh)}
+@supports (height:100dvh){ .big-body .garden{max-width:min(100%, 150dvh)} }
 .big-body .garden-head{color:#FFFEFB}
 .big-body .garden-note,.big-body .mastery-txt{color:#C9D3E6}
-.big-body .scene-wrap{flex:1;min-height:0;display:flex}
-.big-body .garden-art{width:100%;height:100%;object-fit:contain}
+.big-body .garden-art{width:100%;height:auto;display:block}
 .big-hint{flex:0 0 auto;text-align:center;color:#9FB0CC;font-size:12px;font-weight:700;margin-top:4px}
 @media (orientation:landscape){ .big-hint{display:none} }
 body.bigopen{overflow:hidden}
