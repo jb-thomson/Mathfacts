@@ -352,11 +352,21 @@ body.bigopen{overflow:hidden}
 .cat-chip.locked{border-style:dashed;opacity:.85}
 .cat-chip.locked img{filter:brightness(0) saturate(0) opacity(.3)}
 .pick-types{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.type-chip{width:48px;height:48px;border-radius:10px;padding:3px;
-  border:1.5px solid var(--line);background:var(--bg);display:grid;place-items:center}
+.type-chip{width:52px;height:60px;border-radius:10px;padding:3px 3px 4px;
+  border:1.5px solid var(--line);background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:space-between}
 .type-chip img{width:38px;height:38px;object-fit:contain}   /* a percentage
   height here resolves against an auto grid area, so it has to be a real size */
+.type-chip .type-q{font:700 20px/38px 'Fredoka',system-ui;color:var(--muted)}
 .type-chip.on{border-color:var(--ink);border-width:2.5px;background:var(--sun-tint)}
+/* one pip for each of this thing still to be earned */
+.pips{display:flex;gap:3px;align-items:center;height:7px;font-size:9px;line-height:1}
+.pips span{width:6px;height:6px;border-radius:50%;background:var(--good)}
+.pips span.gone{background:var(--line)}
+.type-chip.full{opacity:.5}
+.type-chip.full img{filter:saturate(.25)}
+.type-chip.locked{border-style:dashed}
+.type-chip.locked img{filter:brightness(0) saturate(0) opacity(.28)}
 .pick-hint{margin:8px 2px 0;font-size:12px;font-weight:700;color:var(--muted)}
 .garden-art{touch-action:none}
 .garden-art .fl{cursor:grab}
@@ -627,7 +637,7 @@ body.bigopen{overflow:hidden}
       </p>
       <input id="loadFile" type="file" accept="application/json,.json" hidden>
       <p id="backupNote" class="backup-note" hidden></p>
-      <p class="version-line">v21 · you unlock a kind, you pick the thing</p>
+      <p class="version-line">v22 · earn each thing, and the next one opens</p>
     </section>
 
     <!-- ============ LEARN ============ -->
@@ -1319,26 +1329,69 @@ function openCats(kind, pts){
   for(var i=0;i<list.length;i++) if(catOpen(kind,i,pts)) out.push(i);
   return out;
 }
-function openItems(kind, pts){
-  var out=[], list=catsOf(kind), i, j;
-  for(i=0;i<list.length;i++){
-    if(!catOpen(kind,i,pts)) continue;
-    for(j=0;j<list[i].items.length;j++) out.push(list[i].items[j]);
-  }
-  return out;
-}
 function catOfItem(kind, v){
   var list=catsOf(kind);
   for(var i=0;i<list.length;i++) if(list[i].items.indexOf(v)>=0) return i;
   return -1;
 }
+/* ---- how many of one thing ----
+   Money opens the drawer; the things inside it are still earned one at a time.
+   Each has room for a couple in a scene, and filling that room is what opens
+   the next thing in the drawer — so a scene fills up with a spread of things
+   rather than a dozen of whichever one she liked first, and every one of them
+   had to be worked for. The signature thing gets more room, because a forest
+   with two trees in it is not a forest.
+
+   None of this is stored: what is planted is already on record, and counting it
+   is the whole rule. */
+var ITEM_MAX = 2, BACK_MAX = 5;
+function itemMax(kind, v){
+  var it=(ITEMS[kind]||[])[v];
+  return (it && it.back) ? BACK_MAX : ITEM_MAX;
+}
+function plantedCount(op, v){
+  var arr=placedList(op), n=0;
+  for(var i=0;i<arr.length;i++) if(arr[i].v===v) n++;
+  return n;
+}
+function itemLeft(op, kind, v){ return Math.max(0, itemMax(kind,v) - plantedCount(op,v)); }
+/* How far into a category she has got: the first thing always, and one more for
+   each thing before it that is full. */
+function openInCat(op, kind, ci){
+  var c=catsOf(kind)[ci], n=1, j;
+  if(!c) return 0;
+  for(j=0;j<c.items.length;j++){
+    if(itemLeft(op,kind,c.items[j])>0) break;
+    n=j+2;
+  }
+  return Math.min(n, c.items.length);
+}
+/* Everything she has reached: inside an open category, up to where she has got. */
+function unlockedItems(op, pts){
+  var kind=kindFor(op), cats=catsOf(kind), out=[], i, j, n;
+  for(i=0;i<cats.length;i++){
+    if(!catOpen(kind,i,pts)) continue;
+    n=openInCat(op, kind, i);
+    for(j=0;j<n;j++) out.push(cats[i].items[j]);
+  }
+  return out;
+}
+/* Of those, the ones with room left. If she has filled every last thing she has
+   reached — which the prices are arranged to prevent, but arithmetic is a poor
+   place for optimism — the caps yield rather than leaving a piece she has
+   earned with nowhere to go. */
+function plantableItems(op, pts){
+  var kind=kindFor(op), open=unlockedItems(op,pts), out=[], i;
+  for(i=0;i<open.length;i++) if(itemLeft(op,kind,open[i])>0) out.push(open[i]);
+  return out.length ? out : open;
+}
 /* What she has picked to plant next, remembered per scene. Stored by name
    rather than by index so it survives the item tables being added to. */
-function chosenIndex(kind, pts){
-  var list=ITEMS[kind]||[], open=openItems(kind,pts);
+function chosenIndex(op, pts){
+  var kind=kindFor(op), list=ITEMS[kind]||[], can=plantableItems(op,pts);
   var want = state.choice && state.choice[kind];
-  for(var i=0;i<open.length;i++) if(list[open[i]] && list[open[i]].s===want) return open[i];
-  return open.length ? open[0] : 0;
+  for(var i=0;i<can.length;i++) if(list[can[i]] && list[can[i]].s===want) return can[i];
+  return can.length ? can[0] : -1;
 }
 function chooseItem(kind, v){
   var it=(ITEMS[kind]||[])[v];
@@ -1560,16 +1613,15 @@ function placePiece(op, x, y, surprise){
   if(waitingCount(op)<=0) return false;
   var world=worldOf(), kind=kindFor(op,world), pts=state.pts[op]||0;
   var g=SCENE[kind].ground, lo=g-4, hi=134;
-  var slot=nextSlot(op), arr=placedList(op), v, i;
+  var slot=nextSlot(op), arr=placedList(op), v;
+  /* Either way it comes out of what has room left, so the caps hold however the
+     piece got there. */
   if(surprise){
-    var seen={};
-    for(i=0;i<arr.length;i++) seen[arr[i].v]=(seen[arr[i].v]||0)+1;
-    var rnd=mulberry32(seedFor("place"+op+slot)), pool=openItems(kind,pts);
-    v=pickWeighted(kind,rnd,pool,-1);
-    for(var tries=0; seen[v]>=SAME_MAX && tries<4; tries++) v=pickWeighted(kind,rnd,pool,-1);
+    v=pickWeighted(kind, mulberry32(seedFor("place"+op+slot)), plantableItems(op,pts), -1);
   }else{
-    v=chosenIndex(kind, pts);
+    v=chosenIndex(op, pts);
   }
+  if(v<0 || !(ITEMS[kind]||[])[v]) return false;
   arr.push({ i:slot, v:v, x:Math.max(10,Math.min(290,x)),
                           y:Math.max(lo,Math.min(hi,y)) });
   saveState();
@@ -2009,7 +2061,7 @@ function comingStrip(op, pts){
     var cat = (typeof n.cat==="number") ? catsOf(kind)[n.cat] : null;
     var it = cat  ? list[cat.items[0]]
            : n.big ? list[backIndex(kind)]
-           : n.slot ? list[chosenIndex(kind, pts)]
+           : n.slot ? list[chosenIndex(op, pts)]
            : null;
     var sp = it && SPRITES[it.s];
     var name = last ? "a surprise" : cat ? cat.name
@@ -2028,7 +2080,8 @@ function comingStrip(op, pts){
 function pickerStrip(op, pts){
   var kind=kindFor(op), cats=catsOf(kind), list=ITEMS[kind]||[];
   if(!cats.length) return "";
-  var v=chosenIndex(kind, pts), openCat=catOfItem(kind, v), i, j;
+  var v=chosenIndex(op, pts), openCat=catOfItem(kind, v), i, j;
+  if(v<0) return "";
   var h='<div class="picker" data-op="'+op+'"><div class="pick-cats">';
   var firstLocked=true;
   for(i=0;i<cats.length;i++){
@@ -2045,16 +2098,32 @@ function pickerStrip(op, pts){
       firstLocked=false;
     }
   }
+  /* Inside the open drawer: what she has reached, with a pip for each one she
+     may still plant, then the things she has used up, then whatever is next in
+     the drawer as a shadow. Nothing here has a price — these are earned by
+     planting, not by paying. */
   h+='</div><div class="pick-types">';
-  var open=openCat>=0 ? cats[openCat].items : [];
-  for(j=0;j<open.length;j++){
-    var itm=list[open[j]], isp=SPRITES[itm.s];
-    h+='<button class="type-chip'+(open[j]===v?" on":"")+'" data-op="'+op+'" data-v="'+open[j]+
-       '" aria-pressed="'+(open[j]===v)+'" aria-label="'+itemName(itm)+'" title="'+itemName(itm)+'">'+
-       (isp ? '<img src="'+isp.uri+'" alt="">' : '✦')+'</button>';
+  var items=openCat>=0 ? cats[openCat].items : [], reached=openInCat(op, kind, openCat);
+  for(j=0;j<items.length;j++){
+    var w=items[j], itm=list[w], isp=SPRITES[itm.s];
+    var art = isp ? '<img src="'+isp.uri+'" alt="">' : '<span class="type-q">✦</span>';
+    if(j>=reached){
+      h+='<span class="type-chip locked" title="something else in here" aria-hidden="true">'+
+         art+'<span class="pips lock">🔒</span></span>';
+      break;                                  // one shadow is a hint; five is a list
+    }
+    var left=itemLeft(op,kind,w), max=itemMax(kind,w), pips='', k;
+    for(k=0;k<max;k++) pips+='<span'+(k<left?'':' class="gone"')+'></span>';
+    h+='<button class="type-chip'+(w===v?" on":"")+(left?"":" full")+'" data-op="'+op+
+       '" data-v="'+w+'"'+(left?'':' disabled')+' aria-pressed="'+(w===v)+
+       '" aria-label="'+itemName(itm)+(left?', '+left+' left':', all planted')+
+       '" title="'+itemName(itm)+(left?' · '+left+' left':' · all planted')+'">'+
+       art+'<span class="pips">'+pips+'</span></button>';
   }
+  var mine=itemLeft(op,kind,v);
   return h+'</div><p class="pick-hint">Tap the picture to place your '+
-    itemName(list[v])+'.</p></div>';
+    itemName(list[v])+' — '+mine+' left'+
+    (mine===1 ? ', then the next one opens' : '')+'.</p></div>';
 }
 /* Tapping a kind opens it and takes the first thing inside; tapping a thing
    takes that one. The whole card is redrawn either way, so focus has to be put
@@ -2067,7 +2136,7 @@ function choosePick(op, how, n){
     v=c.items[0];
   }else{
     v=n;
-    if(openItems(kind,pts).indexOf(v)<0) return;    // never a locked thing
+    if(plantableItems(op,pts).indexOf(v)<0) return;   // never a locked or full one
   }
   if(!chooseItem(kind, v)) return;
   sfx.tap();

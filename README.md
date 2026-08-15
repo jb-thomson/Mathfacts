@@ -267,10 +267,8 @@ where it now stands. All of it works the same in the full-screen view.
 
 ### What unlocks is a kind of thing
 
-Every scene's things are grouped into named **categories**, and it is the
-category that gets earned. Reach its price and everything inside it is hers to
-plant, as often as she likes: unlocking Mushrooms hands over all three
-mushrooms, not one of them chosen for her.
+Every scene's things are grouped into named **categories**. Money opens the
+drawer; the things inside it are still earned one at a time.
 
 | Scene | Categories, in the order they open |
 | --- | --- |
@@ -293,20 +291,42 @@ $1.25 or so; one with four opens them at $0, $2.00, $4.75 and $7.75.
 Unlocking a category is the loudest thing the end-of-session summary can say
 short of finishing a section: *"🎁 You unlocked ferns and mushrooms!"*
 
+### Inside a drawer, one thing at a time
+
+An open category does not hand over everything in it. Only its first thing is
+plantable; each has room for **two** of it in a scene — **five** for the
+scene's signature thing, because a forest with two trees in it is not a forest
+— and filling that room is what opens the next thing in the drawer.
+
+So a full scene comes out as a spread of six or so different things, every one
+of them worked for, rather than a dozen copies of whichever one she liked
+first. The picker shows a pip for each one still to be earned, greys out what
+is used up, and puts a padlocked shadow where the next thing will appear.
+
+None of this is stored. What is planted is already on record and counting it is
+the whole rule, so the caps cannot drift out of step with the scene.
+
+A piece earned with nowhere to plant it would be a dead end she cannot spend
+her way out of, so the prices and the caps have to stay in step: at every price,
+in every scene, the room inside what she has opened exceeds the pieces she has
+earned. The tightest is the beach, whose first drawer holds only palms — one
+spare. A test walks every scene at every price and asserts it.
+
 ### Placing what you earn
 
 Money **unlocks** things; the child decides **which one** and **where it goes**.
 A tray under the scene says how many are waiting, and under it a picker: the
 categories along the top — earned ones in colour, the rest padlocked with their
-price — and the things inside whichever one is open underneath. Tap a thing to
-pick it, tap the picture to put it down. Twelve of the same daisy is a perfectly
-good answer if that is what she wants.
+price — and the things inside whichever one is open underneath, each with a pip
+for every one of it still to be earned. Tap a thing to pick it, tap the picture
+to put it down.
 
 Only the *next* locked category is named, because knowing mushrooms are $2.00
 away is the point; the ones behind it stay a silhouette and a price. Anything
 already down can be dragged to a new spot, and everything stays inside the
 ground. **Surprise me** fills the rest for a child who would rather not fiddle —
-drawn at random from the categories she has earned and never from a locked one.
+drawn at random from what she has actually reached, and bound by the same caps,
+so it cannot conjure anything tapping could not.
 
 Tap **⤢** on any scene to open it full screen. The button is not drawn inside
 that view — there is nowhere bigger to go, so offering it again was a control
@@ -656,7 +676,9 @@ each scene with its sizes, weights and which category it belongs to;
 painting's usable foreground begins, `LAND` places the completion landmarks, and
 `WORLDS` maps sections to scenes. Changing any of it restyles every scene
 immediately — the only thing saved per piece is which slot, which item, where
-and how big, so nothing breaks as long as an item stays in its list.
+and how big, so nothing breaks as long as an item stays in its list. `ITEM_MAX`
+and `BACK_MAX` are how many of one thing a scene will hold, which is also how
+long it takes to open the next thing in its drawer.
 
 `CATS` is **built** from `ITEMS` and `CAT_ORDER` rather than written out a
 second time, so an item can never be tagged into a category the picker doesn't
