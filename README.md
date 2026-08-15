@@ -1,12 +1,12 @@
 # Numo — Math Fact Practice
 
-A small, self-contained web app for practising addition, subtraction,
+A small, self-contained web app for practicing addition, subtraction,
 multiplication and division facts.
 
 It adapts to the learner: facts unlock gradually, missed facts come back sooner
 and more often, and facts count as mastered only once they can be recalled both
 correctly and quickly. Each of the four sections has a landscape of its own that
-fills in as it is practised, and is finished only when every fact in it is
+fills in as it is practiced, and is finished only when every fact in it is
 mastered.
 
 Built for phones and tablets, but it works fine with a keyboard on a desktop.
@@ -37,14 +37,14 @@ Numo asks two things the first time it opens:
    and a `Welcome back, NAME` banner fades in and out on each visit. It can be
    changed later from **Change name** at the bottom of the home screen.
 2. **A world** — *Wild Places* or *Space*. The four sections get four different
-   scenes either way, so the picture always says which kind of maths it belongs
+   scenes either way, so the picture always says which kind of math it belongs
    to.
 
 **The world is chosen once and then fixed.** The picker says so plainly, and
 nothing in the app reassigns it afterwards. Erasing all progress is the only way
 to choose again.
 
-## Choosing what to practise
+## Choosing what to practice
 
 The four buttons at the top — `+ − × ÷` — are toggles, and any combination
 works. Pick one for a single-section session, or several to interleave them.
@@ -180,8 +180,8 @@ Every fact is in one of five states, shown as a dot on the fact map:
 | Status | Meaning |
 | --- | --- |
 | **Locked** | In a band that hasn't unlocked yet |
-| **New** | Unlocked but never practised |
-| **Learning** | Practised, not yet mastered |
+| **New** | Unlocked but never practiced |
+| **Learning** | Practiced, not yet mastered |
 | **Tricky** | Missed last time, or missed at least twice in the last five tries |
 | **Mastered** | 5 correct in a row, on **5 different days**, averaging about 5 seconds |
 
@@ -253,11 +253,11 @@ under the scene:
   is hers to set. The steps multiply rather than add, so each tap changes a
   piece by the same proportion whatever size it started at, between 0.55× and
   1.9×.
-- That is all it does. **There is no colour button.** Variety comes from there
+- That is all it does. **There is no color button.** Variety comes from there
   being many kinds of a thing instead of one kind a child can repaint — ten
-  wildflowers rather than one flower in ten colours. A purple version of the
+  wildflowers rather than one flower in ten colors. A purple version of the
   same flower is still the same flower. The tint filters and the per-sprite body
-  masks that recolouring needed are gone from the file too: 184 KB, about a
+  masks that recoloring needed are gone from the file too: 184 KB, about a
   seventh of the app, sitting there for a feature that no longer existed.
 
 - **✓** puts it down. So does tapping anywhere else.
@@ -300,7 +300,7 @@ scene's signature thing, because a forest with two trees in it is not a forest
 
 So a full scene comes out as a spread of six or so different things, every one
 of them worked for, rather than a dozen copies of whichever one she liked
-first. The picker shows a pip for each one still to be earned, greys out what
+first. The picker shows a pip for each one still to be earned, grays out what
 is used up, and puts a padlocked shadow where the next thing will appear.
 
 None of this is stored. What is planted is already on record and counting it is
@@ -316,7 +316,7 @@ spare. A test walks every scene at every price and asserts it.
 
 Money **unlocks** things; the child decides **which one** and **where it goes**.
 A tray under the scene says how many are waiting, and under it a picker: the
-categories along the top — earned ones in colour, the rest padlocked with their
+categories along the top — earned ones in color, the rest padlocked with their
 price — and the things inside whichever one is open underneath, each with a pip
 for every one of it still to be earned. Tap a thing to pick it, tap the picture
 to put it down.
@@ -334,7 +334,10 @@ that did nothing and read as the app being broken.
 
 Turned sideways, the picture takes the screen: the title bar gets out of the
 way, the close button floats over the corner, and the controls sit underneath
-where they can be scrolled to. The art is 2:1 and a phone in landscape is about
+where they can be scrolled to — except the picker, which rides over the top of
+the picture where there is sky rather than ground, so the thing she is about to
+place is in reach without covering where it is going. Locked categories drop
+out of it in there: full screen is for placing, not for shopping. The art is 2:1 and a phone in landscape is about
 2.16:1, so filling the height is as full as it can get — 776×390 on a 844×390
 screen. Fitting it neatly *between* the title and the controls, which is what
 it used to do, left it a stamp in the middle of a navy field. Turning the phone to landscape
@@ -387,7 +390,7 @@ Under each scene, the next three unlocks with their prices, and the treatment
 says how far off each one is:
 
 1. **Painted as it looks.** The nearest thing, shown properly, because it is
-   something she has already seen and the point is to recognise it.
+   something she has already seen and the point is to recognize it.
 2. **The same picture in shadow.** A peek at what is behind it and no more.
 3. **A question mark.** Deliberately withheld.
 
@@ -471,7 +474,7 @@ A section is complete when **every fact in it is mastered** — 169 facts for
 
 ### How long this actually takes
 
-Simulating a child practising one session a day, with the real scheduling and
+Simulating a child practicing one session a day, with the real scheduling and
 mastery code:
 
 | | Addition | Multiplication |
@@ -489,7 +492,7 @@ The home screen shows the four scenes with their points and mastery, a fact map
 per section (tap any dot for that fact's history), and the last 10 days of
 practice.
 
-A streak continues from yesterday, so practising later in the day doesn't break
+A streak continues from yesterday, so practicing later in the day doesn't break
 it — but only completed sets count, as described above.
 
 **Erase all progress** requires two taps — the first arms it, and it disarms
@@ -546,7 +549,7 @@ run up the same migration ladder `loadState()` uses.
   name:     "Alex",                             // "" until asked
   world:    "wild",                             // "wild" | "space" — set once, then fixed
   pts:      { add:0, sub:0, mul:0, div:0 },     // points per section, fills the scenes
-  ops:      ["add","sub"],                      // sections selected to practise
+  ops:      ["add","sub"],                      // sections selected to practice
   unlocked: { add:3, sub:2, mul:2, div:2 },     // highest band unlocked per section
   facts: {
     add: { "3,4": { n, s, r: [], t: [], d: [] } },   // keyed "a,b"
@@ -557,7 +560,7 @@ run up the same migration ladder `loadState()` uses.
     sub: [], mul: [], div: []
   },
   choice:     { forest: "sapling", meadow: "poppy" },       // what is picked to plant next
-  blooms:     { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // vestigial; colour is gone
+  blooms:     { add: { "3": 2 }, sub:{}, mul:{}, div:{} },  // vestigial; color is gone
   log:        { "2026-08-09": { q:20, c:17, t:41200, m:{add:12,sub:4,mul:0,div:0} } },
   finishedOn: { add: "2026-08-09" },            // first completion; never cleared
   days:       { "2026-08-09": 1 },              // sessions completed per day
@@ -598,7 +601,7 @@ still opens.
   reached yet.
 - **v6** (before the space scenes had things of their own) re-rolls which thing
   each already-placed space piece is — until v7 they were all the same shape, so
-  every one recorded the same kind. Positions and colours are untouched.
+  every one recorded the same kind. Positions and colors are untouched.
 - **v5** (before pieces were placed by hand) lays the world out exactly as it
   used to look, from the same seed the old automatic scatter used, so nobody
   opens the app to find their world rearranged.
@@ -607,11 +610,11 @@ still opens.
   easier bar are credited with **3 of the 5 days** now required, so real work
   isn't erased but the too-easy mastery isn't grandfathered in either.
 - **v2** (Numo before worlds) keeps everything — points, facts, bands, days,
-  recoloured growers, sound — and is simply asked for a name and a world.
+  recolored growers, sound — and is simply asked for a name and a world.
 - **v1** (`plusminus.v1`, the original Plus & Minus) carries over facts, bands,
   days and sound. Its single points total predates per-operation scoring, so it
   is split between the addition and subtraction scenes in proportion to how much
-  of each was actually practised. The old key is left in place as a fallback.
+  of each was actually practiced. The old key is left in place as a fallback.
 
 Clearing site data resets progress, as does the erase button.
 
@@ -643,7 +646,7 @@ there.
 
 ```
 index.html               the entire app — markup, styles, fonts, and logic
-manifest.webmanifest     name, colours and icons for an installed app
+manifest.webmanifest     name, colors and icons for an installed app
 apple-touch-icon.png     180px, the iOS Home Screen icon
 icon-192.png             Android
 icon-512.png             Android, and app-store style listings
