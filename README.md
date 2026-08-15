@@ -294,12 +294,12 @@ short of finishing a section: *"🎁 You unlocked ferns and mushrooms!"*
 ### Inside a drawer, one thing at a time
 
 An open category does not hand over everything in it. Only its first thing is
-plantable; each has room for **two** of it in a scene — **five** for the
-scene's signature thing, because a forest with two trees in it is not a forest
+plantable; each has room for **five** of it in a scene — **twelve** for the
+scene's signature thing, because a forest with five trees in it is not a forest
 — and filling that room is what opens the next thing in the drawer.
 
-So a full scene comes out as a spread of six or so different things, every one
-of them worked for, rather than a dozen copies of whichever one she liked
+So a full scene comes out as a spread of eight or ten different things, every
+one of them worked for, rather than forty copies of whichever one she liked
 first. The picker shows a pip for each one still to be earned, grays out what
 is used up, and puts a padlocked shadow where the next thing will appear.
 
@@ -309,8 +309,8 @@ the whole rule, so the caps cannot drift out of step with the scene.
 A piece earned with nowhere to plant it would be a dead end she cannot spend
 her way out of, so the prices and the caps have to stay in step: at every price,
 in every scene, the room inside what she has opened exceeds the pieces she has
-earned. The tightest is the beach, whose first drawer holds only palms — one
-spare. A test walks every scene at every price and asserts it.
+earned. The tightest are the small space scenes, which have only seven or eight kinds
+between them — two spare. A test walks every scene at every price and asserts it.
 
 ### Placing what you earn
 
@@ -376,13 +376,25 @@ The `i`th thing used to cost `round(25 × i^1.5)`. That is a fine difficulty
 curve and terrible money — "$4.63 to the next one" is not a number a child can
 hold on to. The ladder is now:
 
-| | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| **Costs** | 25¢ | 50¢ | $1 | $1.75 | $2.50 | $3.50 | $4.50 | $5.50 | $6.75 | $7.75 | $9 | $10 |
+**Every piece costs a quarter.** All forty of them, which is the $10 a scene has
+always been worth.
 
-Every one of those is **at or below** what the old curve charged, which is the
-property that mattered: changing the prices could only ever hand things out
-earlier, never take back something already standing in a scene.
+It was a rising curve before — 25¢, then 50¢, then $1, up to $10 for the
+twelfth. That had two problems. A scene held twelve things, which is not many
+to show for a month of work; and because a session's money splits across
+whatever she is practicing, a child working on all four sections earned about
+one piece on a good day and nothing on plenty of others. The more she
+practiced, the slower each scene grew.
+
+Forty pieces at a flat quarter fixes both, and happens to be the version a
+child learning money can hold on to: a quarter buys a thing, four quarters buy
+four, and that is the same dollar the Learn section builds out of coins.
+
+| Practicing | Pieces per day | Days to fill a scene | Days with nothing new |
+| --- | --- | --- | --- |
+| one section | 4–6 | 8 | none |
+| two sections | 2–3 | 14 | none |
+| all four | 1–2 | 25 | none |
 
 ### Coming up
 
@@ -671,7 +683,7 @@ The constants that shape the difficulty curve are at the top of the script in
 | `UNLOCK_MS` / `UNLOCK_STREAK` | 7000 / 3 | The gentler bar that opens new bands |
 | `RECENT_N` | 5 | How many recent results and times are kept per fact |
 
-Scene pacing lives beside them: `SLOT_AT` prices each thing in cents, `BUD_AT` and `BLOOM_AT` how quickly each grows up, and the `MILE` table
+Scene pacing lives beside them: `PIECE_COST` prices each thing in cents and `SLOTS` says how many there are, `BUD_AT` and `BLOOM_AT` how quickly each grows up, and the `MILE` table
 when the bigger pieces and sky flourishes arrive. `ITEMS` lists what grows in
 each scene with its sizes, weights and which category it belongs to;
 `CAT_ORDER` sets the order categories unlock in and `CAT_LABEL` names them, with
