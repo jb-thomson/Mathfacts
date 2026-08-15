@@ -186,8 +186,8 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
   letter-spacing:.04em}
 .coming-chip{display:flex;align-items:center;gap:5px;padding:3px 8px 3px 5px;border-radius:99px;
   background:var(--paper);border:1.5px solid var(--line)}
-.coming-chip img{width:20px;height:20px;object-fit:contain;
-  filter:brightness(0) saturate(0) opacity(.34)}
+.coming-chip img{width:20px;height:20px;object-fit:contain}
+.coming-chip img.hint{filter:brightness(0) saturate(0) opacity(.34)}
 .coming-chip b{font-family:'Fredoka';font-weight:600;font-size:12.5px;color:var(--muted)}
 .coming-chip .coming-q{width:20px;text-align:center;font-family:'Fredoka';font-weight:700;
   font-size:14px;color:var(--muted);opacity:.55}
@@ -311,7 +311,25 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 .big-body .garden-note,.big-body .mastery-txt{color:#C9D3E6}
 .big-body .garden-art{width:100%;height:auto;display:block}
 .big-hint{flex:0 0 auto;text-align:center;color:#9FB0CC;font-size:12px;font-weight:700;margin-top:4px}
-@media (orientation:landscape){ .big-hint{display:none} }
+/* Sideways, the picture takes the screen — that is the whole promise of the
+   button, and fitting it neatly between a title bar and a row of controls left
+   it a stamp in the middle instead. The art is 2:1 and the phone is about
+   2.16:1, so filling the height is as full as it can get: everything above it
+   gets out of the way, the close button floats over the corner, and the
+   controls sit underneath where they can be scrolled to. */
+@media (orientation:landscape){
+  .big-hint{display:none}
+  .big{padding:0}
+  .big .big-bar{position:absolute;z-index:3;top:calc(6px + env(safe-area-inset-top));
+    right:calc(8px + env(safe-area-inset-right));left:auto;width:auto}
+  .big .big-title{display:none}
+  .big-body .garden-head{display:none}
+  .big-body .garden{max-width:none}
+  .big-body .garden-art{width:auto;height:100vh;max-width:100%;margin:0 auto}
+}
+@supports (height:100dvh){
+  @media (orientation:landscape){ .big-body .garden-art{height:100dvh} }
+}
 body.bigopen{overflow:hidden}
 .scene-expand{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:9px;
   background:rgba(255,254,251,.88);border:2px solid var(--ink);font-size:15px;line-height:1;
@@ -1965,13 +1983,13 @@ function upcoming(op, pts){
     var ct=catThreshold(kind,i);
     if(ct>pts) out.push({at:ct, cat:i});
   }
-  var extras=[{at:MILE.small, what:"a big one at the edge"},
-              {at:MILE.big,   what:"another big one"},
+  var extras=[{at:MILE.small, what:"a big one at the edge", big:1},
+              {at:MILE.big,   what:"another big one", big:1},
               {at:MILE.fly1,  what:"something in the sky"},
               {at:MILE.fly2,  what:"more in the sky"}];
   if(kind==="meadow") extras.push({at:MILE.high, what:"a hot air balloon"});
   for(i=0;i<extras.length;i++)
-    if(extras[i].at>pts) out.push({at:extras[i].at, what:extras[i].what});
+    if(extras[i].at>pts) out.push({at:extras[i].at, what:extras[i].what, big:extras[i].big});
   out.sort(function(a,b){ return a.at-b.at; });
   return out.slice(0,3);
 }
@@ -1980,16 +1998,25 @@ function comingStrip(op, pts){
   if(!next.length)
     return '<div class="coming"><span class="coming-lab">Everything here is unlocked ✨</span></div>';
   var h='<div class="coming"><span class="coming-lab">Coming up</span>', i;
+  var list=ITEMS[kind]||[];
   for(i=0;i<next.length;i++){
     var n=next[i], last=(i===next.length-1 && next.length>1);
-    /* A locked category shows the silhouette of one of its things, which says
-       "something new lives here" without saying what. */
+    /* Whatever is coming, show the thing itself where there is a thing to show.
+       The nearest one is painted as it really looks, because it is something
+       she has already seen and the point is to recognise it; the one after is
+       the same picture in shadow, a peek and no more; the furthest stays a
+       question mark. A bare glyph in the first slot said nothing at all. */
     var cat = (typeof n.cat==="number") ? catsOf(kind)[n.cat] : null;
-    var it = cat ? ITEMS[kind][cat.items[0]] : null, sp = it && SPRITES[it.s];
-    var name = last ? "a surprise" : cat ? cat.name : (n.what || "a new thing to place");
+    var it = cat  ? list[cat.items[0]]
+           : n.big ? list[backIndex(kind)]
+           : n.slot ? list[chosenIndex(kind, pts)]
+           : null;
+    var sp = it && SPRITES[it.s];
+    var name = last ? "a surprise" : cat ? cat.name
+             : it ? itemName(it) : (n.what || "a new thing to place");
     h+='<span class="coming-chip'+(last?" mystery":"")+'" title="'+name+'">'+
        (last||!sp ? '<span class="coming-q">'+(last?"?":"✦")+'</span>'
-                  : '<img src="'+sp.uri+'" alt="">')+
+                  : '<img class="'+(i===0?"seen":"hint")+'" src="'+sp.uri+'" alt="">')+
        '<b>'+dollarsTxt(n.at)+'</b></span>';
   }
   return h+'</div>';

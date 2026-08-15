@@ -310,7 +310,14 @@ drawn at random from the categories she has earned and never from a locked one.
 
 Tap **⤢** on any scene to open it full screen. The button is not drawn inside
 that view — there is nowhere bigger to go, so offering it again was a control
-that did nothing and read as the app being broken. Turning the phone to landscape
+that did nothing and read as the app being broken.
+
+Turned sideways, the picture takes the screen: the title bar gets out of the
+way, the close button floats over the corner, and the controls sit underneath
+where they can be scrolled to. The art is 2:1 and a phone in landscape is about
+2.16:1, so filling the height is as full as it can get — 776×390 on a 844×390
+screen. Fitting it neatly *between* the title and the controls, which is what
+it used to do, left it a stamp in the middle of a navy field. Turning the phone to landscape
 fills the display; placing and dragging work there too. The scene on the
 end-of-session summary opens the same way — there is nothing to place there, so
 the whole picture is the button.
@@ -356,18 +363,20 @@ earlier, never take back something already standing in a scene.
 
 ### Coming up
 
-Under each scene, the next three unlocks with their prices. A **✦** is another
-thing to put down; a darkened **silhouette** is a whole new category arriving,
-drawn from something that lives inside it; the last is a question mark. Knowing
-exactly what is coming is not a reason to keep going, so the preview shows
-enough to pull and not enough to spoil.
+Under each scene, the next three unlocks with their prices, and the treatment
+says how far off each one is:
 
-Which *thing* a piece turns out to be stopped being worth advertising the
-moment she started choosing it herself — but a new kind of thing still is, and
-paying the advertised price opens exactly the category the silhouette came
-from. A slot's *number* is only an identity, handed out back-to-front by the
-seeded layout; what a piece costs depends on how many have been earned before
-it.
+1. **Painted as it looks.** The nearest thing, shown properly, because it is
+   something she has already seen and the point is to recognise it.
+2. **The same picture in shadow.** A peek at what is behind it and no more.
+3. **A question mark.** Deliberately withheld.
+
+A bare glyph in the first slot said nothing at all — it named neither the thing
+nor its kind, and read as a placeholder rather than as a reward. Where the
+coming thing is a whole new category the picture is one of the things inside
+it, and paying the advertised price opens exactly that category. A slot's
+*number* is only an identity, handed out back-to-front by the seeded layout;
+what a piece costs depends on how many have been earned before it.
 
 ## Rewinding a scene
 
