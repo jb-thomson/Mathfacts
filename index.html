@@ -173,6 +173,10 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 .garden-head{display:flex;align-items:center;gap:7px;margin-bottom:7px}
 .garden-name{font-family:'Fredoka';font-weight:600;font-size:16px}
 .garden-name .sym{font-size:18px}
+/* a button rather than a label, on a live scene: tap it to play just this one */
+button.garden-name{border:0;background:none;padding:2px 6px 2px 2px;margin-left:-6px;
+  border-radius:9px;color:inherit;cursor:pointer}
+button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-dot)}
 /* the amount, which swaps between cents and dollars when it is tapped */
 .garden-pts{margin-left:auto;display:flex;align-items:baseline;gap:6px;padding:2px 8px;
   border:0;background:none;border-radius:9px;font-family:'Fredoka';font-weight:700;
@@ -311,37 +315,32 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 .big-body .garden-note,.big-body .mastery-txt{color:#C9D3E6}
 .big-body .garden-art{width:100%;height:auto;display:block}
 .big-hint{flex:0 0 auto;text-align:center;color:#9FB0CC;font-size:12px;font-weight:700;margin-top:4px}
-/* Sideways, the picture takes the screen — that is the whole promise of the
-   button, and fitting it neatly between a title bar and a row of controls left
-   it a stamp in the middle instead. The art is 2:1 and the phone is about
-   2.16:1, so filling the height is as full as it can get: everything above it
-   gets out of the way, the close button floats over the corner, and the
-   controls sit underneath where they can be scrolled to. */
+/* Sideways is where she actually plays, so nothing that works can be left
+   below a fold she has no reason to know is there. The picture and its
+   controls now share a flex column that always fits the screen exactly: the
+   picture is the flexible part and shrinks to whatever the controls need,
+   rather than being nailed to 100vh and pushing everything else off-screen.
+   That 100vh version genuinely lost the "surprise me" button and the whole
+   picker below the bottom edge, reachable only by scrolling a view with no
+   visible scrollbar and no reason for a child to try. */
 @media (orientation:landscape){
   .big-hint{display:none}
   .big{padding:0}
-  .big .big-bar{position:absolute;z-index:3;top:calc(6px + env(safe-area-inset-top));
+  .big .big-bar{position:absolute;z-index:5;top:calc(6px + env(safe-area-inset-top));
     right:calc(8px + env(safe-area-inset-right));left:auto;width:auto}
   .big .big-title{display:none}
+  .big-body{display:flex}
+  .big-body .garden{display:flex;flex-direction:column;width:100%;max-width:none;height:100%}
   .big-body .garden-head{display:none}
-  .big-body .garden{max-width:none}
-  .big-body .garden-art{width:auto;height:100vh;max-width:100%;margin:0 auto}
-}
-@supports (height:100dvh){
-  @media (orientation:landscape){ .big-body .garden-art{height:100dvh} }
-}
-/* Sideways the picture takes the whole window, so everything under it is off
-   the bottom — including the one control that matters while looking at it. The
-   picker rides over the top of the picture instead, where there is sky rather
-   than ground, so it never covers what she is aiming at. Locked kinds drop out
-   of it: in here she is placing, not shopping. */
-@media (orientation:landscape){
-  .big-body .picker{position:fixed;z-index:4;margin:0;padding:5px 7px;
-    top:calc(6px + env(safe-area-inset-top));
-    left:calc(8px + env(safe-area-inset-left));
-    right:calc(58px + env(safe-area-inset-right));
-    background:rgba(255,254,251,.94);border-color:var(--ink);
-    display:flex;align-items:center;gap:9px;overflow-x:auto}
+  .big-body .scene-wrap{flex:1 1 auto;min-height:0;display:flex}
+  /* the svg's own default preserveAspectRatio (xMidYMid meet) keeps it 2:1 and
+     centred as this box resizes, so it is never stretched or cropped */
+  .big-body .garden-art{flex:1 1 auto;min-height:0;width:100%;height:100%;display:block}
+  /* mastery, the note and coming-up are reading, not playing — trimmed here on
+     purpose so the picture and the things she can actually tap keep the room */
+  .big-body .mastery,.big-body .garden-note,.big-body .coming{display:none}
+  .big-body .tray,.big-body .picker{flex:0 0 auto;margin:5px 8px 0;max-width:calc(100% - 16px)}
+  .big-body .picker{padding:5px 7px;display:flex;align-items:center;gap:9px;overflow-x:auto}
   .big-body .pick-cats,.big-body .pick-types{flex:0 0 auto;flex-wrap:nowrap;margin-top:0}
   .big-body .cat-chip.locked{display:none}
   .big-body .pick-hint{display:none}
@@ -399,6 +398,7 @@ body.bigopen{overflow:hidden}
   color:var(--ink);font:800 18px/1 'Fredoka',system-ui;display:grid;place-items:center;padding:0}
 .piece-bar button[disabled]{opacity:.32}
 .piece-bar .pb-done{background:var(--good-tint);color:var(--good-deep)}
+.piece-bar .pb-return{background:var(--coral-tint);color:var(--coral-deep);font-size:16px}
 .mastery{display:flex;align-items:center;gap:8px;margin-top:9px}
 .mastery-meter{
   flex:1;height:7px;border-radius:99px;background:var(--line);overflow:hidden;
@@ -2003,13 +2003,28 @@ function pieceBar(op){
   if(!rec) return "";
   var kind=kindFor(op), it=itemOf(kind, rec), z=sizeOf(rec);
   var name=itemName(it);
+  /* Nothing is actually spent when a piece is placed — the slot it fills is
+     the only thing that changes — so putting one back costs her nothing and
+     simply frees that slot for something else. Set apart from resize, on the
+     other side of the bar, since it removes the piece rather than adjusting
+     it. */
   return '<div class="piece-bar" data-op="'+op+'">'+
+    '<button class="pb-return" data-act="return" aria-label="Put this '+name+
+      ' back and choose something else">↩</button>'+
     '<button class="pb-small" data-act="small"'+(z<=SIZE_MIN+0.001?' disabled':'')+
       ' aria-label="Make this '+name+' smaller">−</button>'+
     '<button class="pb-big" data-act="big"'+(z>=SIZE_MAX-0.001?' disabled':'')+
       ' aria-label="Make this '+name+' bigger">+</button>'+
     '<button class="pb-done" data-act="done" aria-label="Done with this '+name+'">✓</button>'+
     '</div>';
+}
+/* Take a piece back off the ground. Its slot is free again, so the tray and
+   picker reappear with room for a different choice — nothing was ever really
+   spent placing it, so nothing is owed back either. */
+function returnPiece(op, i){
+  var arr=placedList(op);
+  for(var k=0;k<arr.length;k++) if(arr[k].i===i){ arr.splice(k,1); saveState(); return true; }
+  return false;
 }
 function selectPiece(op, i){
   sel = {op:op, i:i};
@@ -2190,7 +2205,15 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
   return '<div class="garden'+(everDone?" done":"")+(slipped?" slipped":"")+
     (interactive?" live":"")+(expandable&&!interactive?" tap-big":"")+'" data-op="'+op+'">'+
     '<div class="garden-head">'+
-      '<span class="garden-name"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</span>'+
+      /* Tapping into a scene and finding nothing to do there but look is a
+         dead end — she saw the fjord, wanted division, and there was no way
+         to get from looking at it to playing it without leaving the scene,
+         finding the row of + − × ÷ toggles, and starting over. The name is
+         the door in instead: tap it, play only this. */
+      (interactive
+        ? '<button class="garden-name" data-op="'+op+'" aria-label="Play just '+
+          OP_NAME[op]+'"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</button>'
+        : '<span class="garden-name"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</span>')+
       (everDone?completeBadge(slipped):"")+
       (label
         ? '<span class="garden-pts plain">'+label+'</span>'
@@ -2225,6 +2248,21 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
 
 /* ---------------- session ---------------- */
 var S = null;
+/* The shortcut from a scene straight into practicing it: narrow the mode row
+   down to just this one operation and go. It changes the toggle rather than
+   sitting beside it, so home shows the truth about what she is about to get
+   next time she taps "Start practicing" instead of a shortcut that quietly
+   disagrees with what the row displays. */
+function playThisOnly(op){
+  if(S) return;
+  sel = null;
+  if(bigOp) closeBig();
+  state.ops = [op];
+  saveState();
+  renderModeRow();
+  sfx.tap();
+  startSession();
+}
 function startSession(){
   S = { ops:state.ops.slice(), asked:0, len:SESSION_LEN, points:0,
         requeue:[], missed:{}, newlyMastered:[], missedList:[],
@@ -2775,9 +2813,16 @@ function pieceAction(bar, act){
   var op=bar.getAttribute("data-op");
   if(!sel || sel.op!==op) return;
   if(act==="done"){ sfx.tap(); clearSel(); return; }
+  if(act==="return"){
+    var i=sel.i;
+    if(returnPiece(op,i)){ sel=null; sfx.tap(); refreshScenes(); }
+    return;
+  }
   if(resizePiece(op, sel.i, act==="big" ? 1 : -1)){ sfx.tap(); refreshScenes(); }
 }
 document.addEventListener("click", function(e){
+  var gn = e.target.closest ? e.target.closest(".garden-name[data-op]") : null;
+  if(gn){ playThisOnly(gn.getAttribute("data-op")); return; }
   /* On the summary card there is nothing to place or drag, so the whole picture
      is the button — turning the phone then fills the screen with it. */
   var tb = e.target.closest ? e.target.closest(".garden.tap-big") : null;
@@ -3571,6 +3616,7 @@ function addCoin(v){
    the minute hand is going round, and "the hour changed" is just the moment it
    finishes a lap. So the hour hand is driven by the total minutes, never set. */
 var clockMins = 3*60 + 0;              // minutes past 12, 0..719
+var CLK_HOUR = "#0FA3A8", CLK_MIN = "#2F9E44";
 var clockFlash = 0;
 function clockAngle(mins){ return (mins%60)/60*360; }
 function hand(cx, cy, len, deg, w, col){
@@ -3594,7 +3640,12 @@ function clockArt(){
     if(big){
       var n=(i/5)||12, ra=R-24;
       s+='<text x="'+n1(cx+Math.cos(a)*ra)+'" y="'+n1(cy+Math.sin(a)*ra+5)+'" text-anchor="middle" '+
-         'font-family="Fredoka,sans-serif" font-size="15" font-weight="700" fill="'+INK+'">'+n+'</text>';
+         'font-family="Fredoka,sans-serif" font-size="15" font-weight="700" fill="'+CLK_HOUR+'">'+n+'</text>';
+      /* the minute each hour mark stands for, in the minute hand's colour */
+      var mn=(i===0?0:i);
+      s+='<text x="'+n1(cx+Math.cos(a)*(R-40))+'" y="'+n1(cy+Math.sin(a)*(R-40)+4)+'" text-anchor="middle" '+
+         'font-family="Nunito,sans-serif" font-size="10" font-weight="800" fill="'+CLK_MIN+
+         '" opacity=".75">'+mn+'</text>';
     }
   }
   /* how far round this hour we are — the hour hand's progress, made visible */
@@ -3605,15 +3656,18 @@ function clockArt(){
        ' A'+rr+' '+rr+' 0 '+(sweep>180?1:0)+' 1 '+n1(cx+Math.cos(a1)*rr)+' '+n1(cy+Math.sin(a1)*rr)+
        ' Z" fill="#0FA3A8" opacity=".13"/>';
   }
-  s+=hand(cx, cy, R-40, (hourF%12)*30, 8.5, INK);          // hour, driven by the minutes
-  s+=hand(cx, cy, R-16, clockAngle(m), 5, "#EF5B3F");       // minute
+  /* Each hand is the colour of the half of the time it tells, and the digits
+     above are painted to match — so "the long hand is on the 9" and "the 45"
+     are visibly the same fact rather than two things to be told about. */
+  s+=hand(cx, cy, R-40, (hourF%12)*30, 8.5, CLK_HOUR);      // hour, driven by the minutes
+  s+=hand(cx, cy, R-16, clockAngle(m), 5, CLK_MIN);         // minute
   s+='<circle cx="'+cx+'" cy="'+cy+'" r="6" fill="'+INK+'"/>';
   /* the fat invisible handle on the end of the minute hand */
   var ma=(clockAngle(m)-90)*Math.PI/180;
   s+='<g class="grab" data-h="min"><circle cx="'+n1(cx+Math.cos(ma)*(R-16))+'" cy="'+
      n1(cy+Math.sin(ma)*(R-16))+'" r="20" fill="transparent"/>'+
      '<circle cx="'+n1(cx+Math.cos(ma)*(R-16))+'" cy="'+n1(cy+Math.sin(ma)*(R-16))+
-     '" r="8" fill="#EF5B3F" stroke="'+INK+'" stroke-width="2.4"/></g>';
+     '" r="8" fill="'+CLK_MIN+'" stroke="'+INK+'" stroke-width="2.4"/></g>';
   s+='<text x="150" y="218" text-anchor="middle" font-family="Nunito,sans-serif" font-size="11.5" '+
      'font-weight="800" fill="#68738F">'+(60-(m%60))+' minutes until the hour changes</text>';
   return s+'</svg>';
@@ -3622,8 +3676,14 @@ function clockText(){
   var m=((clockMins%720)+720)%720, h=Math.floor(m/60)||12, mm=m%60;
   return h+":"+(mm<10?"0":"")+mm;
 }
+function clockDigits(){
+  var m=((clockMins%720)+720)%720, h=Math.floor(m/60)||12, mm=m%60;
+  return '<span style="color:'+CLK_HOUR+'">'+h+'</span>'+
+         '<span style="color:'+INK+';opacity:.45">:</span>'+
+         '<span style="color:'+CLK_MIN+'">'+(mm<10?"0":"")+mm+'</span>';
+}
 function renderClock(){
-  el.clockSum.textContent = clockText();
+  el.clockSum.innerHTML = clockDigits();
   el.clockArt.innerHTML = clockArt();
   var mm=((clockMins%720)+720)%720 % 60;
   el.clockSay.textContent = clockFlash
