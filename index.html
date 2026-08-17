@@ -3516,6 +3516,10 @@ function avatarMatches(it){
     if(g==="gender"){
       if(it.gender==="both"){ if(!(sel.boy||sel.girl)) return false; }
       else if(!sel[it.gender]) return false;
+    }else if(g==="skin"){
+      // fair and tan sit close enough that a strict split hides real matches
+      var skinOk = sel[it.skin] || ((it.skin==="fair"||it.skin==="tan") && (sel.fair||sel.tan));
+      if(!skinOk) return false;
     }else if(!sel[it[g]]) return false;
   }
   return true;
