@@ -163,7 +163,15 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 
 /* ---------- avatar picker ---------- */
 .avatar-step{text-align:left}
-.avatar-step .setup-title,.avatar-step .setup-sub{text-align:center}
+.avatar-step .setup-sub{text-align:center}
+.avatar-headrow{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.avatar-headrow .setup-title{text-align:left;margin:0;flex:1 1 auto;min-width:0}
+.avatar-later{
+  flex:0 0 auto;background:var(--teal);color:#fff;border:0;border-radius:999px;
+  padding:10px 20px;font-family:'Fredoka';font-weight:700;font-size:16px;
+  box-shadow:0 3px 0 var(--teal-deep);
+}
+.avatar-later:active{transform:translateY(3px);box-shadow:0 0 0 var(--teal-deep)}
 .avatar-filters{margin-top:16px;display:flex;flex-direction:column;gap:8px}
 .afrow{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .aflabel{
@@ -650,7 +658,10 @@ body.bigopen{overflow:hidden}
       </div>
 
       <div class="card setup-card avatar-step" id="stepAvatar" hidden>
-        <h2 class="setup-title">Pick your look</h2>
+        <div class="avatar-headrow">
+          <h2 class="setup-title">Pick your look</h2>
+          <button class="avatar-later" id="avatarSkip">Later</button>
+        </div>
         <p class="setup-sub">Tap the tags to find one you like, then tap a face.</p>
         <div class="avatar-filters" id="avatarFilters">
           <div class="afrow"><span class="aflabel">Who</span><div class="achips" data-group="gender">
@@ -690,7 +701,6 @@ body.bigopen{overflow:hidden}
         </div>
         <div class="avatar-grid" id="avatarGrid"></div>
         <p class="avatar-empty" id="avatarEmpty" hidden>No one matches those tags yet — try clearing one.</p>
-        <button class="linkish avatar-skip" id="avatarSkip">Not sure yet — skip for now</button>
       </div>
 
       <div class="card setup-card" id="stepWorld" hidden>
