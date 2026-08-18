@@ -81,7 +81,24 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--teal);outl
 .hero .mark{width:52px;height:52px;flex:0 0 auto}
 .hero h1{font-family:'Fredoka';font-weight:700;font-size:38px;letter-spacing:1px;line-height:1.05;text-wrap:balance}
 .hero .tag{color:var(--muted);font-size:14.5px;margin-top:3px}
-.avatar-btn{margin-left:auto;flex:0 0 auto;border:0;background:none;padding:0;border-radius:50%}
+.avatar-btn{margin-left:auto;flex:0 0 auto;border:0;background:none;padding:0;border-radius:50%;position:relative}
+.level-badge{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
+.level-num{
+  font-family:'Fredoka';font-weight:700;font-size:12px;color:#fff;background:var(--teal);
+  border-radius:99px;padding:2px 9px;white-space:nowrap;
+}
+.level-rank{font-family:'Fredoka';font-weight:600;font-size:12.5px;color:var(--muted)}
+.level-bar{
+  flex:1 1 70px;min-width:50px;max-width:110px;height:6px;border-radius:99px;
+  background:var(--bg-dot);overflow:hidden;
+}
+.level-fill{height:100%;background:var(--teal);border-radius:99px}
+.avatar-deco{
+  position:absolute;bottom:-2px;right:-2px;width:18px;height:18px;
+  filter:drop-shadow(0 1px 1px rgba(0,0,0,.3));
+}
+.avatar-deco svg{width:100%;height:100%;display:block}
+.avatar-deco-big{width:24px;height:24px;bottom:0;right:0}
 .avatar-btn:active .avatar-badge{transform:scale(.93)}
 body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,body.quizzing #screen-learn{display:none}
 
@@ -663,10 +680,16 @@ body.bigopen{overflow:hidden}
     <div>
       <h1>Numo</h1>
       <p class="tag" id="heroTag">Grow your math, grow your world</p>
+      <div class="level-badge" id="levelBadge" hidden>
+        <span class="level-num" id="levelNum"></span>
+        <span class="level-rank" id="levelRank"></span>
+        <div class="level-bar"><div class="level-fill" id="levelFill"></div></div>
+      </div>
     </div>
     <button id="avatarBtn" class="avatar-btn" hidden aria-label="Choose your look">
       <img id="avatarBadge" class="avatar-badge" alt="" hidden>
       <span id="avatarPlaceholder" class="avatar-badge-placeholder" hidden aria-hidden="true">+</span>
+      <span id="avatarDeco" class="avatar-deco" hidden aria-hidden="true"></span>
     </button>
   </header>
 
@@ -674,6 +697,7 @@ body.bigopen{overflow:hidden}
     <div class="avatar-mascot" id="avatarMascot">
       <button class="avatar-mascot-btn" id="avatarMascotBtn" aria-label="Say hi to your avatar">
         <img id="avatarMascotImg" alt="">
+        <span id="mascotDeco" class="avatar-deco avatar-deco-big" hidden aria-hidden="true"></span>
       </button>
       <div class="avatar-bubble" id="avatarBubble" hidden></div>
     </div>
@@ -1697,6 +1721,95 @@ var WORLDS = {
 function worldOf(){ return (state.world && WORLDS[state.world]) ? state.world : "wild"; }
 function kindFor(op, world){ return WORLDS[world||worldOf()].order[op]; }
 
+/* ---------------- levels, ranks and badges ----------------
+   One number for how far she's come across every section she's ever
+   practiced, so it only ever goes up — deselecting a section, or a fact
+   slipping back to amber, never costs her a level. Thirty ranks, flavored to
+   whichever world she chose, so the title feels like it belongs to her
+   world rather than a generic tier. */
+var RANKS = {
+  wild: ["Seedling","Sprout","Budding Sprout","Little Leaf","Leafling","Fern Finder",
+    "Meadow Wanderer","Trail Blazer","Berry Picker","Forest Scout","River Rambler",
+    "Fjord Explorer","Tide Pool Tracker","Beachcomber","Wildflower Keeper","Grove Guardian",
+    "Canopy Climber","Mountain Mapper","Wilderness Ranger","Nature Navigator",
+    "Old Growth Guide","Wild Pathfinder","Summit Seeker","Storm Watcher","Wildlands Warden",
+    "Ancient Oak","Wild Sage","Nature's Champion","Wilderness Legend","Guardian of the Wild"],
+  space: ["Space Cadet","Launch Trainee","Star Spotter","Comet Chaser","Moon Walker",
+    "Rocket Rider","Orbit Rookie","Satellite Scout","Asteroid Hunter","Planet Hopper",
+    "Ice Moon Voyager","Ring Rider","Nebula Navigator","Meteor Tracker","Station Specialist",
+    "Solar Sailor","Galaxy Guide","Star Chart Master","Deep Space Pilot","Cosmic Voyager",
+    "Nova Navigator","Constellation Keeper","Wormhole Wanderer","Interstellar Ace",
+    "Galactic Pathfinder","Star Commander","Nebula Sage","Cosmic Legend","Galaxy Champion",
+    "Commander of the Cosmos"]
+};
+var LEVEL_COUNT=30;
+var ALL_FACTS_TOTAL=(function(){ var t=0; for(var i=0;i<OPS.length;i++) t+=totalFacts(OPS[i]); return t; })();
+/* Level 1 starts at zero, level 30 lands exactly on full mastery; the curve
+   in between grows faster than linear, so early levels come quickly and the
+   last few take real work — the shape of most games' leveling, not a flat
+   ramp. */
+var LEVEL_THRESH=(function(){
+  var arr=[0];
+  for(var n=1;n<=LEVEL_COUNT;n++) arr[n]=Math.round(ALL_FACTS_TOTAL*Math.pow((n-1)/(LEVEL_COUNT-1),1.5));
+  /* rounding bunches the first couple of levels to the same number — 0
+     mastered would otherwise already read as level 2. Force each threshold
+     at least one past the last so every level asks for real progress. */
+  for(n=2;n<=LEVEL_COUNT;n++) if(arr[n]<=arr[n-1]) arr[n]=arr[n-1]+1;
+  arr[LEVEL_COUNT]=ALL_FACTS_TOTAL;
+  return arr;
+})();
+function totalMastered(){
+  var t=0; for(var i=0;i<OPS.length;i++) t+=masteryOf(OPS[i]).done;
+  return t;
+}
+function levelFor(mastered){
+  var lvl=1;
+  for(var n=1;n<=LEVEL_COUNT;n++){ if(mastered>=LEVEL_THRESH[n]) lvl=n; else break; }
+  return lvl;
+}
+function rankName(lvl, world){ return (RANKS[world||worldOf()]||RANKS.wild)[lvl-1]; }
+
+/* Every fifth level unlocks a small sticker for her avatar — drawn inline
+   rather than generated, since a badge is a simple flat shape and doesn't
+   need painterly art the way a face does. The highest one she's earned
+   shows automatically; there's no separate pile of unequipped badges to
+   manage. */
+var DECO_ORDER=["star","crown","medal","wreath","gem","sun"];
+var DECO_LEVEL={star:5,crown:10,medal:15,wreath:20,gem:25,sun:30};
+var DECO_NAME={star:"Star",crown:"Crown",medal:"Medal",wreath:"Wreath",gem:"Gem",sun:"Sunburst"};
+var DECO_SVG={
+  star:'<svg viewBox="0 0 24 24"><path d="M12 1l3.09 6.26L22 8.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 13.14l-5-4.87 6.91-1.01L12 1z" fill="#FFC93C" stroke="#8A6A0E" stroke-width="1"/></svg>',
+  crown:'<svg viewBox="0 0 24 24"><path d="M3 8l4 3 5-6 5 6 4-3-2 10H5L3 8z" fill="#FFC93C" stroke="#8A6A0E" stroke-width="1"/><circle cx="3" cy="7" r="1.6" fill="#FFC93C" stroke="#8A6A0E" stroke-width="0.8"/><circle cx="12" cy="4" r="1.6" fill="#FFC93C" stroke="#8A6A0E" stroke-width="0.8"/><circle cx="21" cy="7" r="1.6" fill="#FFC93C" stroke="#8A6A0E" stroke-width="0.8"/></svg>',
+  medal:'<svg viewBox="0 0 24 24"><path d="M7 2l5 6 5-6" stroke="#EF5B3F" stroke-width="3" fill="none"/><circle cx="12" cy="15" r="7" fill="#FFC93C" stroke="#8A6A0E" stroke-width="1.3"/><circle cx="12" cy="15" r="3" fill="#FFF3D4"/></svg>',
+  wreath:'<svg viewBox="0 0 24 24"><path d="M4 20C2 14 4 6 11 3" stroke="#2F9E44" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M20 20C22 14 20 6 13 3" stroke="#2F9E44" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="12" cy="20" r="1.7" fill="#EF5B3F"/></svg>',
+  gem:'<svg viewBox="0 0 24 24"><path d="M4 9L12 2l8 7-8 13L4 9z" fill="#7BC7E8" stroke="#1F5FA6" stroke-width="1.2"/><path d="M4 9h16M8 9l4-7 4 7M8 9l4 13M16 9l-4 13" stroke="#1F5FA6" stroke-width="0.7" fill="none"/></svg>',
+  sun:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5" fill="#FFC93C" stroke="#8A6A0E" stroke-width="1"/><g stroke="#FFC93C" stroke-width="2.2" stroke-linecap="round"><path d="M12 1v3M12 20v3M1 12h3M20 12h3M4 4l2 2M18 18l2 2M4 20l2-2M18 6l2-2"/></g></svg>'
+};
+function decorationForLevel(lvl){
+  var best=null;
+  for(var i=0;i<DECO_ORDER.length;i++){ var d=DECO_ORDER[i]; if(lvl>=DECO_LEVEL[d]) best=d; }
+  return best;
+}
+function renderLevel(){
+  var mastered=totalMastered(), lvl=levelFor(mastered), world=worldOf();
+  el.levelBadge.hidden=!state.name;
+  if(!state.name) return;
+  el.levelNum.textContent="Lv "+lvl;
+  el.levelRank.textContent=rankName(lvl, world);
+  if(lvl>=LEVEL_COUNT){
+    el.levelFill.style.width="100%";
+  }else{
+    var lo=LEVEL_THRESH[lvl], hi=LEVEL_THRESH[lvl+1];
+    var pct=hi>lo ? Math.max(0,Math.min(1,(mastered-lo)/(hi-lo))) : 1;
+    el.levelFill.style.width=(pct*100)+"%";
+  }
+  var deco=decorationForLevel(lvl);
+  var svg=deco?DECO_SVG[deco]:"";
+  el.avatarDeco.innerHTML=svg; el.avatarDeco.hidden=!deco;
+  el.avatarDeco.setAttribute("aria-label", deco?DECO_NAME[deco]+" badge":"");
+  el.mascotDeco.innerHTML=svg; el.mascotDeco.hidden=!deco;
+}
+
 /* `ground` is where each painting's empty foreground strip begins, so earned
    pieces stand on the ground the artwork actually shows. */
 var SCENE = {
@@ -2558,6 +2671,7 @@ var el = {};
  "stepAvatar","avatarFilters","avatarGrid","avatarEmpty","avatarCount","avatarClear","avatarSkip",
  "avatarBadge","avatarBtn","avatarPlaceholder",
  "avatarLife","avatarMascot","avatarMascotBtn","avatarMascotImg","avatarBubble",
+ "levelBadge","levelNum","levelRank","levelFill","avatarDeco","mascotDeco",
  "bigScene","bigBody","bigTitle","bigClose","bigHint",
  "saveBtn","loadBtn","loadFile","backupNote","soundHome",
  "learnTopics","learnNumbers","dragSum","dragArt","dragSay",
@@ -2574,7 +2688,7 @@ function renderHome(){
     ? state.name+"’s world" : "Grow your math, grow your world";
   el.worldTitle.innerHTML = "Your "+WORLDS[worldOf()].mine+
     ' <span class="note">tap a picture to place things</span>';
-  renderModeRow(); renderScenes(); renderGrid(); renderDays(); renderAvatarBadge(); renderAvatarLife();
+  renderModeRow(); renderScenes(); renderGrid(); renderDays(); renderAvatarBadge(); renderAvatarLife(); renderLevel();
 }
 function renderModeRow(){
   var btns=el.modeRow.querySelectorAll("button");
