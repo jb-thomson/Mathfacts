@@ -212,6 +212,42 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 }
 .avatar-badge-placeholder[hidden]{display:none;
 }
+
+/* ---------- avatar's secret life ---------- */
+.avatar-life{position:relative;height:78px;margin:2px 0 6px}
+.avatar-mascot{position:absolute;top:0;transition:left .5s ease}
+.avatar-mascot-btn{
+  border:0;background:none;padding:0;border-radius:50%;display:block;position:relative;
+}
+.avatar-mascot-btn img{
+  width:64px;height:64px;border-radius:50%;object-fit:cover;display:block;
+  border:3px solid var(--paper);box-shadow:0 3px 0 var(--line),0 0 0 2px var(--line);
+}
+.avatar-mascot-btn:active img{transform:scale(.94)}
+@keyframes avWiggle{
+  0%,100%{transform:rotate(0)}
+  20%{transform:rotate(-11deg)}
+  40%{transform:rotate(9deg)}
+  60%{transform:rotate(-7deg)}
+  80%{transform:rotate(4deg)}
+}
+.avatar-mascot-btn.wiggle img{animation:avWiggle .6s ease}
+.avatar-bubble{
+  position:absolute;bottom:calc(100% + 10px);left:50%;transform:translateX(-50%);
+  width:max-content;max-width:220px;background:var(--paper);border:2px solid var(--ink);
+  border-radius:14px;padding:9px 12px;font-family:'Fredoka';font-weight:600;font-size:13px;
+  line-height:1.3;color:var(--ink);box-shadow:0 4px 0 var(--ink-soft);
+  opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:21;
+}
+.avatar-bubble.show{opacity:1}
+.avatar-bubble::after{
+  content:"";position:absolute;top:100%;left:50%;transform:translateX(-50%);
+  border:9px solid transparent;border-top-color:var(--ink);
+}
+.avatar-bubble::before{
+  content:"";position:absolute;top:calc(100% - 2.5px);left:50%;transform:translateX(-50%);
+  border:7px solid transparent;border-top-color:var(--paper);z-index:1;
+}
 .world-opt{
   display:block;width:100%;text-align:left;padding:10px;
   background:var(--paper);border:2px solid var(--ink);border-radius:16px;box-shadow:0 4px 0 var(--ink-soft);
@@ -633,6 +669,15 @@ body.bigopen{overflow:hidden}
       <span id="avatarPlaceholder" class="avatar-badge-placeholder" hidden aria-hidden="true">+</span>
     </button>
   </header>
+
+  <div class="avatar-life" id="avatarLife" hidden>
+    <div class="avatar-mascot" id="avatarMascot">
+      <button class="avatar-mascot-btn" id="avatarMascotBtn" aria-label="Say hi to your avatar">
+        <img id="avatarMascotImg" alt="">
+      </button>
+      <div class="avatar-bubble" id="avatarBubble" hidden></div>
+    </div>
+  </div>
 
   <div id="welcome" class="welcome" hidden aria-live="polite"></div>
 
@@ -1153,7 +1198,16 @@ var sfx={
   yes:  function(){ tone(659.25,0,0.09,"sine",0.22); tone(987.77,0.07,0.22,"sine",0.20); buzz(20); },
   star: function(){ tone(659.25,0,0.09,"sine",0.22); tone(830.61,0.08,0.09,"sine",0.20);
                     tone(1244.51,0.16,0.35,"sine",0.18); buzz([25,60,25]); },
-  no:   function(){ tone(233.08,0,0.18,"triangle",0.16,180); tone(174.61,0.15,0.28,"triangle",0.14,140); buzz([50,60,50]); }
+  no:   function(){ tone(233.08,0,0.18,"triangle",0.16,180); tone(174.61,0.15,0.28,"triangle",0.14,140); buzz([50,60,50]); },
+  /* three different playful blips so tapping the avatar doesn't always sound
+     the same, picked at random rather than in a fixed rotation */
+  wiggle: function(){
+    var r=Math.random();
+    if(r<0.34){ tone(392,0,0.07,"triangle",0.14,660); tone(660,0.06,0.09,"triangle",0.13,880); }
+    else if(r<0.67){ tone(523.25,0,0.06,"sine",0.16); tone(659.25,0.05,0.06,"sine",0.15); tone(783.99,0.10,0.10,"sine",0.14); }
+    else{ tone(330,0,0.05,"triangle",0.15,220); tone(440,0.05,0.08,"triangle",0.14,660); }
+    buzz(12);
+  }
 };
 
 /* ---------------- fact helpers ---------------- */
@@ -2503,6 +2557,7 @@ var el = {};
  "againBtn","homeBtn","welcome","heroTag","worldTitle","stepName","stepWorld","nameInput","nameNext","worldPick",
  "stepAvatar","avatarFilters","avatarGrid","avatarEmpty","avatarCount","avatarClear","avatarSkip",
  "avatarBadge","avatarBtn","avatarPlaceholder",
+ "avatarLife","avatarMascot","avatarMascotBtn","avatarMascotImg","avatarBubble",
  "bigScene","bigBody","bigTitle","bigClose","bigHint",
  "saveBtn","loadBtn","loadFile","backupNote","soundHome",
  "learnTopics","learnNumbers","dragSum","dragArt","dragSay",
@@ -2519,7 +2574,7 @@ function renderHome(){
     ? state.name+"’s world" : "Grow your math, grow your world";
   el.worldTitle.innerHTML = "Your "+WORLDS[worldOf()].mine+
     ' <span class="note">tap a picture to place things</span>';
-  renderModeRow(); renderScenes(); renderGrid(); renderDays(); renderAvatarBadge();
+  renderModeRow(); renderScenes(); renderGrid(); renderDays(); renderAvatarBadge(); renderAvatarLife();
 }
 function renderModeRow(){
   var btns=el.modeRow.querySelectorAll("button");
@@ -3584,6 +3639,113 @@ el.avatarSkip.addEventListener("click", function(){
   renderAvatarBadge();
   if(repickingAvatar){ repickingAvatar=false; finishSetup(); return; }
   advanceSetup();
+});
+
+/* ---------------- avatar's secret life ----------------
+   She picked a face; this is what makes it feel like hers rather than a
+   sticker. It stands somewhere a little different every time the app is
+   opened, and tapping it wiggles, makes a sound, and shares a fact — three
+   different sounds and eighty different facts, so it never repeats twice
+   in a row the same way. */
+var FACTS=[
+"A group of flamingos is called a flamboyance.","Octopuses have three hearts.",
+"Honey never spoils — archaeologists have found edible honey thousands of years old.",
+"A shrimp's heart is in its head.","Bananas are berries, but strawberries aren't.",
+"A single cloud can weigh more than a million pounds.",
+"Sea otters hold hands while sleeping so they don't drift apart.",
+"There are more stars in the universe than grains of sand on every beach on Earth.",
+"A blue whale's heart is about the size of a small car.","Butterflies taste with their feet.",
+"It takes about 8 minutes for sunlight to reach Earth.","A group of crows is called a murder.",
+"Elephants can't jump.","The Eiffel Tower grows a little taller in summer heat.",
+"A day on Venus is longer than a year on Venus.","Wombat poop is cube-shaped.",
+"Sloths can hold their breath longer than dolphins can.",
+"One kind of jellyfish is biologically immortal.","Your nose can remember 50,000 different scents.",
+"A snail can sleep for three years.","The shortest war in history lasted about 38 minutes.",
+"Cows have best friends and get stressed when they're separated.",
+"Saturn would float in water, if you had a bathtub big enough.",
+"Some turtles can breathe through their butts.",
+"Koalas have fingerprints almost identical to human ones.",
+"A group of pandas is called an embarrassment.","It snows on Mars sometimes.",
+"Humans share about 60% of their DNA with bananas.",
+"Dolphins call each other by name, using their own special whistle.",
+"The Great Wall of China isn't actually visible from space with the naked eye.",
+"A hummingbird's heart beats over 1,200 times a minute.",
+"Peanuts aren't nuts — they're legumes, like beans.",
+"A crocodile can't stick its tongue out.",
+"There are more possible chess games than atoms in the universe.",
+"Starfish don't have brains.",
+"Your stomach gets a whole new lining every few days so it doesn't digest itself.",
+"Antarctica is the world's largest desert.","Some fish can cough.",
+"A rainbow can be a full circle if you're high enough in the sky.",
+"Kangaroos can't walk backward.",
+"Squirrels plant thousands of trees a year by forgetting where they buried acorns.",
+"A bolt of lightning is hotter than the surface of the sun.",
+"Giraffes only need about 30 minutes of sleep a day.",
+"Sharks existed before trees did.","Your ears never stop growing.",
+"A group of owls is called a parliament.","Octopuses can taste with their whole body.",
+"The moon drifts away from Earth about as fast as your fingernails grow.",
+"Some bamboo can grow almost a meter in a single day.",
+"A rhinoceros horn is made of the same stuff as your fingernails.",
+"There's a planet made almost entirely of diamond.",
+"Otters use rocks as tools to crack open shellfish.",
+"It's impossible to hum while holding your nose closed.","Cats can't taste sweetness.",
+"A group of jellyfish is called a smack.","Mount Everest grows a few millimeters taller every year.",
+"A woodpecker can peck up to 20 times a second.",
+"The tallest mountain in the solar system is on Mars — three times taller than Everest.",
+"Polar bears have black skin under their white fur.","Some plants can count.",
+"Bees can recognize human faces.",
+"An adult body has enough iron in it to make a small nail.",
+"Penguins propose to their mates with a pebble.",
+"A chameleon's tongue can be twice as long as its body.",
+"A group of hedgehogs is called a prickle.",
+"There's a lake in Bolivia so flat and reflective it looks like a giant mirror.",
+"Ants don't have lungs.","The first oranges weren't orange — they were green.",
+"Some jellyfish glow in the dark.","Your brain uses about 20% of your body's energy.",
+"A group of rhinos is called a crash.","Tigers have striped skin, not just striped fur.",
+"Space is completely silent — there's no air there to carry sound.",
+"Sea horses are the only animal where the dad gives birth.",
+"One lightning bolt has enough energy to toast about 100,000 pieces of bread.",
+"Cows can walk up stairs but not down them.",
+"One kind of frog can freeze solid in winter and thaw out alive in spring.",
+"There are volcanoes on the ocean floor taller than any mountain on land."
+];
+var avatarSpotPct=null;
+function avatarLifeSpot(){
+  if(avatarSpotPct===null){
+    var spots=[4,20,38,56,74];
+    avatarSpotPct=spots[Math.floor(Math.random()*spots.length)];
+  }
+  return avatarSpotPct;
+}
+var bubbleTimer=null;
+function renderAvatarLife(){
+  var a=state.avatar && avatarById(state.avatar);
+  el.avatarLife.hidden=!a;
+  if(!a) return;
+  el.avatarMascotImg.src=a.src;
+  el.avatarMascot.style.left=avatarLifeSpot()+"%";
+}
+el.avatarMascotBtn.addEventListener("click", function(){
+  el.avatarMascotBtn.classList.remove("wiggle"); void el.avatarMascotBtn.offsetWidth;
+  el.avatarMascotBtn.classList.add("wiggle");
+  sfx.wiggle();
+  el.avatarBubble.textContent=FACTS[Math.floor(Math.random()*FACTS.length)];
+  el.avatarBubble.style.transform="";
+  el.avatarBubble.hidden=false;
+  void el.avatarBubble.offsetWidth;
+  el.avatarBubble.classList.add("show");
+  /* centered on the avatar, it can run off either edge near the sides of the
+     screen — nudge it back in bounds without moving the tail far from where
+     the avatar actually is */
+  var margin=10, rect=el.avatarBubble.getBoundingClientRect(), shift=0;
+  if(rect.left<margin) shift=margin-rect.left;
+  else if(rect.right>window.innerWidth-margin) shift=(window.innerWidth-margin)-rect.right;
+  if(shift) el.avatarBubble.style.transform="translateX(calc(-50% + "+shift+"px))";
+  clearTimeout(bubbleTimer);
+  bubbleTimer=setTimeout(function(){
+    el.avatarBubble.classList.remove("show");
+    setTimeout(function(){ el.avatarBubble.hidden=true; },250);
+  },4200);
 });
 
 var welcomeTimer=null, welcomeTimer2=null;
