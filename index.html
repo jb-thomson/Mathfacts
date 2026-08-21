@@ -401,27 +401,34 @@ button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-do
   .coins-going{opacity:0}
 }
 .big[hidden]{display:none}
-.big{position:fixed;inset:0;z-index:40;background:var(--ink);display:flex;flex-direction:column;
-  padding:calc(8px + env(safe-area-inset-top)) 10px calc(8px + env(safe-area-inset-bottom))}
-.big-bar{display:flex;align-items:center;gap:10px;flex:0 0 auto}
-.big-title{flex:1;font-family:'Fredoka';font-weight:600;font-size:17px;color:#FFFEFB}
+/* This view is meant to read as full screen the instant it opens — art edge
+   to edge, a few small floating pills for controls — not a smaller "card"
+   that only turns into that once she happens to rotate the phone. Portrait
+   and landscape now share exactly the same layout; the picture is simply
+   shorter (letterboxed top and bottom, like any widescreen video) when the
+   phone is held upright, rather than sitting in its own scrollable card with
+   reading-only stats and a "turn sideways" hint in the empty space below. */
+.big{position:fixed;inset:0;z-index:40;background:var(--ink);display:flex;flex-direction:column;padding:0}
+.big-bar{position:absolute;z-index:5;top:calc(6px + env(safe-area-inset-top));
+  right:calc(8px + env(safe-area-inset-right));display:flex;align-items:center;gap:10px}
+.big-title{display:none}
 .big-close{width:38px;height:38px;flex:0 0 auto;border-radius:11px;background:var(--paper);
   border:2px solid var(--ink);font-family:'Fredoka';font-weight:600;font-size:20px}
-/* The picture keeps its 2:1 shape, so its height follows from its width and the
-   only way to make it fit a short screen is to cap how wide it may be: at most
-   150vh across is at most 75vh tall, whatever the phone is doing. It used to be
-   told height:100%, which resolves to nothing against a flex track of unknown
-   height — so in landscape the art came out half the window's *width* tall,
-   overflowed the panel, and the controls underneath were painted straight over
-   the middle of it with no way to scroll them back into view. */
-.big-body{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
-  -webkit-overflow-scrolling:touch}
-.big-body .garden{margin:0 auto;width:100%;max-width:min(100%, 150vh)}
-@supports (height:100dvh){ .big-body .garden{max-width:min(100%, 150dvh)} }
-.big-body .garden-head{color:#FFFEFB}
-.big-body .garden-note,.big-body .mastery-txt{color:#C9D3E6}
-.big-body .garden-art{width:100%;height:auto;display:block}
-.big-hint{flex:0 0 auto;text-align:center;color:#9FB0CC;font-size:12px;font-weight:700;margin-top:4px}
+.big-body{flex:1;min-height:0;display:flex;overflow:hidden}
+.big-body .garden{display:flex;flex-direction:column;width:100%;max-width:none;height:100%;
+  position:relative;margin:0}
+.big-body .garden-head{display:none}
+/* The tray and picker used to sit in their own row below the art, shrinking
+   it to make room. They float on top instead, as small separate pills near
+   the edges — never a strip across the bottom, which is exactly where she
+   needs to see the ground to plant things. */
+.big-body .scene-wrap{position:absolute;inset:0;display:flex}
+/* the svg's own default preserveAspectRatio (xMidYMid meet) keeps it 2:1 and
+   centred as this box resizes, so it is never stretched or cropped */
+.big-body .garden-art{width:100%;height:100%;display:block}
+/* mastery, the note and coming-up are reading, not playing — trimmed here on
+   purpose so the picture and the things she can actually tap keep the room */
+.big-body .mastery,.big-body .garden-note,.big-body .coming{display:none}
 .big-a2hs[hidden]{display:none}
 .big-a2hs{position:absolute;left:50%;transform:translateX(-50%);
   top:calc(10px + env(safe-area-inset-top));z-index:8;max-width:min(88%,360px);
@@ -432,59 +439,41 @@ button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-do
 .big-a2hs button{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:0;
   background:rgba(255,254,251,.18);color:#FFFEFB;font:800 14px/1 'Fredoka',system-ui;
   display:grid;place-items:center;padding:0}
-/* Sideways is where she actually plays, so nothing that works can be left
-   below a fold she has no reason to know is there. The picture and its
-   controls now share a flex column that always fits the screen exactly: the
-   picture is the flexible part and shrinks to whatever the controls need,
-   rather than being nailed to 100vh and pushing everything else off-screen.
-   That 100vh version genuinely lost the "surprise me" button and the whole
-   picker below the bottom edge, reachable only by scrolling a view with no
-   visible scrollbar and no reason for a child to try. */
-@media (orientation:landscape){
-  .big-hint{display:none}
-  .big{padding:0}
-  .big .big-bar{position:absolute;z-index:5;top:calc(6px + env(safe-area-inset-top));
-    right:calc(8px + env(safe-area-inset-right));left:auto;width:auto}
-  .big .big-title{display:none}
-  .big-body{display:flex}
-  .big-body .garden{display:flex;flex-direction:column;width:100%;max-width:none;height:100%;
-    position:relative}
-  .big-body .garden-head{display:none}
-  /* The art fills the whole full-screen view edge to edge now — the tray and
-     picker used to sit in their own row below it, shrinking the picture to
-     make room. They float on top instead, like the controls in any phone
-     game, so the artwork stays full-bleed underneath them. */
-  .big-body .scene-wrap{position:absolute;inset:0;display:flex}
-  /* the svg's own default preserveAspectRatio (xMidYMid meet) keeps it 2:1 and
-     centred as this box resizes, so it is never stretched or cropped */
-  .big-body .garden-art{width:100%;height:100%;display:block}
-  /* mastery, the note and coming-up are reading, not playing — trimmed here on
-     purpose so the picture and the things she can actually tap keep the room */
-  .big-body .mastery,.big-body .garden-note,.big-body .coming{display:none}
-  /* the piece controls default to hovering over the bottom of the art, which
-     is now where the floating tray/picker panel lives — move them up top so
-     the two floating panels never cover one another */
-  .big-body .piece-bar{bottom:auto;top:calc(10px + env(safe-area-inset-top));z-index:6}
-  /* Its own padding stays click-through (pointer-events:none), so a tap that
-     lands on the panel's background rather than an actual button or chip
-     still reaches a piece standing on the art underneath — only the tray
-     and picker themselves, re-enabled below, capture the tap. */
-  .big-body .place-panel{position:absolute;z-index:4;left:calc(8px + env(safe-area-inset-left));
-    right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));
-    max-height:46%;overflow-y:auto;-webkit-overflow-scrolling:touch;pointer-events:none;
-    background:rgba(255,254,251,.94);border-radius:12px;padding:6px 8px 7px;
-    box-shadow:0 3px 14px rgba(0,0,0,.3)}
-  .big-body .place-panel .tray{margin-top:0;pointer-events:auto}
-  .big-body .place-panel .picker{margin-top:6px;background:transparent;border:0;pointer-events:auto}
-  .big-body .picker{padding:5px 7px;display:flex;align-items:center;gap:9px;overflow-x:auto}
-  .big-body .pick-cats,.big-body .pick-types{flex:0 0 auto;flex-wrap:nowrap;margin-top:0}
-  .big-body .cat-chip.locked{display:none}
-  .big-body .pick-hint{display:none}
-  .big-body .cat-chip{font-size:11px;padding:2px 8px 2px 3px}
-  .big-body .cat-chip img{width:19px;height:19px}
-  .big-body .type-chip{width:44px;height:52px}
-  .big-body .type-chip img{width:32px;height:32px}
-}
+/* The whole tray+picker "panel" is now just an invisible column pinned down
+   the right edge — everything inside it is its own small pill, not one
+   shared bar, and its own padding stays click-through so a tap between pills
+   still reaches a piece standing on the art underneath. */
+.big-body .place-panel{position:absolute;z-index:4;top:calc(52px + env(safe-area-inset-top));
+  bottom:calc(10px + env(safe-area-inset-bottom));right:calc(8px + env(safe-area-inset-right));
+  width:auto;max-width:128px;display:flex;flex-direction:column;align-items:flex-end;gap:7px;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;pointer-events:none;
+  background:transparent;padding:0;box-shadow:none}
+.big-body .place-panel::-webkit-scrollbar{display:none}
+.big-body .place-panel .tray{flex:0 0 auto;margin:0;display:flex;flex-direction:column;
+  align-items:flex-end;gap:7px;background:transparent;border:0;padding:0;pointer-events:auto}
+.big-body .place-panel .tray-txt{flex:none;max-width:124px;background:var(--sun-tint);
+  border:1.5px solid var(--sun-deep);border-radius:16px;padding:5px 11px;font-size:11px;
+  line-height:1.3;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.big-body .place-panel .tray-auto{border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.big-body .place-panel .picker{flex:0 0 auto;min-height:0;margin:0;background:transparent;
+  border:0;padding:0;pointer-events:auto;display:flex;flex-direction:column;align-items:flex-end;
+  gap:7px}
+.big-body .place-panel .picker::-webkit-scrollbar{display:none}
+.big-body .pick-cats,.big-body .pick-types{display:flex;flex-direction:column;flex-wrap:nowrap;
+  gap:7px;margin-top:0}
+.big-body .cat-chip.locked{display:none}
+.big-body .pick-hint{display:none}
+/* icon-only round pills — the name is still there for a screen reader, just
+   visually tucked away, so a sighted eye reads them exactly like Township's
+   little round buttons rather than a labelled bar */
+.big-body .cat-chip{width:44px;height:44px;padding:0;justify-content:center;border-radius:50%;
+  box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.big-body .cat-chip span:last-child{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.big-body .cat-chip img{width:24px;height:24px}
+.big-body .type-chip{width:44px;height:44px;padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.big-body .type-chip img{width:26px;height:26px}
+.big-body .type-chip .pips{width:36px;max-height:10px}
 body.bigopen{overflow:hidden}
 .scene-expand{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:9px;
   background:rgba(255,254,251,.88);border:2px solid var(--ink);font-size:15px;line-height:1;
@@ -741,7 +730,6 @@ body.bigopen{overflow:hidden}
       <button id="bigClose" class="big-close" aria-label="Close the big view">×</button>
     </div>
     <div id="bigBody" class="big-body"></div>
-    <p id="bigHint" class="big-hint">Turn your phone sideways to fill the screen</p>
     <div id="bigA2hs" class="big-a2hs" hidden>
       <span>For a real full-screen view with no browser bar: tap <b>Share</b>, then <b>Add to Home Screen</b>.</span>
       <button id="bigA2hsClose" aria-label="Dismiss this tip">×</button>
@@ -2707,7 +2695,7 @@ var el = {};
  "avatarBadge","avatarBtn","avatarPlaceholder",
  "avatarLife","avatarMascot","avatarMascotBtn","avatarMascotImg","avatarBubble",
  "levelBadge","levelNum","levelRank","levelFill","avatarDeco","mascotDeco",
- "bigScene","bigBody","bigTitle","bigClose","bigHint","bigA2hs","bigA2hsClose",
+ "bigScene","bigBody","bigTitle","bigClose","bigA2hs","bigA2hsClose",
  "saveBtn","loadBtn","loadFile","backupNote","soundHome",
  "learnTopics","learnNumbers","dragSum","dragArt","dragSay",
  "gridArt","gridSay","learnMoney","moneySum","moneyArt","moneySay","coinRow","moneyBack","moneyClear",
