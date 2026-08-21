@@ -426,9 +426,28 @@ button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-do
 /* the svg's own default preserveAspectRatio (xMidYMid meet) keeps it 2:1 and
    centred as this box resizes, so it is never stretched or cropped */
 .big-body .garden-art{width:100%;height:100%;display:block}
-/* mastery, the note and coming-up are reading, not playing — trimmed here on
-   purpose so the picture and the things she can actually tap keep the room */
-.big-body .mastery,.big-body .garden-note,.big-body .coming{display:none}
+/* Mastery, the note toward the next unlock, and the shadowed preview of
+   what's coming all still belong here — without them the screen is just a
+   picture, not a game in progress. They live in their own small column on
+   the left, mirroring the tray/picker column on the right, so the middle
+   and the whole bottom edge of the ground stay completely clear. */
+.big-body .progress-panel{position:absolute;z-index:4;top:calc(52px + env(safe-area-inset-top));
+  bottom:calc(10px + env(safe-area-inset-bottom));left:calc(8px + env(safe-area-inset-left));
+  width:auto;max-width:150px;display:flex;flex-direction:column;align-items:flex-start;gap:7px;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;pointer-events:none;
+  background:transparent;padding:0;box-shadow:none}
+.big-body .progress-panel::-webkit-scrollbar{display:none}
+.big-body .mastery{flex:0 0 auto;margin:0;background:rgba(255,254,251,.94);border-radius:999px;
+  padding:5px 10px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.big-body .mastery-meter{width:50px;flex:0 0 auto}
+.big-body .mastery-txt{font-size:10px;white-space:normal;max-width:92px}
+.big-body .garden-note{flex:0 0 auto;margin:0;max-width:150px;background:var(--sun-tint);
+  border:1.5px solid var(--sun-deep);border-radius:14px;padding:5px 11px;font-size:11px;
+  line-height:1.3;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.big-body .coming{flex:0 0 auto;flex-direction:column;flex-wrap:nowrap;margin:0;gap:7px;
+  align-items:flex-start}
+.big-body .coming-lab{font-size:10px;color:#C9D3E6}
+.big-body .coming-chip{box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .big-a2hs[hidden]{display:none}
 .big-a2hs{position:absolute;left:50%;transform:translateX(-50%);
   top:calc(10px + env(safe-area-inset-top));z-index:8;max-width:min(88%,360px);
@@ -2534,8 +2553,14 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
         ' scene is — drag back to watch it grow" aria-valuemin="0" aria-valuemax="'+
         (state.pts[op]||0)+'" aria-valuenow="'+pts+'"><i style="width:'+n1(pct)+'%"></i></div>':'')+
       (scrubbing?'<div class="scrub-tag">'+dollarsTxt(pts)+'</div>':'')+'</div>'+
-    (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
-      '<span class="mastery-txt">'+mtxt+'</span></div>':'')+
+    (withBar || (withNote && note)
+      ? '<div class="progress-panel">'+
+        (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
+          '<span class="mastery-txt">'+mtxt+'</span></div>':'')+
+        (withNote && note ?'<p class="garden-note">'+note+'</p>':'')+
+        (withBar && !scrubbing ? comingStrip(op, pts) : '')+
+        '</div>'
+      : '')+
     (withBar && !scrubbing && waitingCount(op)>0
       ? '<div class="place-panel"><div class="tray"><span class="tray-txt">'+waitingCount(op)+
         (waitingCount(op)===1?' new thing':' new things')+
@@ -2543,8 +2568,6 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
         '<button class="tray-auto" data-op="'+op+'">Surprise me</button></div>'+
         pickerStrip(op, pts)+'</div>'
       : '')+
-    (withNote && note ?'<p class="garden-note">'+note+'</p>':'')+
-    (withBar && !scrubbing ? comingStrip(op, pts) : '')+
     '</div>';
 }
 
