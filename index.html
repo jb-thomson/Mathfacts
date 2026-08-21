@@ -422,6 +422,16 @@ button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-do
 .big-body .garden-note,.big-body .mastery-txt{color:#C9D3E6}
 .big-body .garden-art{width:100%;height:auto;display:block}
 .big-hint{flex:0 0 auto;text-align:center;color:#9FB0CC;font-size:12px;font-weight:700;margin-top:4px}
+.big-a2hs[hidden]{display:none}
+.big-a2hs{position:absolute;left:50%;transform:translateX(-50%);
+  top:calc(10px + env(safe-area-inset-top));z-index:8;max-width:min(88%,360px);
+  display:flex;align-items:center;gap:8px;background:rgba(20,24,38,.92);color:#FFFEFB;
+  border-radius:11px;padding:8px 10px;font-size:12px;font-weight:700;line-height:1.35;
+  box-shadow:0 4px 14px rgba(0,0,0,.32)}
+.big-a2hs span{flex:1}
+.big-a2hs button{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:0;
+  background:rgba(255,254,251,.18);color:#FFFEFB;font:800 14px/1 'Fredoka',system-ui;
+  display:grid;place-items:center;padding:0}
 /* Sideways is where she actually plays, so nothing that works can be left
    below a fold she has no reason to know is there. The picture and its
    controls now share a flex column that always fits the screen exactly: the
@@ -437,16 +447,35 @@ button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-do
     right:calc(8px + env(safe-area-inset-right));left:auto;width:auto}
   .big .big-title{display:none}
   .big-body{display:flex}
-  .big-body .garden{display:flex;flex-direction:column;width:100%;max-width:none;height:100%}
+  .big-body .garden{display:flex;flex-direction:column;width:100%;max-width:none;height:100%;
+    position:relative}
   .big-body .garden-head{display:none}
-  .big-body .scene-wrap{flex:1 1 auto;min-height:0;display:flex}
+  /* The art fills the whole full-screen view edge to edge now — the tray and
+     picker used to sit in their own row below it, shrinking the picture to
+     make room. They float on top instead, like the controls in any phone
+     game, so the artwork stays full-bleed underneath them. */
+  .big-body .scene-wrap{position:absolute;inset:0;display:flex}
   /* the svg's own default preserveAspectRatio (xMidYMid meet) keeps it 2:1 and
      centred as this box resizes, so it is never stretched or cropped */
-  .big-body .garden-art{flex:1 1 auto;min-height:0;width:100%;height:100%;display:block}
+  .big-body .garden-art{width:100%;height:100%;display:block}
   /* mastery, the note and coming-up are reading, not playing — trimmed here on
      purpose so the picture and the things she can actually tap keep the room */
   .big-body .mastery,.big-body .garden-note,.big-body .coming{display:none}
-  .big-body .tray,.big-body .picker{flex:0 0 auto;margin:5px 8px 0;max-width:calc(100% - 16px)}
+  /* the piece controls default to hovering over the bottom of the art, which
+     is now where the floating tray/picker panel lives — move them up top so
+     the two floating panels never cover one another */
+  .big-body .piece-bar{bottom:auto;top:calc(10px + env(safe-area-inset-top));z-index:6}
+  /* Its own padding stays click-through (pointer-events:none), so a tap that
+     lands on the panel's background rather than an actual button or chip
+     still reaches a piece standing on the art underneath — only the tray
+     and picker themselves, re-enabled below, capture the tap. */
+  .big-body .place-panel{position:absolute;z-index:4;left:calc(8px + env(safe-area-inset-left));
+    right:calc(8px + env(safe-area-inset-right));bottom:calc(8px + env(safe-area-inset-bottom));
+    max-height:46%;overflow-y:auto;-webkit-overflow-scrolling:touch;pointer-events:none;
+    background:rgba(255,254,251,.94);border-radius:12px;padding:6px 8px 7px;
+    box-shadow:0 3px 14px rgba(0,0,0,.3)}
+  .big-body .place-panel .tray{margin-top:0;pointer-events:auto}
+  .big-body .place-panel .picker{margin-top:6px;background:transparent;border:0;pointer-events:auto}
   .big-body .picker{padding:5px 7px;display:flex;align-items:center;gap:9px;overflow-x:auto}
   .big-body .pick-cats,.big-body .pick-types{flex:0 0 auto;flex-wrap:nowrap;margin-top:0}
   .big-body .cat-chip.locked{display:none}
@@ -713,6 +742,10 @@ body.bigopen{overflow:hidden}
     </div>
     <div id="bigBody" class="big-body"></div>
     <p id="bigHint" class="big-hint">Turn your phone sideways to fill the screen</p>
+    <div id="bigA2hs" class="big-a2hs" hidden>
+      <span>For a real full-screen view with no browser bar: tap <b>Share</b>, then <b>Add to Home Screen</b>.</span>
+      <button id="bigA2hsClose" aria-label="Dismiss this tip">×</button>
+    </div>
   </div>
 
   <main>
@@ -992,6 +1025,7 @@ var defaultState = function(){ return {
   name:"",                            // "" until the child tells us
   avatar:null,                        // id into AVATARS — "" until she picks a face
   avatarSkipped:false,                 // she chose "not yet" instead of picking one
+  a2hsHintSeen:false,                  // seen the "add to home screen for full-screen" tip
   world:null,                         // "wild" | "space" — chosen once, then fixed
   pts:{add:0, sub:0, mul:0, div:0},   // points per section — decorates the scenes
   ops:["add","sub"],                  // sections selected for practice (>=1)
@@ -1019,6 +1053,7 @@ function fill(s){
   if(typeof s.name !== "string") s.name = "";
   if(typeof s.avatar !== "string") s.avatar = null;
   if(typeof s.avatarSkipped !== "boolean") s.avatarSkipped = false;
+  if(typeof s.a2hsHintSeen !== "boolean") s.a2hsHintSeen = false;
   if(s.world !== "wild" && s.world !== "space") s.world = null;
   for(var i=0;i<OPS.length;i++){
     var o = OPS[i];
@@ -2514,11 +2549,11 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
     (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
       '<span class="mastery-txt">'+mtxt+'</span></div>':'')+
     (withBar && !scrubbing && waitingCount(op)>0
-      ? '<div class="tray"><span class="tray-txt">'+waitingCount(op)+
+      ? '<div class="place-panel"><div class="tray"><span class="tray-txt">'+waitingCount(op)+
         (waitingCount(op)===1?' new thing':' new things')+
         ' to place</span>'+
         '<button class="tray-auto" data-op="'+op+'">Surprise me</button></div>'+
-        pickerStrip(op, pts)
+        pickerStrip(op, pts)+'</div>'
       : '')+
     (withNote && note ?'<p class="garden-note">'+note+'</p>':'')+
     (withBar && !scrubbing ? comingStrip(op, pts) : '')+
@@ -2672,7 +2707,7 @@ var el = {};
  "avatarBadge","avatarBtn","avatarPlaceholder",
  "avatarLife","avatarMascot","avatarMascotBtn","avatarMascotImg","avatarBubble",
  "levelBadge","levelNum","levelRank","levelFill","avatarDeco","mascotDeco",
- "bigScene","bigBody","bigTitle","bigClose","bigHint",
+ "bigScene","bigBody","bigTitle","bigClose","bigHint","bigA2hs","bigA2hsClose",
  "saveBtn","loadBtn","loadFile","backupNote","soundHome",
  "learnTopics","learnNumbers","dragSum","dragArt","dragSay",
  "gridArt","gridSay","learnMoney","moneySum","moneyArt","moneySay","coinRow","moneyBack","moneyClear",
@@ -2974,6 +3009,21 @@ function renderBig(){
   el.bigTitle.textContent = OP_NAME[op]+" · "+WORLDS[worldOf()].name;
   el.bigBody.innerHTML = sceneBlock(op, p, "", true, true, true);
 }
+/* iOS Safari never implements element Fullscreen (only Mac Safari does), so
+   requestFullscreen below silently no-ops there and her own browser chrome —
+   address bar, share/tab icons — stays on screen no matter what this page
+   asks for. The one way around that on iOS is opening from a Home Screen
+   icon (already wired up via the manifest's standalone display mode); this
+   just tells her that, once, instead of leaving her stuck behind a bar of
+   Safari furniture with no explanation. */
+function isIOSDevice(){
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+}
+function isStandaloneApp(){
+  return window.navigator.standalone === true ||
+    (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches);
+}
 function openBig(op){
   bigOp = op;
   el.bigScene.hidden = false;
@@ -2983,6 +3033,7 @@ function openBig(op){
      viewport, so this is a bonus where it works rather than a requirement. */
   try{ if(document.documentElement.requestFullscreen) document.documentElement.requestFullscreen(); }catch(e){}
   window.scrollTo(0,0);
+  el.bigA2hs.hidden = !(isIOSDevice() && !isStandaloneApp() && !state.a2hsHintSeen);
 }
 function closeBig(){
   bigOp = null; sel = null;
@@ -2993,6 +3044,11 @@ function closeBig(){
   if(!el.summary.hidden) renderSummaryScenes(); else renderScenes();
 }
 el.bigClose.addEventListener("click", closeBig);
+el.bigA2hsClose.addEventListener("click", function(){
+  el.bigA2hs.hidden = true;
+  state.a2hsHintSeen = true;
+  saveState();
+});
 document.addEventListener("keydown", function(e){
   if(e.key==="Escape" && bigOp) closeBig();
 });
