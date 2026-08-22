@@ -277,13 +277,18 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
 button.garden-name{border:0;background:none;padding:2px 6px 2px 2px;margin-left:-6px;
   border-radius:9px;color:inherit;cursor:pointer}
 button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-dot)}
-/* the amount, which swaps between cents and dollars when it is tapped */
+/* the amount gained in a single session, shown as a plain label rather than
+   the two running totals below (there is nothing to spend or track yet) */
 .garden-pts{margin-left:auto;display:flex;align-items:baseline;gap:6px;padding:2px 8px;
   border:0;background:none;border-radius:9px;font-family:'Fredoka';font-weight:700;
-  font-size:17px;color:var(--ink);cursor:pointer}
-.garden-pts:hover,.garden-pts:focus-visible{background:var(--bg-dot)}
-.garden-pts small{font-family:'Nunito';font-size:11.5px;font-weight:800;color:var(--muted)}
-.garden-pts.plain{cursor:default;font-size:14px;color:var(--good-deep)}
+  font-size:17px;color:var(--ink)}
+.garden-pts.plain{font-size:14px;color:var(--good-deep)}
+/* lifetime never drops; balance is lifetime minus whatever has been spent */
+.garden-econ{margin-left:auto;display:flex;gap:12px}
+.econ-num{display:flex;flex-direction:column;align-items:flex-end}
+.econ-num b{font-family:'Fredoka';font-weight:700;font-size:16px;color:var(--ink)}
+.econ-num small{font-family:'Nunito';font-size:10px;font-weight:800;color:var(--muted);
+  text-transform:uppercase;letter-spacing:.02em}
 /* a glimpse of the next few things, and what they cost */
 .coming{display:flex;align-items:center;gap:7px;margin-top:9px;flex-wrap:wrap}
 .coming-lab{font-size:11.5px;font-weight:800;color:var(--muted);text-transform:uppercase;
@@ -1011,7 +1016,6 @@ var OP_NAME = {add:"Addition", sub:"Subtraction", mul:"Multiplication", div:"Div
 var STATE_V = 8;
 var defaultState = function(){ return {
   v:STATE_V, sound:true,
-  moneyView:"cents",                  // "cents" | "dollars" — which way the totals read
   finishedOn:{},                      // section -> date first completed; never cleared
   log:{},                             // "YYYY-MM-DD" -> a day's totals, for the report
   placed:{add:[], sub:[], mul:[], div:[]},  // where each earned piece has been put
@@ -1021,7 +1025,8 @@ var defaultState = function(){ return {
   avatarSkipped:false,                 // she chose "not yet" instead of picking one
   a2hsHintSeen:false,                  // seen the "add to home screen for full-screen" tip
   world:null,                         // "wild" | "space" — chosen once, then fixed
-  pts:{add:0, sub:0, mul:0, div:0},   // points per section — decorates the scenes
+  pts:{add:0, sub:0, mul:0, div:0},   // lifetime earned per section — never decreases
+  spent:{add:0, sub:0, mul:0, div:0}, // spent so far per section — balance is pts minus this
   ops:["add","sub"],                  // sections selected for practice (>=1)
   unlocked:{add:3, sub:2, mul:2, div:2},
   facts:{add:{}, sub:{}, mul:{}, div:{}},   // key "a,b" -> {n,s,r:[],t:[]}
@@ -1035,14 +1040,13 @@ var didMigrate = false;
    blob can't crash the app on load. */
 function fill(s){
   var d = defaultState();
-  s.pts = s.pts || {}; s.unlocked = s.unlocked || {};
+  s.pts = s.pts || {}; s.spent = s.spent || {}; s.unlocked = s.unlocked || {};
   s.facts = s.facts || {}; s.blooms = s.blooms || {};
   s.days = s.days || {}; s.finishedOn = s.finishedOn || {}; s.log = s.log || {};
   s.placed = s.placed || {};
   if(!s.choice || typeof s.choice !== "object") s.choice = {};
   if(s.seedPlaced) s.seedPlaced = true;
   if(s.reroll) s.reroll = true;
-  if(s.moneyView !== "dollars") s.moneyView = "cents";
   if(s.sound === undefined) s.sound = true;
   if(typeof s.name !== "string") s.name = "";
   if(typeof s.avatar !== "string") s.avatar = null;
@@ -1052,6 +1056,7 @@ function fill(s){
   for(var i=0;i<OPS.length;i++){
     var o = OPS[i];
     if(typeof s.pts[o] !== "number") s.pts[o] = 0;
+    if(typeof s.spent[o] !== "number") s.spent[o] = 0;
     if(typeof s.unlocked[o] !== "number") s.unlocked[o] = d.unlocked[o];
     if(!s.facts[o]) s.facts[o] = {};
     if(!s.blooms[o]) s.blooms[o] = {};
@@ -1875,14 +1880,11 @@ function dollarsTxt(c){
   c=Math.max(0, Math.round(c));
   return "$"+Math.floor(c/100)+"."+String(c%100).padStart(2,"0");
 }
-/* for running totals in a sentence: pennies while it is pennies */
-function moneyShort(c){
-  c=Math.max(0, Math.round(c));
-  return c<100 ? centsTxt(c) : dollarsTxt(c);
-}
-function moneyView(){ return state.moneyView==="dollars" ? "dollars" : "cents"; }
-function moneyMain(c){ return moneyView()==="dollars" ? dollarsTxt(c) : centsTxt(c); }
-function moneyAlt(c){ return moneyView()==="dollars" ? centsTxt(c) : dollarsTxt(c); }
+/* Lifetime is every cent ever earned in a section — it never drops, so she
+   can watch it climb toward a dollar milestone the way a real balance would.
+   Balance is what is left to spend once buying is added; nothing spends yet,
+   so today the two numbers always match. */
+function balanceOf(op){ return (state.pts[op]||0) - (state.spent[op]||0); }
 
 /* What each thing costs: a quarter. Every one of them, all the way to a full
    scene — forty pieces at 25¢ is exactly the $10 a scene has always been worth.
@@ -2223,27 +2225,6 @@ function sceneAlt(op,pts,done){
   if(!n) return OP_NAME[op]+" "+SCENE[kind].label+", empty and waiting for a first "+what+".";
   return OP_NAME[op]+" "+SCENE[kind].label+" with "+n+" "+what+(n===1?"":"s")+".";
 }
-function sceneNote(op,p){
-  if(p<=0) return "";               // the coming-up strip underneath already says the price
-  if(p>=GOAL) return "Every corner filled in! ✨";
-  /* Whichever comes first: another thing to put down, or a whole new kind of
-     thing to choose from. Naming the kind is what makes it worth saving for. */
-  var kind=kindFor(op), best=null, i, t;
-  for(i=1;i<=SLOTS;i++){
-    t=slotThreshold(i);
-    if(p<t){ best={at:t, what:"something new arrives"}; break; }
-  }
-  var cats=catsOf(kind);
-  for(i=0;i<cats.length;i++){
-    t=catThreshold(kind,i);
-    /* At a tie a new kind of thing is the better news than one more piece —
-       and with every piece a flat quarter, ties are common. */
-    if(p<t){ if(!best || t<=best.at) best={at:t, what:"you unlock "+cats[i].name}; break; }
-  }
-  if(best) return moneyShort(best.at-p)+" more and "+best.what+".";
-  return moneyShort(GOAL-p)+" more to fill it right up.";
-}
-
 /* ---------------- mastery & completion ----------------
    Points decorate the scene; mastery is what finishes it. Both derive from
    state that already exists, so nothing extra is stored and nothing goes
@@ -2507,7 +2488,8 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
     ? "Back at "+dollarsTxt(pts)+". Let go to return to now."
     : slipped
     ? "Badge at risk — practice "+short+" fact"+(short===1?"":"s")+" to win your gold back."
-    : done ? "Finished — every fact mastered! ✨" : sceneNote(op,pts);
+    : done ? "Finished — every fact mastered! ✨"
+    : pts>=GOAL ? "Every corner filled in! ✨" : "";
   /* the scene keeps its golden light and landmark once earned */
   return '<div class="garden'+(everDone?" done":"")+(slipped?" slipped":"")+
     (interactive?" live":"")+(expandable&&!interactive?" tap-big":"")+'" data-op="'+op+'">'+
@@ -2524,9 +2506,11 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
       (everDone?completeBadge(slipped):"")+
       (label
         ? '<span class="garden-pts plain">'+label+'</span>'
-        : '<button class="garden-pts" data-op="'+op+'" aria-label="'+OP_NAME[op]+': '+
-          moneyMain(pts)+'. Tap to show it as '+(moneyView()==="dollars"?"cents":"dollars and cents")+
-          '.">'+moneyMain(pts)+'<small>'+moneyAlt(pts)+'</small></button>')+'</div>'+
+        : '<div class="garden-econ" aria-label="'+OP_NAME[op]+': '+dollarsTxt(pts)+
+          ' lifetime, '+dollarsTxt(balanceOf(op))+' to spend.">'+
+          '<span class="econ-num"><b>'+dollarsTxt(pts)+'</b><small>lifetime</small></span>'+
+          '<span class="econ-num"><b>'+dollarsTxt(balanceOf(op))+'</b><small>balance</small></span>'+
+          '</div>')+'</div>'+
     '<div class="scene-wrap">'+sceneSVG(op,pts,interactive,everDone)+
       /* No expand button inside the full-screen view: there is nowhere bigger
          to go, so tapping it did nothing at all and looked broken. */
@@ -2779,8 +2763,7 @@ function renderScenes(){
     html+=sceneBlock(op,p,"",true,true,true);
   }
   el.gardens.innerHTML=html;
-  el.totalLine.innerHTML = "You have <b>"+dollarsTxt(total)+"</b> in all <small>"+
-    centsTxt(total)+"</small>"+
+  el.totalLine.innerHTML = "You have <b>"+dollarsTxt(total)+"</b> in all"+
     (finished ? " · "+finished+" of "+OPS.length+" finished 🏅" : "");
 }
 function renderGrid(){
@@ -3162,16 +3145,6 @@ document.addEventListener("click", function(e){
   var tb = e.target.closest ? e.target.closest(".garden.tap-big") : null;
   if(tb && e.target.closest("svg.garden-art")){
     openBig(tb.getAttribute("data-op")); return;
-  }
-  var amt = e.target.closest ? e.target.closest(".garden-pts") : null;
-  if(amt){
-    state.moneyView = (moneyView()==="dollars") ? "cents" : "dollars";
-    saveState(); sfx.tap();
-    refreshScenes();
-    var again=(bigOp?el.bigBody:el.gardens).querySelector('.garden-pts[data-op="'+
-      amt.getAttribute("data-op")+'"]');
-    if(again) again.focus();
-    return;
   }
   var pb = e.target.closest ? e.target.closest(".piece-bar button") : null;
   if(pb){ pieceAction(pb.closest(".piece-bar"), pb.getAttribute("data-act")); return; }
