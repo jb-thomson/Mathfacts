@@ -83,11 +83,6 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--teal);outl
 .hero .tag{color:var(--muted);font-size:14.5px;margin-top:3px}
 .avatar-wrap{margin-left:auto;flex:0 0 auto;position:relative}
 .avatar-btn{border:0;background:none;padding:0;border-radius:50%;position:relative;display:block}
-.avatar-edit{
-  position:absolute;bottom:-2px;left:-2px;width:24px;height:24px;border-radius:50%;
-  background:var(--paper);border:2px solid var(--ink);color:var(--ink);padding:0;
-  font-size:11px;line-height:1;display:grid;place-items:center;
-}
 .level-badge{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
 .level-num{
   font-family:'Fredoka';font-weight:700;font-size:12px;color:#fff;background:var(--teal);
@@ -242,14 +237,22 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
   80%{transform:rotate(4deg)}
 }
 .avatar-btn.wiggle .avatar-badge{animation:avWiggle .6s ease}
+.avatar-bubble[hidden]{display:none}
 .avatar-bubble{
   position:absolute;top:calc(100% + 10px);left:50%;transform:translateX(-50%);
   width:max-content;max-width:220px;background:var(--paper);border:2px solid var(--ink);
   border-radius:14px;padding:9px 12px;font-family:'Fredoka';font-weight:600;font-size:13px;
   line-height:1.3;color:var(--ink);box-shadow:0 4px 0 var(--ink-soft);
   opacity:0;pointer-events:none;transition:opacity .2s ease;z-index:21;
+  display:flex;flex-direction:column;align-items:flex-start;gap:7px;
 }
 .avatar-bubble.show{opacity:1}
+#avatarFact{margin:0}
+/* her way back to the picker, now that tapping the avatar itself means
+   "say hi" — small and unhurried, not a badge stuck on the portrait */
+.avatar-change{align-self:stretch;pointer-events:auto;border:1.5px solid var(--line);
+  border-radius:9px;padding:5px 8px;background:var(--bg);font-family:'Nunito';
+  font-weight:800;font-size:11.5px;color:var(--muted)}
 .avatar-bubble::before{
   content:"";position:absolute;bottom:100%;left:50%;transform:translateX(-50%);
   border:9px solid transparent;border-bottom-color:var(--ink);
@@ -284,8 +287,7 @@ button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-do
   font-size:17px;color:var(--ink)}
 .garden-pts.plain{font-size:14px;color:var(--good-deep)}
 /* lifetime never drops; balance is lifetime minus whatever has been spent */
-.garden-econ{margin-left:auto;display:flex;gap:12px}
-.econ-num{display:flex;flex-direction:column;align-items:flex-end}
+.econ-num{display:flex;flex-direction:column;align-items:flex-start}
 .econ-num b{font-family:'Fredoka';font-weight:700;font-size:16px;color:var(--ink)}
 .econ-num small{font-family:'Nunito';font-size:10px;font-weight:800;color:var(--muted);
   text-transform:uppercase;letter-spacing:.02em}
@@ -435,6 +437,10 @@ button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-do
   overflow-y:auto;-webkit-overflow-scrolling:touch;pointer-events:none;
   background:transparent;padding:0;box-shadow:none}
 .big-body .progress-panel::-webkit-scrollbar{display:none}
+.big-body .wallet{flex:0 0 auto;flex-direction:column;gap:7px;margin:0}
+.big-body .econ-num{background:rgba(255,254,251,.94);border-radius:999px;padding:5px 11px;
+  align-items:center;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.big-body .econ-num b{font-size:14px}
 .big-body .mastery{flex:0 0 auto;margin:0;background:rgba(255,254,251,.94);border-radius:999px;
   padding:5px 10px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .big-body .mastery-meter{width:50px;flex:0 0 auto}
@@ -456,29 +462,22 @@ button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-do
 .big-a2hs button{flex:0 0 auto;width:22px;height:22px;border-radius:50%;border:0;
   background:rgba(255,254,251,.18);color:#FFFEFB;font:800 14px/1 'Fredoka',system-ui;
   display:grid;place-items:center;padding:0}
-/* The whole tray+picker "panel" is now just an invisible column pinned down
-   the right edge — everything inside it is its own small pill, not one
-   shared bar, and its own padding stays click-through so a tap between pills
-   still reaches a piece standing on the art underneath. */
+/* The whole picker "panel" is now just an invisible column pinned down the
+   right edge — everything inside it is its own small pill, not one shared
+   bar, and its own padding stays click-through so a tap between pills still
+   reaches a piece standing on the art underneath. */
 .big-body .place-panel{position:absolute;z-index:4;top:calc(52px + env(safe-area-inset-top));
   bottom:calc(10px + env(safe-area-inset-bottom));right:calc(8px + env(safe-area-inset-right));
   width:auto;max-width:128px;display:flex;flex-direction:column;align-items:flex-end;gap:7px;
   overflow-y:auto;-webkit-overflow-scrolling:touch;pointer-events:none;
   background:transparent;padding:0;box-shadow:none}
 .big-body .place-panel::-webkit-scrollbar{display:none}
-.big-body .place-panel .tray{flex:0 0 auto;margin:0;display:flex;flex-direction:column;
-  align-items:flex-end;gap:7px;background:transparent;border:0;padding:0;pointer-events:auto}
-.big-body .place-panel .tray-txt{flex:none;max-width:124px;background:var(--sun-tint);
-  border:1.5px solid var(--sun-deep);border-radius:16px;padding:5px 11px;font-size:11px;
-  line-height:1.3;text-align:center;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-.big-body .place-panel .tray-auto{border-radius:999px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
 .big-body .place-panel .picker{flex:0 0 auto;min-height:0;margin:0;background:transparent;
   border:0;padding:0;pointer-events:auto;display:flex;flex-direction:column;align-items:flex-end;
   gap:7px}
 .big-body .place-panel .picker::-webkit-scrollbar{display:none}
 .big-body .pick-cats,.big-body .pick-types{display:flex;flex-direction:column;flex-wrap:nowrap;
   gap:7px;margin-top:0}
-.big-body .cat-chip.locked{display:none}
 .big-body .pick-hint{display:none}
 /* icon-only round pills — the name is still there for a screen reader, just
    visually tucked away, so a sighted eye reads them exactly like Township's
@@ -488,18 +487,16 @@ button.garden-name:hover,button.garden-name:focus-visible{background:var(--bg-do
 .big-body .cat-chip span:last-child{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
   overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 .big-body .cat-chip img{width:24px;height:24px}
-.big-body .type-chip{width:44px;height:44px;padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
-.big-body .type-chip img{width:26px;height:26px}
+.big-body .type-chip{width:52px;height:70px;padding:2px;box-shadow:0 2px 8px rgba(0,0,0,.18)}
+.big-body .type-chip img{width:28px;height:28px}
+.big-body .type-price{font-size:9px}
 .big-body .type-chip .pips{width:36px;max-height:10px}
 body.bigopen{overflow:hidden}
 .scene-expand{position:absolute;right:8px;top:8px;width:30px;height:30px;border-radius:9px;
   background:rgba(255,254,251,.88);border:2px solid var(--ink);font-size:15px;line-height:1;
   display:grid;place-items:center}
-.tray{display:flex;align-items:center;gap:8px;margin-top:8px;background:var(--sun-tint);
-  border:1.5px solid var(--sun-deep);border-radius:10px;padding:6px 8px 6px 10px}
-.tray-txt{flex:1;font-size:12.5px;font-weight:800;color:var(--ink)}
-.tray-auto{font-family:'Fredoka';font-weight:600;font-size:12px;padding:5px 10px;border-radius:8px;
-  background:var(--paper);border:1.5px solid var(--ink);white-space:nowrap}
+/* the wallet: two running totals, dollars and cents, side by side */
+.wallet{display:flex;gap:12px;margin-top:8px}
 /* choosing what to plant: the kinds of thing on top, what's inside underneath */
 .picker{margin-top:7px;border:1.5px solid var(--line);border-radius:10px;
   padding:7px 8px 8px;background:var(--paper)}
@@ -513,12 +510,14 @@ body.bigopen{overflow:hidden}
 .cat-chip.locked{border-style:dashed;opacity:.85}
 .cat-chip.locked img{filter:brightness(0) saturate(0) opacity(.3)}
 .pick-types{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-.type-chip{width:52px;height:60px;border-radius:10px;padding:3px 3px 4px;
+.type-chip{width:52px;height:74px;border-radius:10px;padding:3px 3px 4px;
   border:1.5px solid var(--line);background:var(--bg);
   display:flex;flex-direction:column;align-items:center;justify-content:space-between}
-.type-chip img{width:38px;height:38px;object-fit:contain}   /* a percentage
+.type-chip img{width:32px;height:32px;object-fit:contain}   /* a percentage
   height here resolves against an auto grid area, so it has to be a real size */
-.type-chip .type-q{font:700 20px/38px 'Fredoka',system-ui;color:var(--muted)}
+.type-chip .type-q{font:700 18px/32px 'Fredoka',system-ui;color:var(--muted)}
+/* what it costs — a price tag under the icon, same on every unlocked thing */
+.type-price{font-family:'Nunito';font-size:10px;font-weight:800;color:var(--muted)}
 .type-chip.on{border-color:var(--ink);border-width:2.5px;background:var(--sun-tint)}
 /* one pip for each of this thing still to be earned. Wrapped and capped to the
    chip's own width — with BACK_MAX at 12, a single unwrapped row of dots ran
@@ -727,8 +726,10 @@ body.bigopen{overflow:hidden}
         <span id="avatarPlaceholder" class="avatar-badge-placeholder" hidden aria-hidden="true">+</span>
         <span id="avatarDeco" class="avatar-deco" hidden aria-hidden="true"></span>
       </button>
-      <button id="avatarEdit" class="avatar-edit" hidden aria-label="Choose your look">✎</button>
-      <div class="avatar-bubble" id="avatarBubble" hidden></div>
+      <div class="avatar-bubble" id="avatarBubble" hidden>
+        <p id="avatarFact"></p>
+        <button id="avatarChangeLook" class="avatar-change">Change my look</button>
+      </div>
     </div>
   </header>
 
@@ -1938,20 +1939,13 @@ function nextSlot(op){
   return SLOTS;
 }
 /* Put down the next earned piece. What it *is* is her choice — whatever is
-   selected in the picker — unless she asked to be surprised, in which case it
-   is drawn at random from the categories she has earned and nothing else. */
-function placePiece(op, x, y, surprise){
+   selected in the picker. */
+function placePiece(op, x, y){
   if(waitingCount(op)<=0) return false;
   var world=worldOf(), kind=kindFor(op,world), pts=state.pts[op]||0;
   var g=SCENE[kind].ground, lo=g-4, hi=134;
-  var slot=nextSlot(op), arr=placedList(op), v;
-  /* Either way it comes out of what has room left, so the caps hold however the
-     piece got there. */
-  if(surprise){
-    v=pickWeighted(kind, mulberry32(seedFor("place"+op+slot)), plantableItems(op,pts), -1);
-  }else{
-    v=chosenIndex(op, pts);
-  }
+  var slot=nextSlot(op), arr=placedList(op);
+  var v=chosenIndex(op, pts);
   if(v<0 || !(ITEMS[kind]||[])[v]) return false;
   arr.push({ i:slot, v:v, x:Math.max(10,Math.min(290,x)),
                           y:Math.max(lo,Math.min(hi,y)) });
@@ -2409,27 +2403,28 @@ function pickerStrip(op, pts){
   if(!cats.length) return "";
   var v=chosenIndex(op, pts), openCat=catOfItem(kind, v), i, j;
   if(v<0) return "";
-  var h='<div class="picker" data-op="'+op+'"><div class="pick-cats">';
-  var firstLocked=true;
-  for(i=0;i<cats.length;i++){
-    var c=cats[i], sp=SPRITES[list[c.items[0]].s];
-    var thumb = sp ? '<img src="'+sp.uri+'" alt="">' : '<span class="cat-q">✦</span>';
-    if(catOpen(kind,i,pts)){
+  var h='<div class="picker" data-op="'+op+'">';
+  /* Switching between kinds only matters once there is more than one open —
+     with just the first one unlocked, a second row that shows the exact same
+     icon a second time is not a choice, it is a duplicate. What's still
+     locked is already named in the coming-up strip above, so it isn't
+     repeated here too. */
+  var openCount=0;
+  for(i=0;i<cats.length;i++) if(catOpen(kind,i,pts)) openCount++;
+  if(openCount>1){
+    h+='<div class="pick-cats">';
+    for(i=0;i<cats.length;i++){
+      if(!catOpen(kind,i,pts)) continue;
+      var c=cats[i], sp=SPRITES[list[c.items[0]].s];
+      var thumb = sp ? '<img src="'+sp.uri+'" alt="">' : '<span class="cat-q">✦</span>';
       h+='<button class="cat-chip'+(i===openCat?" on":"")+'" data-op="'+op+'" data-cat="'+i+
          '" aria-pressed="'+(i===openCat)+'">'+thumb+'<span>'+c.name+'</span></button>';
-    }else{
-      /* The next one is named, because knowing mushrooms are $2.00 away is the
-         point. The ones after it stay a price and a shadow. */
-      h+='<span class="cat-chip locked" title="'+(firstLocked?c.name:"Something new")+'">'+
-         thumb+'<span>🔒 '+(firstLocked?c.name+" · ":"")+dollarsTxt(catThreshold(kind,i))+'</span></span>';
-      firstLocked=false;
     }
+    h+='</div>';
   }
-  /* Inside the open drawer: what she has reached, with a pip for each one she
-     may still plant, then the things she has used up, then whatever is next in
-     the drawer as a shadow. Nothing here has a price — these are earned by
-     planting, not by paying. */
-  h+='</div><div class="pick-types">';
+  /* Inside the open drawer: what she has reached, its price, and a pip for
+     each one she may still plant before the next thing in the drawer opens. */
+  h+='<div class="pick-types">';
   var items=openCat>=0 ? cats[openCat].items : [], reached=openInCat(op, kind, openCat);
   for(j=0;j<items.length;j++){
     var w=items[j], itm=list[w], isp=SPRITES[itm.s];
@@ -2443,9 +2438,9 @@ function pickerStrip(op, pts){
     for(k=0;k<max;k++) pips+='<span'+(k<left?'':' class="gone"')+'></span>';
     h+='<button class="type-chip'+(w===v?" on":"")+(left?"":" full")+'" data-op="'+op+
        '" data-v="'+w+'"'+(left?'':' disabled')+' aria-pressed="'+(w===v)+
-       '" aria-label="'+itemName(itm)+(left?', '+left+' left':', all planted')+
-       '" title="'+itemName(itm)+(left?' · '+left+' left':' · all planted')+'">'+
-       art+'<span class="pips">'+pips+'</span></button>';
+       '" aria-label="'+itemName(itm)+', '+centsTxt(PIECE_COST)+(left?', '+left+' left':', all planted')+
+       '" title="'+itemName(itm)+' · '+centsTxt(PIECE_COST)+(left?' · '+left+' left':' · all planted')+'">'+
+       art+'<small class="type-price">'+centsTxt(PIECE_COST)+'</small><span class="pips">'+pips+'</span></button>';
   }
   var mine=itemLeft(op,kind,v);
   return h+'</div><p class="pick-hint">Tap the picture to place your '+
@@ -2504,13 +2499,7 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
           OP_NAME[op]+'"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</button>'
         : '<span class="garden-name"><span class="sym">'+OP_SYM[op]+'</span> '+OP_NAME[op]+'</span>')+
       (everDone?completeBadge(slipped):"")+
-      (label
-        ? '<span class="garden-pts plain">'+label+'</span>'
-        : '<div class="garden-econ" aria-label="'+OP_NAME[op]+': '+dollarsTxt(pts)+
-          ' lifetime, '+dollarsTxt(balanceOf(op))+' to spend.">'+
-          '<span class="econ-num"><b>'+dollarsTxt(pts)+'</b><small>lifetime</small></span>'+
-          '<span class="econ-num"><b>'+dollarsTxt(balanceOf(op))+'</b><small>balance</small></span>'+
-          '</div>')+'</div>'+
+      (label?'<span class="garden-pts plain">'+label+'</span>':'')+'</div>'+
     '<div class="scene-wrap">'+sceneSVG(op,pts,interactive,everDone)+
       /* No expand button inside the full-screen view: there is nowhere bigger
          to go, so tapping it did nothing at all and looked broken. */
@@ -2525,6 +2514,11 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
       (scrubbing?'<div class="scrub-tag">'+dollarsTxt(pts)+'</div>':'')+'</div>'+
     (withBar || (withNote && note)
       ? '<div class="progress-panel">'+
+        (withBar?'<div class="wallet" aria-label="'+OP_NAME[op]+': '+dollarsTxt(pts)+
+          ' lifetime, '+dollarsTxt(balanceOf(op))+' to spend.">'+
+          '<span class="econ-num"><b>'+dollarsTxt(pts)+'</b><small>lifetime</small></span>'+
+          '<span class="econ-num"><b>'+dollarsTxt(balanceOf(op))+'</b><small>balance</small></span>'+
+          '</div>':'')+
         (withBar?'<div class="mastery"><span class="mastery-meter"><i style="width:'+n1(mpct)+'%"></i></span>'+
           '<span class="mastery-txt">'+mtxt+'</span></div>':'')+
         (withNote && note ?'<p class="garden-note">'+note+'</p>':'')+
@@ -2532,11 +2526,7 @@ function sceneBlock(op, pts, label, interactive, withBar, withNote, expandable){
         '</div>'
       : '')+
     (withBar && !scrubbing && waitingCount(op)>0
-      ? '<div class="place-panel"><div class="tray"><span class="tray-txt">'+waitingCount(op)+
-        (waitingCount(op)===1?' new thing':' new things')+
-        ' to place</span>'+
-        '<button class="tray-auto" data-op="'+op+'">Surprise me</button></div>'+
-        pickerStrip(op, pts)+'</div>'
+      ? '<div class="place-panel">'+pickerStrip(op, pts)+'</div>'
       : '')+
     '</div>';
 }
@@ -2685,7 +2675,7 @@ var el = {};
  "sumGardens","sumGardensTitle","sumGardenArt","sumMastered","sumMasteredChips","sumWork","sumWorkChips","sumNote",
  "againBtn","homeBtn","welcome","heroTag","worldTitle","stepName","stepWorld","nameInput","nameNext","worldPick",
  "stepAvatar","avatarFilters","avatarGrid","avatarEmpty","avatarCount","avatarClear","avatarSkip",
- "avatarWrap","avatarBadge","avatarBtn","avatarEdit","avatarPlaceholder","avatarBubble",
+ "avatarWrap","avatarBadge","avatarBtn","avatarPlaceholder","avatarBubble","avatarFact","avatarChangeLook",
  "levelBadge","levelNum","levelRank","levelFill","avatarDeco",
  "bigScene","bigBody","bigTitle","bigClose","bigA2hs","bigA2hsClose",
  "saveBtn","loadBtn","loadFile","backupNote","soundHome",
@@ -3150,20 +3140,6 @@ document.addEventListener("click", function(e){
   if(pb){ pieceAction(pb.closest(".piece-bar"), pb.getAttribute("data-act")); return; }
   var ex = e.target.closest ? e.target.closest(".scene-expand") : null;
   if(ex){ sel=null; openBig(ex.getAttribute("data-op")); return; }
-  var b = e.target.closest ? e.target.closest(".tray-auto") : null;
-  if(b){
-    var op = b.getAttribute("data-op"), world = worldOf(), plan = scenePlan(op, world);
-    var guard = 0;
-    while(waitingCount(op)>0 && guard++ < SLOTS){
-      var slot = nextSlot(op), spot = null;
-      for(var k=0;k<plan.length;k++) if(plan[k].i===slot) spot = plan[k];
-      /* "Surprise me" means exactly that — a mix out of everything earned,
-         rather than a dozen copies of whatever happens to be selected. */
-      placePiece(op, spot?spot.x:150, spot?spot.y:SCENE[kindFor(op)].ground+8, true);
-    }
-    sel=null; sfx.star(); refreshScenes();
-    return;
-  }
   /* the picker: a kind on top, one of its things underneath */
   var cch = e.target.closest ? e.target.closest(".cat-chip[data-cat]") : null;
   if(cch){ choosePick(cch.getAttribute("data-op"), "cat", +cch.getAttribute("data-cat")); return; }
@@ -3763,7 +3739,6 @@ function renderAvatarBadge(){
   el.avatarWrap.hidden=!state.name;
   el.avatarBadge.hidden=!a;
   el.avatarPlaceholder.hidden=!!a;
-  el.avatarEdit.hidden=!a;
   el.avatarBtn.setAttribute("aria-label", a?"Say hi to your avatar":"Choose your look");
   if(a) el.avatarBadge.src=a.src;
 }
@@ -3774,19 +3749,22 @@ function openAvatarPicker(){
   renderAvatarGrid();
   window.scrollTo(0,0);
 }
-el.avatarEdit.addEventListener("click", function(e){
+el.avatarChangeLook.addEventListener("click", function(e){
   e.stopPropagation();
+  el.avatarBubble.classList.remove("show");
+  el.avatarBubble.hidden=true;
   openAvatarPicker();
 });
 el.avatarBtn.addEventListener("click", function(){
   /* No face chosen yet (still the "+" placeholder) — the whole button opens
-     the picker. Once she has a face, the button's job changes: say hi to it,
-     and the small pencil badge is what opens the picker instead. */
+     the picker directly. Once she has a face, tapping it says hi instead;
+     "Change my look" rides along in the same bubble that pops up, so there
+     is still just the one thing to tap on the avatar itself. */
   if(!state.avatar){ openAvatarPicker(); return; }
   el.avatarBtn.classList.remove("wiggle"); void el.avatarBtn.offsetWidth;
   el.avatarBtn.classList.add("wiggle");
   sfx.wiggle();
-  el.avatarBubble.textContent=FACTS[Math.floor(Math.random()*FACTS.length)];
+  el.avatarFact.textContent=FACTS[Math.floor(Math.random()*FACTS.length)];
   el.avatarBubble.style.transform="";
   el.avatarBubble.hidden=false;
   void el.avatarBubble.offsetWidth;
