@@ -274,7 +274,16 @@ body.quizzing .hero,body.quizzing #screen-home,body.quizzing #screen-summary,bod
    it sits beside on the home cards — a fixed height plus object-fit:contain
    keeps the card a sane size instead of a tall mostly-empty square */
 .garden-art.plant-art{height:200px;object-fit:contain;background:var(--paper)}
-.big-body .garden-art.plant-art{height:100%}
+/* Full screen has no card around it and a dark backdrop, so stretching the
+   image to 100% just paints most of the screen cream with a tiny pot lost in
+   the middle, and the ink border is invisible against the ink backdrop. Size
+   it like a framed photo instead — a fixed square, centered, with a shadow
+   that actually shows against dark. */
+.big-body .plant-garden .scene-wrap{align-items:center;justify-content:center}
+.big-body .garden-art.plant-art{
+  width:min(80vw,56vh);height:min(80vw,56vh);flex:0 0 auto;
+  border:0;border-radius:22px;box-shadow:0 14px 34px rgba(0,0,0,.4)
+}
 
 /* ---------- scenes ---------- */
 .garden{margin-top:18px}
