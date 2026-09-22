@@ -83,6 +83,12 @@ button:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--teal);outl
 .hero .tag{color:var(--muted);font-size:14.5px;margin-top:3px}
 .avatar-wrap{margin-left:auto;flex:0 0 auto;position:relative}
 .avatar-btn{border:0;background:none;padding:0;border-radius:50%;position:relative;display:block}
+/* shown the instant the app opens, right under the tagline — the whole
+   point is not having to scroll down to the practice-days card to see it */
+.streak-badge[hidden]{display:none}
+.streak-badge{display:inline-flex;align-items:center;gap:4px;margin-top:6px;
+  font-family:'Fredoka';font-weight:700;font-size:13px;color:var(--sun-deep)}
+#streakNum{color:var(--ink)}
 .level-badge{display:flex;align-items:center;gap:6px;margin-top:6px;flex-wrap:wrap}
 .level-num{
   font-family:'Fredoka';font-weight:700;font-size:12px;color:#fff;background:var(--teal);
@@ -724,6 +730,7 @@ body.bigopen{overflow:hidden}
     <div>
       <h1>Numo</h1>
       <p class="tag" id="heroTag">Grow your math, grow your world</p>
+      <div class="streak-badge" id="streakBadge" hidden>🔥 <span id="streakNum"></span></div>
       <div class="level-badge" id="levelBadge" hidden>
         <span class="level-num" id="levelNum"></span>
         <span class="level-rank" id="levelRank"></span>
@@ -877,7 +884,7 @@ body.bigopen{overflow:hidden}
       </p>
       <input id="loadFile" type="file" accept="application/json,.json" hidden>
       <p id="backupNote" class="backup-note" hidden></p>
-      <p class="version-line">v25 · longer sessions, smarter picking</p>
+      <p class="version-line">v26 · streak up front</p>
     </section>
 
     <!-- ============ LEARN ============ -->
@@ -2844,7 +2851,7 @@ function streak(){
 var el = {};
 ["screen-home","screen-quiz","screen-summary","screen-setup","screen-learn","startBtn","learnBtn","modeRow","pickNote","gardens","totalLine",
  "learnHome",
- "factGrid","cellInfo","gridTabs","dayStrip","streakLine","resetBtn","renameBtn","worldBtn","quitBtn","quitNote","qbar","qcount",
+ "factGrid","cellInfo","gridTabs","dayStrip","streakLine","streakBadge","streakNum","resetBtn","renameBtn","worldBtn","quitBtn","quitNote","qbar","qcount",
  "opChip","factLine","answerSlot","feedback","sessionPoints","soundBtn","sumTitle","sumPoints","sumStopped","sumDone",
  "sumGardens","sumGardensTitle","sumGardenArt","sumMastered","sumMasteredChips","sumWork","sumWorkChips","sumNote",
  "againBtn","homeBtn","welcome","heroTag","worldTitle","stepName","stepWorld","nameInput","nameNext","worldPick","worldWarn",
@@ -2996,6 +3003,8 @@ function renderDays(){
   var s=streak();
   el.streakLine.textContent = s>=2 ? "🔥 "+s+"-day streak — keep it going!"
     : (state.days[todayKey()] ? "✅ Practiced today!" : "Finish a whole set today to build a streak!");
+  el.streakBadge.hidden = !state.name || s<1;
+  if(s>=1) el.streakNum.textContent = s+"-day streak";
 }
 function renderQuestion(){
   var q=S.q;
